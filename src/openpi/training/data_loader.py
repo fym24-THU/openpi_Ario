@@ -131,6 +131,11 @@ def create_torch_dataset(
     data_config: _config.DataConfig, action_horizon: int, model_config: _model.BaseModelConfig
 ) -> Dataset:
     """Create a dataset for training."""
+    if data_config.ario_config is not None:
+        from openpi.datasets.ario_dataset import ArioStreamingDataset
+
+        return ArioStreamingDataset(data_config.ario_config, action_horizon)
+
     repo_id = data_config.repo_id
     if repo_id is None:
         raise ValueError("Repo ID is not set. Cannot create dataset.")
