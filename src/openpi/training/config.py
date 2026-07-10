@@ -529,6 +529,9 @@ class ArioXingchenDataConfig(DataConfigFactory):
     use_delta_actions: bool = True
     default_prompt: str = "fold clothes"
     cache_size: int = 32
+    max_episodes: int | None = None
+    disk_cache_dir: str = "/tmp/ario_disk_cache"
+    disk_cache_max_gb: float = 200.0
 
     @override
     def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
@@ -539,8 +542,8 @@ class ArioXingchenDataConfig(DataConfigFactory):
             inputs=[
                 _transforms.RepackTransform(
                     {
-                        "observation/image": "image",
-                        "observation/state": "state",
+                        "observation/image": "observation/image",
+                        "observation/state": "observation/state",
                         "actions": "actions",
                         "prompt": "prompt",
                     }
@@ -570,6 +573,9 @@ class ArioXingchenDataConfig(DataConfigFactory):
             image_size=self.image_size,
             task=self.default_prompt,
             cache_size=self.cache_size,
+            max_episodes=self.max_episodes,
+            disk_cache_dir=self.disk_cache_dir,
+            disk_cache_max_gb=self.disk_cache_max_gb,
         )
 
         return dataclasses.replace(
@@ -1070,6 +1076,7 @@ _CONFIGS = [
     #
     TrainConfig(
         name="pi05_xingchen_fold_ario",
+        exp_name="pi05_xingchen_fold_ario",
         model=pi0_config.Pi0Config(
             pi05=True,
             action_dim=32,
@@ -1107,6 +1114,7 @@ _CONFIGS = [
     #
     TrainConfig(
         name="pi05_xingchen_fold_ario_debug",
+        exp_name="pi05_xingchen_fold_ario_debug",
         model=pi0_config.Pi0Config(
             pi05=True,
             action_dim=32,
@@ -1117,6 +1125,7 @@ _CONFIGS = [
             s3_prefixes="s3://shengshu-base2-test/ario/xingchen/xingchen3-Pretrain_XC03_叠短袖_260623_01/",
             s3_endpoint="https://oss-cn-wulanchabu.aliyuncs.com",
             min_frames=600,
+            max_episodes=3,
             use_delta_actions=True,
         ),
         weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),

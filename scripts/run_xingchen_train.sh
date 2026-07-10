@@ -8,11 +8,19 @@ source .venv/bin/activate
 # OSS credentials (read from environment)
 export AWS_ACCESS_KEY_ID="${ALIBABA_ACCESS_KEY_ID:?Set ALIBABA_ACCESS_KEY_ID env var}"
 export AWS_SECRET_ACCESS_KEY="${ALIBABA_ACCESS_KEY_SECRET:?Set ALIBABA_ACCESS_KEY_SECRET env var}"
+export WANDB_MODE=disabled
+export https_proxy=192.168.48.27:18000
+export http_proxy=192.168.48.27:18000
 
 echo "=== Step 1: Computing norm stats ==="
-python scripts/compute_norm_stats.py --config-name pi05_xingchen_fold_ario
+NORM_STATS_DIR="./assets/pi05_xingchen_fold_ario/xingchen/fold_clothes"
+if [ -d "$NORM_STATS_DIR" ] && [ "$(ls -A $NORM_STATS_DIR 2>/dev/null)" ]; then
+    echo "Norm stats already exist at $NORM_STATS_DIR, skipping computation."
+else
+    python scripts/compute_norm_stats.py --config-name pi05_xingchen_fold_ario
+fi
 
 echo "=== Step 2: Training ==="
-python scripts/train.py pi05_xingchen_fold_ario
+python scripts/train.py pi05_xingchen_fold_ario --overwrite
 
 echo "=== Done ==="

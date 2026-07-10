@@ -27,6 +27,9 @@ class ArioConfig:
     image_size: tuple[int, int] = IMAGE_SIZE
     task: str = "fold clothes"
     cache_size: int = 32
+    max_episodes: int | None = None
+    disk_cache_dir: str = "/tmp/ario_disk_cache"
+    disk_cache_max_gb: float = 200.0
 
 
 class ArioStreamingDataset:
@@ -48,6 +51,8 @@ class ArioStreamingDataset:
 
         # Discover episodes and build global frame index
         episodes = self._discover_episodes()
+        if config.max_episodes is not None:
+            episodes = episodes[: config.max_episodes]
         self._episodes = episodes  # list of (bucket, prefix)
 
         # Build frame index: for each episode, count usable (downsampled) frames.
@@ -55,6 +60,13 @@ class ArioStreamingDataset:
         self._episode_lengths: list[int] = []  # downsampled frame count per episode
         self._cumulative: list[int] = []  # cumulative sum for global index lookup
         self._build_index()
+
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        state["_s3"] = None
+        state["_pid"] = None
+        state["_cache"] = OrderedDict()
+        return state
 
     def _get_s3(self):
         # Recreate client after fork (pid changes)
@@ -97,6 +109,8 @@ class ArioStreamingDataset:
                         ep_prefix = key[: key.rfind("/video.mp4") + 1]
                         episodes.append((bucket, ep_prefix))
         episodes.sort(key=lambda x: x[1])
+        if self._config.max_episodes is not None:
+            episodes = episodes[: self._config.max_episodes]
         print(f"ArioStreamingDataset: found {len(episodes)} episodes on S3")
         return episodes
 
@@ -139,6 +153,9 @@ class ArioStreamingDataset:
         bucket, prefix = self._episodes[ep_idx]
         cache_key = prefix
 
+        import sys
+        print(f"[DEBUG worker {os.getpid()}] __getitem__ idx={index} ep={ep_idx} frame={frame_idx}", flush=True, file=sys.stderr)
+
         state_action, frames = self._get_episode(bucket, prefix, cache_key)
 
         # Current frame image and state
@@ -171,10 +188,26 @@ class ArioStreamingDataset:
     def _get_episode(
         self, bucket: str, prefix: str, cache_key: str
     ) -> tuple[np.ndarray, list[np.ndarray]]:
-        """Get episode data, using LRU cache."""
+        """Get episode data, using memory LRU cache backed by disk cache."""
         if cache_key in self._cache:
             self._cache.move_to_end(cache_key)
             return self._cache[cache_key]
+
+        # Try disk cache
+        disk_path = self._disk_cache_path(cache_key)
+        if disk_path.exists():
+            try:
+                data = np.load(disk_path, allow_pickle=True)
+                state_action = data["state_action"]
+                frames = list(data["frames"])
+                disk_path.stat()  # touch atime for LRU
+                os.utime(disk_path, None)
+                self._cache[cache_key] = (state_action, frames)
+                if len(self._cache) > self._cache_size:
+                    self._cache.popitem(last=False)
+                return state_action, frames
+            except Exception:
+                disk_path.unlink(missing_ok=True)
 
         # Download and decode
         s3 = self._get_s3()
@@ -189,11 +222,45 @@ class ArioStreamingDataset:
         state_action = state_action[indices].astype(np.float32)
         frames = [frames[i] for i in indices]
 
+        # Save to disk cache
+        self._save_to_disk_cache(disk_path, state_action, frames)
+
         self._cache[cache_key] = (state_action, frames)
         if len(self._cache) > self._cache_size:
             self._cache.popitem(last=False)
 
         return state_action, frames
+
+    def _disk_cache_path(self, cache_key: str) -> Path:
+        import hashlib
+        key_hash = hashlib.md5(cache_key.encode()).hexdigest()
+        cache_dir = Path(self._config.disk_cache_dir)
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        return cache_dir / f"{key_hash}.npz"
+
+    def _save_to_disk_cache(self, path: Path, state_action: np.ndarray, frames: list[np.ndarray]):
+        try:
+            self._evict_disk_cache_if_needed()
+            frames_arr = np.stack(frames)
+            np.savez(path, state_action=state_action, frames=frames_arr)
+        except Exception:
+            path.unlink(missing_ok=True)
+
+    def _evict_disk_cache_if_needed(self):
+        cache_dir = Path(self._config.disk_cache_dir)
+        if not cache_dir.exists():
+            return
+        max_bytes = int(self._config.disk_cache_max_gb * 1024**3)
+        files = list(cache_dir.glob("*.npz"))
+        total = sum(f.stat().st_size for f in files)
+        if total <= max_bytes:
+            return
+        files.sort(key=lambda f: f.stat().st_atime)
+        for f in files:
+            if total <= max_bytes * 0.8:
+                break
+            total -= f.stat().st_size
+            f.unlink(missing_ok=True)
 
     def _build_state_action(self, s3, bucket: str, prefix: str) -> np.ndarray:
         tensors = {}

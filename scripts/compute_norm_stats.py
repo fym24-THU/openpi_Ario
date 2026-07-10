@@ -87,17 +87,26 @@ def create_rlds_dataloader(
 
 
 def main(config_name: str, max_frames: int | None = None):
+    import sys
+    print(f"[DEBUG] Loading config: {config_name}", flush=True)
     config = _config.get_config(config_name)
+    print(f"[DEBUG] Config loaded. batch_size={config.batch_size}, num_workers={config.num_workers}", flush=True)
     data_config = config.data.create(config.assets_dirs, config.model)
+    print(f"[DEBUG] Data config created. repo_id={data_config.repo_id}", flush=True)
 
     if data_config.rlds_data_dir is not None:
+        print("[DEBUG] Using RLDS dataloader", flush=True)
         data_loader, num_batches = create_rlds_dataloader(
             data_config, config.model.action_horizon, config.batch_size, max_frames
         )
     else:
+        print(f"[DEBUG] Using torch dataloader, num_workers={config.num_workers}", flush=True)
         data_loader, num_batches = create_torch_dataloader(
             data_config, config.model.action_horizon, config.batch_size, config.model, config.num_workers, max_frames
         )
+    print(f"[DEBUG] Dataloader created. num_batches={num_batches}", flush=True)
+    print(f"[DEBUG] Starting iteration over dataloader...", flush=True)
+    sys.stdout.flush()
 
     keys = ["state", "actions"]
     stats = {key: normalize.RunningStats() for key in keys}
