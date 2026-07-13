@@ -455,13 +455,9 @@ class TorchDataLoader:
         return self._data_loader
 
     def __iter__(self):
-        import sys
-        print(f"[DEBUG data_loader] __iter__ called, creating data_iter...", flush=True)
         num_items = 0
         while True:
             data_iter = iter(self._data_loader)
-            print(f"[DEBUG data_loader] data_iter created, calling next()...", flush=True)
-            sys.stdout.flush()
             while True:
                 if self._num_batches is not None and num_items >= self._num_batches:
                     return
@@ -469,8 +465,6 @@ class TorchDataLoader:
                     batch = next(data_iter)
                 except StopIteration:
                     break  # We've exhausted the dataset. Create a new iterator and start over.
-                if num_items == 0:
-                    print(f"[DEBUG data_loader] First batch received! keys={list(batch.keys()) if isinstance(batch, dict) else type(batch)}", flush=True)
                 num_items += 1
                 # For JAX, convert to sharded arrays; for PyTorch, return torch tensors
                 if self._sharding is not None:

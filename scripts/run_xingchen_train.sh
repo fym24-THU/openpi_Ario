@@ -9,18 +9,39 @@ source .venv/bin/activate
 export AWS_ACCESS_KEY_ID="${ALIBABA_ACCESS_KEY_ID:?Set ALIBABA_ACCESS_KEY_ID env var}"
 export AWS_SECRET_ACCESS_KEY="${ALIBABA_ACCESS_KEY_SECRET:?Set ALIBABA_ACCESS_KEY_SECRET env var}"
 export WANDB_MODE=disabled
-export https_proxy=192.168.48.27:18000
-export http_proxy=192.168.48.27:18000
+export NCCL_SOCKET_IFNAME=eth0
+export GLOO_SOCKET_IFNAME=eth0
+export TORCHELASTIC_ERROR_FILE=/tmp/torch_error.json
 
-echo "=== Step 1: Computing norm stats ==="
-NORM_STATS_DIR="./assets/pi05_xingchen_fold_ario/xingchen/fold_clothes"
-if [ -d "$NORM_STATS_DIR" ] && [ "$(ls -A $NORM_STATS_DIR 2>/dev/null)" ]; then
-    echo "Norm stats already exist at $NORM_STATS_DIR, skipping computation."
+
+# Number of GPUs (auto-detect or override via env)
+NUM_GPUS=${NUM_GPUS:-$(nvidia-smi -L 2>/dev/null | wc -l)}
+if [ "$NUM_GPUS" -lt 1 ]; then
+    NUM_GPUS=1
+fi
+echo "Using $NUM_GPUS GPU(s)"
+
+
+echo "=== Step 1: Convert JAX weights to PyTorch (if not already done) ==="
+PYTORCH_WEIGHT_DIR="./checkpoints/pi05_base_pytorch"
+if [ -f "$PYTORCH_WEIGHT_DIR/model.safetensors" ]; then
+    echo "PyTorch weights already exist at $PYTORCH_WEIGHT_DIR, skipping conversion."
 else
-    python scripts/compute_norm_stats.py --config-name pi05_xingchen_fold_ario
+    echo "Converting JAX weights to PyTorch format..."
+    python examples/convert_jax_model_to_pytorch.py \
+        --checkpoint_dir ~/.cache/openpi/openpi-assets/checkpoints/pi05_base \
+        --config_name pi05_xingchen_fold_ario \
+        --output_path "$PYTORCH_WEIGHT_DIR" \
+        --precision bfloat16
 fi
 
-echo "=== Step 2: Training ==="
-python scripts/train.py pi05_xingchen_fold_ario --overwrite
+echo "=== Step 2: Training (PyTorch DDP) ==="
+MASTER_ADDR=$(hostname -I | awk '{print $1}')
+MASTER_PORT=$((RANDOM % 10000 + 20000))
+echo "Using MASTER_ADDR=$MASTER_ADDR MASTER_PORT=$MASTER_PORT"
+
+torchrun --nnodes=1 --nproc_per_node=$NUM_GPUS \
+    --master_addr="$MASTER_ADDR" --master_port="$MASTER_PORT" \
+    scripts/train_pytorch.py pi05_xingchen_fold_ario --overwrite
 
 echo "=== Done ==="

@@ -1095,7 +1095,7 @@ _CONFIGS = [
             ),
             use_delta_actions=True,
         ),
-        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
+        pytorch_weight_path="./checkpoints/pi05_base_pytorch",
         lr_schedule=_optimizer.CosineDecaySchedule(
             warmup_steps=5_000,
             peak_lr=5e-5,
@@ -1104,7 +1104,7 @@ _CONFIGS = [
         ),
         optimizer=_optimizer.AdamW(clip_gradient_norm=1.0),
         ema_decay=0.999,
-        num_train_steps=50_000,
+        num_train_steps=100_000,
         batch_size=64,
         save_interval=5000,
         keep_period=10_000,
@@ -1128,7 +1128,7 @@ _CONFIGS = [
             max_episodes=3,
             use_delta_actions=True,
         ),
-        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
+        pytorch_weight_path="./checkpoints/pi05_base_pytorch",
         lr_schedule=_optimizer.CosineDecaySchedule(
             warmup_steps=50,
             peak_lr=5e-5,

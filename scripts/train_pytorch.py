@@ -329,15 +329,19 @@ def train_loop(config: _config.TrainConfig):
         else:
             raise FileNotFoundError(f"Experiment checkpoint directory {exp_checkpoint_dir} does not exist for resume")
     elif config.overwrite and config.checkpoint_dir.exists():
-        shutil.rmtree(config.checkpoint_dir)
-        logging.info(f"Overwriting checkpoint directory: {config.checkpoint_dir}")
+        if is_main:
+            shutil.rmtree(config.checkpoint_dir)
+            logging.info(f"Overwriting checkpoint directory: {config.checkpoint_dir}")
 
     # Create checkpoint directory with experiment name
     if not resuming:
         # For new runs, create experiment-specific checkpoint directory
         exp_checkpoint_dir = config.checkpoint_dir
-        exp_checkpoint_dir.mkdir(parents=True, exist_ok=True)
-        logging.info(f"Created experiment checkpoint directory: {exp_checkpoint_dir}")
+        if is_main:
+            exp_checkpoint_dir.mkdir(parents=True, exist_ok=True)
+            logging.info(f"Created experiment checkpoint directory: {exp_checkpoint_dir}")
+        if use_ddp:
+            dist.barrier()
     else:
         # For resume, checkpoint_dir is already set to the experiment directory
         logging.info(f"Using existing experiment checkpoint directory: {config.checkpoint_dir}")
@@ -511,7 +515,10 @@ def train_loop(config: _config.TrainConfig):
         if use_ddp and hasattr(loader, "set_epoch"):
             loader.set_epoch(global_step // len(loader))
 
+        data_start = time.time()
         for observation, actions in loader:
+            data_time = time.time() - data_start
+
             # Check if we've reached the target number of steps
             if global_step >= config.num_train_steps:
                 break
@@ -526,6 +533,8 @@ def train_loop(config: _config.TrainConfig):
                 pg["lr"] = lr_schedule(global_step)
 
             # Forward pass
+            torch.cuda.synchronize()
+            train_start = time.time()
             losses = model(observation, actions)
             # Ensure losses is a tensor and handle different return types
             if isinstance(losses, list | tuple):
@@ -548,6 +557,8 @@ def train_loop(config: _config.TrainConfig):
             # Optimizer step
             optim.step()
             optim.zero_grad(set_to_none=True)
+            torch.cuda.synchronize()
+            train_time = time.time() - train_start
 
             # Clear gradients more aggressively
             for param in model.parameters():
@@ -580,9 +591,11 @@ def train_loop(config: _config.TrainConfig):
                     if len(vals) > 0:
                         avg_grad_norm = sum(vals) / len(vals)
                 logging.info(
-                    f"step={global_step} loss={avg_loss:.4f} lr={avg_lr:.2e} grad_norm={avg_grad_norm:.2f} time={elapsed:.1f}s"
+                    f"step={global_step} loss={avg_loss:.4f} lr={avg_lr:.2e} grad_norm={avg_grad_norm:.2f} "
+                    f"data_time={data_time:.3f}s train_time={train_time:.3f}s time={elapsed:.1f}s"
                     if avg_grad_norm is not None
-                    else f"step={global_step} loss={avg_loss:.4f} lr={avg_lr:.2e} time={elapsed:.1f}s"
+                    else f"step={global_step} loss={avg_loss:.4f} lr={avg_lr:.2e} "
+                    f"data_time={data_time:.3f}s train_time={train_time:.3f}s time={elapsed:.1f}s"
                 )
 
                 # Log to wandb
@@ -603,6 +616,9 @@ def train_loop(config: _config.TrainConfig):
             global_step += 1
             # Save checkpoint using the new mechanism
             save_checkpoint(model, optim, global_step, config, is_main, data_config)
+
+            # Reset data timer for next iteration
+            data_start = time.time()
 
             # Update progress bar
             if pbar is not None:

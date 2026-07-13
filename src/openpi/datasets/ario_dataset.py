@@ -146,31 +146,56 @@ class ArioStreamingDataset:
     def __len__(self) -> int:
         return self._cumulative[-1] if self._cumulative else 0
 
-    def __getitem__(self, index: int) -> dict:
+    def __getitem__(self, index: int, _retries: int = 3, _timeout: float = 60.0) -> dict:
+        import random
+        import signal
+
         if index < 0:
             index += len(self)
-        ep_idx, frame_idx = self._global_to_local(index)
-        bucket, prefix = self._episodes[ep_idx]
-        cache_key = prefix
 
-        import sys
-        print(f"[DEBUG worker {os.getpid()}] __getitem__ idx={index} ep={ep_idx} frame={frame_idx}", flush=True, file=sys.stderr)
+        for attempt in range(_retries):
+            ep_idx, frame_idx = self._global_to_local(index)
+            bucket, prefix = self._episodes[ep_idx]
+            cache_key = prefix
 
-        state_action, frames = self._get_episode(bucket, prefix, cache_key)
+            try:
+                state_action, frames = self._get_episode_with_timeout(bucket, prefix, cache_key, _timeout)
 
-        # Current frame image and state
-        image = frames[frame_idx]
-        state = state_action[frame_idx]
+                image = frames[frame_idx]
+                state = state_action[frame_idx]
+                actions = self._get_action_chunk(state_action, frame_idx)
 
-        # Action chunk: action_horizon consecutive frames, clamp at end
-        actions = self._get_action_chunk(state_action, frame_idx)
+                return {
+                    "observation/image": image,
+                    "observation/state": state,
+                    "actions": actions,
+                    "prompt": self._config.task,
+                }
+            except (TimeoutError, Exception) as e:
+                print(f"[WARN] Episode fetch failed (attempt {attempt+1}/{_retries}), ep={ep_idx}: {e}. Skipping.", flush=True)
+                index = random.randint(0, len(self) - 1)
 
-        return {
-            "observation/image": image,
-            "observation/state": state,
-            "actions": actions,
-            "prompt": self._config.task,
-        }
+        raise RuntimeError(f"Failed to fetch any episode after {_retries} retries")
+
+    def _get_episode_with_timeout(self, bucket, prefix, cache_key, timeout):
+        """Wrap _get_episode with a timeout. Falls back to no-timeout on non-main threads."""
+        import signal
+        import threading
+
+        if threading.current_thread() is not threading.main_thread():
+            return self._get_episode(bucket, prefix, cache_key)
+
+        def _handler(signum, frame):
+            raise TimeoutError(f"Episode fetch timed out after {timeout}s")
+
+        old_handler = signal.signal(signal.SIGALRM, _handler)
+        signal.alarm(int(timeout))
+        try:
+            result = self._get_episode(bucket, prefix, cache_key)
+        finally:
+            signal.alarm(0)
+            signal.signal(signal.SIGALRM, old_handler)
+        return result
 
     def _global_to_local(self, index: int) -> tuple[int, int]:
         """Convert global frame index to (episode_idx, local_frame_idx)."""
