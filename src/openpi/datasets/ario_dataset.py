@@ -17,6 +17,8 @@ ACTION_DIM = 31
 PT_FILES = ["eef_torso.pt", "head.pt", "eef_left.pt", "gripper_cmd.pt", "eef_right.pt"]
 IMAGE_SIZE = (320, 240)
 
+CAMERA_VIEWS = ("cam_high", "cam_left_wrist", "cam_right_wrist")
+
 
 @dataclass
 class ArioConfig:
@@ -30,6 +32,7 @@ class ArioConfig:
     max_episodes: int | None = None
     disk_cache_dir: str = "/tmp/ario_disk_cache"
     disk_cache_max_gb: float = 200.0
+    multi_view: bool = True
 
 
 class ArioStreamingDataset:
@@ -45,8 +48,8 @@ class ArioStreamingDataset:
         self._s3 = None
         self._pid: int | None = None
 
-        # LRU cache for decoded episodes: ep_key -> (state_action, frames)
-        self._cache: OrderedDict[str, tuple[np.ndarray, list[np.ndarray]]] = OrderedDict()
+        # LRU cache for decoded episodes: ep_key -> (state_action, frames_dict)
+        self._cache: OrderedDict[str, tuple[np.ndarray, dict[str, list[np.ndarray]]]] = OrderedDict()
         self._cache_size = config.cache_size
 
         # Discover episodes and build global frame index
@@ -159,18 +162,23 @@ class ArioStreamingDataset:
             cache_key = prefix
 
             try:
-                state_action, frames = self._get_episode_with_timeout(bucket, prefix, cache_key, _timeout)
+                state_action, frames_dict = self._get_episode_with_timeout(bucket, prefix, cache_key, _timeout)
 
-                image = frames[frame_idx]
                 state = state_action[frame_idx]
                 actions = self._get_action_chunk(state_action, frame_idx)
 
-                return {
-                    "observation/image": image,
+                result = {
+                    "observation/image": frames_dict["cam_high"][frame_idx],
                     "observation/state": state,
                     "actions": actions,
                     "prompt": self._config.task,
                 }
+
+                if self._config.multi_view:
+                    for cam in CAMERA_VIEWS:
+                        result[f"observation/{cam}"] = frames_dict[cam][frame_idx]
+
+                return result
             except (TimeoutError, Exception) as e:
                 print(f"[WARN] Episode fetch failed (attempt {attempt+1}/{_retries}), ep={ep_idx}: {e}. Skipping.", flush=True)
                 index = random.randint(0, len(self) - 1)
@@ -212,7 +220,7 @@ class ArioStreamingDataset:
 
     def _get_episode(
         self, bucket: str, prefix: str, cache_key: str
-    ) -> tuple[np.ndarray, list[np.ndarray]]:
+    ) -> tuple[np.ndarray, dict[str, list[np.ndarray]]]:
         """Get episode data, using memory LRU cache backed by disk cache."""
         if cache_key in self._cache:
             self._cache.move_to_end(cache_key)
@@ -224,37 +232,49 @@ class ArioStreamingDataset:
             try:
                 data = np.load(disk_path, allow_pickle=True)
                 state_action = data["state_action"]
-                frames = list(data["frames"])
-                disk_path.stat()  # touch atime for LRU
+                frames_dict = {}
+                for cam in CAMERA_VIEWS:
+                    if cam in data:
+                        frames_dict[cam] = list(data[cam])
+                    else:
+                        frames_dict[cam] = list(data["frames"])
+                disk_path.stat()
                 os.utime(disk_path, None)
-                self._cache[cache_key] = (state_action, frames)
+                self._cache[cache_key] = (state_action, frames_dict)
                 if len(self._cache) > self._cache_size:
                     self._cache.popitem(last=False)
-                return state_action, frames
+                return state_action, frames_dict
             except Exception:
                 disk_path.unlink(missing_ok=True)
 
         # Download and decode
         s3 = self._get_s3()
         state_action = self._build_state_action(s3, bucket, prefix)
-        frames = self._extract_video_frames(s3, bucket, prefix + "video.mp4")
+
+        if self._config.multi_view:
+            frames_dict = self._extract_multi_view_frames(s3, bucket, prefix)
+        else:
+            frames = self._extract_video_frames(s3, bucket, prefix + "video.mp4")
+            frames_dict = {cam: frames for cam in CAMERA_VIEWS}
 
         # Align lengths and downsample
-        raw_len = min(len(state_action), len(frames))
+        min_len = len(state_action)
+        for cam in frames_dict:
+            min_len = min(min_len, len(frames_dict[cam]))
         rate = self._config.video_downsample_rate
-        indices = list(range(0, raw_len, rate))
+        indices = list(range(0, min_len, rate))
 
         state_action = state_action[indices].astype(np.float32)
-        frames = [frames[i] for i in indices]
+        frames_dict = {cam: [frames_dict[cam][i] for i in indices] for cam in frames_dict}
 
         # Save to disk cache
-        self._save_to_disk_cache(disk_path, state_action, frames)
+        self._save_to_disk_cache(disk_path, state_action, frames_dict)
 
-        self._cache[cache_key] = (state_action, frames)
+        self._cache[cache_key] = (state_action, frames_dict)
         if len(self._cache) > self._cache_size:
             self._cache.popitem(last=False)
 
-        return state_action, frames
+        return state_action, frames_dict
 
     def _disk_cache_path(self, cache_key: str) -> Path:
         import hashlib
@@ -263,11 +283,13 @@ class ArioStreamingDataset:
         cache_dir.mkdir(parents=True, exist_ok=True)
         return cache_dir / f"{key_hash}.npz"
 
-    def _save_to_disk_cache(self, path: Path, state_action: np.ndarray, frames: list[np.ndarray]):
+    def _save_to_disk_cache(self, path: Path, state_action: np.ndarray, frames_dict: dict[str, list[np.ndarray]]):
         try:
             self._evict_disk_cache_if_needed()
-            frames_arr = np.stack(frames)
-            np.savez(path, state_action=state_action, frames=frames_arr)
+            save_data = {"state_action": state_action}
+            for cam, frames in frames_dict.items():
+                save_data[cam] = np.stack(frames)
+            np.savez(path, **save_data)
         except Exception:
             path.unlink(missing_ok=True)
 
@@ -316,6 +338,23 @@ class ArioStreamingDataset:
         finally:
             os.unlink(tmp.name)
         return frames
+
+    def _extract_multi_view_frames(
+        self, s3, bucket: str, prefix: str
+    ) -> dict[str, list[np.ndarray]]:
+        """Load frames from raw_video/ for each camera view."""
+        frames_dict = {}
+        for cam in CAMERA_VIEWS:
+            video_key = prefix + f"raw_video/{cam}.mp4"
+            try:
+                frames_dict[cam] = self._extract_video_frames(s3, bucket, video_key)
+            except Exception as e:
+                if cam == "cam_high":
+                    # Fallback: try the top-level video.mp4 for the base view
+                    frames_dict[cam] = self._extract_video_frames(s3, bucket, prefix + "video.mp4")
+                else:
+                    raise RuntimeError(f"Missing required camera view {cam}: {e}")
+        return frames_dict
 
     def _decode_video(self, path: Path) -> list[np.ndarray]:
         cap = cv2.VideoCapture(str(path))
