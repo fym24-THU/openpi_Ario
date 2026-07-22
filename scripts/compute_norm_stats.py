@@ -87,12 +87,21 @@ def create_rlds_dataloader(
 
 
 def main(config_name: str, max_frames: int | None = None):
+    import dataclasses
     import sys
     print(f"[DEBUG] Loading config: {config_name}", flush=True)
     config = _config.get_config(config_name)
     print(f"[DEBUG] Config loaded. batch_size={config.batch_size}, num_workers={config.num_workers}", flush=True)
     data_config = config.data.create(config.assets_dirs, config.model)
     print(f"[DEBUG] Data config created. repo_id={data_config.repo_id}", flush=True)
+
+    # For Ario datasets, enable skip_video to avoid downloading videos (only need state/actions)
+    if data_config.ario_config is not None:
+        data_config = dataclasses.replace(
+            data_config,
+            ario_config=dataclasses.replace(data_config.ario_config, skip_video=True),
+        )
+        print("[DEBUG] Ario dataset: skip_video=True (only downloading .pt files)", flush=True)
 
     if data_config.rlds_data_dir is not None:
         print("[DEBUG] Using RLDS dataloader", flush=True)

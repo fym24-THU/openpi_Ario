@@ -502,6 +502,15 @@ def train_loop(config: _config.TrainConfig):
         )
         logging.info("EMA is not supported for PyTorch training")
         logging.info(f"Training precision: {model_cfg.dtype}")
+        if hasattr(config.data, 'multi_view'):
+            multi_view_enabled = config.data.multi_view
+            if multi_view_enabled:
+                logging.info("Multi-view (3-view) training: ENABLED")
+                logging.info("  Camera views: cam_high, cam_left_wrist, cam_right_wrist")
+                logging.info("  Primary view (observation/image): cam_high (source: raw_video/cam_high.mp4)")
+                logging.info("  NOTE: if raw_video/cam_high.mp4 is missing per-episode, a [WARN] will print at runtime")
+            else:
+                logging.info("Multi-view (3-view) training: DISABLED (single-view: video.mp4)")
 
     # Training loop - iterate until we reach num_train_steps
     pbar = (
@@ -590,12 +599,21 @@ def train_loop(config: _config.TrainConfig):
                     ]
                     if len(vals) > 0:
                         avg_grad_norm = sum(vals) / len(vals)
+
+                # Compute ETA
+                time_per_step = elapsed / config.log_interval
+                remaining_steps = config.num_train_steps - global_step
+                eta_seconds = remaining_steps * time_per_step
+                eta_h = int(eta_seconds // 3600)
+                eta_m = int((eta_seconds % 3600) // 60)
+                eta_str = f"ETA={eta_h}h{eta_m:02d}m"
+
                 logging.info(
                     f"step={global_step} loss={avg_loss:.4f} lr={avg_lr:.2e} grad_norm={avg_grad_norm:.2f} "
-                    f"data_time={data_time:.3f}s train_time={train_time:.3f}s time={elapsed:.1f}s"
+                    f"data_time={data_time:.3f}s train_time={train_time:.3f}s time={elapsed:.1f}s {eta_str}"
                     if avg_grad_norm is not None
                     else f"step={global_step} loss={avg_loss:.4f} lr={avg_lr:.2e} "
-                    f"data_time={data_time:.3f}s train_time={train_time:.3f}s time={elapsed:.1f}s"
+                    f"data_time={data_time:.3f}s train_time={train_time:.3f}s time={elapsed:.1f}s {eta_str}"
                 )
 
                 # Log to wandb

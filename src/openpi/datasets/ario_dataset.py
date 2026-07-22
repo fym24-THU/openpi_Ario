@@ -28,6 +28,8 @@ class ArioConfig:
     min_frames: int = 1885
     image_size: tuple[int, int] = IMAGE_SIZE
     task: str = "fold clothes"
+    load_instructions: bool = False
+    skip_video: bool = False
     cache_size: int = 32
     max_episodes: int | None = None
     disk_cache_dir: str = "/tmp/ario_disk_cache"
@@ -51,6 +53,9 @@ class ArioStreamingDataset:
         # LRU cache for decoded episodes: ep_key -> (state_action, frames_dict)
         self._cache: OrderedDict[str, tuple[np.ndarray, dict[str, list[np.ndarray]]]] = OrderedDict()
         self._cache_size = config.cache_size
+
+        # Per-episode instructions loaded from instructions.json
+        self._instructions: dict[str, str] = {}
 
         # Discover episodes and build global frame index
         episodes = self._discover_episodes()
@@ -119,6 +124,8 @@ class ArioStreamingDataset:
 
     def _build_index(self):
         """Download eef_torso.pt from each episode to determine its length."""
+        import json
+
         from tqdm import tqdm
 
         s3 = self._get_s3()
@@ -136,6 +143,19 @@ class ArioStreamingDataset:
 
             if raw_len < self._config.min_frames:
                 continue
+
+            # Load per-episode instruction from instructions.json
+            if self._config.load_instructions:
+                try:
+                    instr_data = self._s3_download_bytes(s3, bucket, prefix + "instructions.json")
+                    instr_json = json.loads(instr_data)
+                    sub_instructions = instr_json.get("sub_instructions", [])
+                    if sub_instructions:
+                        self._instructions[prefix] = sub_instructions[0]["instruction"]
+                    else:
+                        self._instructions[prefix] = self._config.task
+                except Exception:
+                    self._instructions[prefix] = self._config.task
 
             n_frames = len(range(0, raw_len, rate))
             valid_episodes.append((bucket, prefix))
@@ -167,11 +187,13 @@ class ArioStreamingDataset:
                 state = state_action[frame_idx]
                 actions = self._get_action_chunk(state_action, frame_idx)
 
+                prompt = self._instructions.get(prefix, self._config.task)
+
                 result = {
                     "observation/image": frames_dict["cam_high"][frame_idx],
                     "observation/state": state,
                     "actions": actions,
-                    "prompt": self._config.task,
+                    "prompt": prompt,
                 }
 
                 if self._config.multi_view:
@@ -251,21 +273,30 @@ class ArioStreamingDataset:
         s3 = self._get_s3()
         state_action = self._build_state_action(s3, bucket, prefix)
 
-        if self._config.multi_view:
-            frames_dict = self._extract_multi_view_frames(s3, bucket, prefix)
+        if self._config.skip_video:
+            # Only need state/actions (e.g. for norm stats), skip expensive video download
+            rate = self._config.video_downsample_rate
+            indices = list(range(0, len(state_action), rate))
+            state_action = state_action[indices].astype(np.float32)
+            target_w, target_h = self._config.image_size
+            dummy_frame = np.zeros((target_h, target_w, 3), dtype=np.uint8)
+            frames_dict = {cam: [dummy_frame] * len(state_action) for cam in CAMERA_VIEWS}
         else:
-            frames = self._extract_video_frames(s3, bucket, prefix + "video.mp4")
-            frames_dict = {cam: frames for cam in CAMERA_VIEWS}
+            if self._config.multi_view:
+                frames_dict = self._extract_multi_view_frames(s3, bucket, prefix)
+            else:
+                frames = self._extract_video_frames(s3, bucket, prefix + "video.mp4")
+                frames_dict = {cam: frames for cam in CAMERA_VIEWS}
 
-        # Align lengths and downsample
-        min_len = len(state_action)
-        for cam in frames_dict:
-            min_len = min(min_len, len(frames_dict[cam]))
-        rate = self._config.video_downsample_rate
-        indices = list(range(0, min_len, rate))
+            # Align lengths and downsample
+            min_len = len(state_action)
+            for cam in frames_dict:
+                min_len = min(min_len, len(frames_dict[cam]))
+            rate = self._config.video_downsample_rate
+            indices = list(range(0, min_len, rate))
 
-        state_action = state_action[indices].astype(np.float32)
-        frames_dict = {cam: [frames_dict[cam][i] for i in indices] for cam in frames_dict}
+            state_action = state_action[indices].astype(np.float32)
+            frames_dict = {cam: [frames_dict[cam][i] for i in indices] for cam in frames_dict}
 
         # Save to disk cache
         self._save_to_disk_cache(disk_path, state_action, frames_dict)
@@ -350,7 +381,11 @@ class ArioStreamingDataset:
                 frames_dict[cam] = self._extract_video_frames(s3, bucket, video_key)
             except Exception as e:
                 if cam == "cam_high":
-                    # Fallback: try the top-level video.mp4 for the base view
+                    print(
+                        f"[WARN] raw_video/cam_high.mp4 not found for {prefix}, "
+                        f"falling back to video.mp4. Error: {e}",
+                        flush=True,
+                    )
                     frames_dict[cam] = self._extract_video_frames(s3, bucket, prefix + "video.mp4")
                 else:
                     raise RuntimeError(f"Missing required camera view {cam}: {e}")

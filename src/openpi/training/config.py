@@ -528,10 +528,12 @@ class ArioXingchenDataConfig(DataConfigFactory):
     image_size: tuple[int, int] = (320, 240)
     use_delta_actions: bool = True
     default_prompt: str = "fold clothes"
+    load_instructions: bool = False
     cache_size: int = 32
     max_episodes: int | None = None
     disk_cache_dir: str = "/tmp/ario_disk_cache"
     disk_cache_max_gb: float = 200.0
+    multi_view: bool = True
 
     @override
     def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
@@ -572,10 +574,12 @@ class ArioXingchenDataConfig(DataConfigFactory):
             min_frames=self.min_frames,
             image_size=self.image_size,
             task=self.default_prompt,
+            load_instructions=self.load_instructions,
             cache_size=self.cache_size,
             max_episodes=self.max_episodes,
             disk_cache_dir=self.disk_cache_dir,
             disk_cache_max_gb=self.disk_cache_max_gb,
+            multi_view=self.multi_view,
         )
 
         return dataclasses.replace(
@@ -1075,24 +1079,18 @@ _CONFIGS = [
     # Xingchen (Astribot-S1) fold-clothes config — streaming from Ario/OSS directly.
     #
     TrainConfig(
-        name="pi05_xingchen_fold_ario",
-        exp_name="pi05_xingchen_fold_ario",
+        name="pi05_xingchen_ario",
+        exp_name="new_blocks",
         model=pi0_config.Pi0Config(
             pi05=True,
             action_dim=32,
             action_horizon=50,
         ),
         data=ArioXingchenDataConfig(
-            repo_id="xingchen/fold_clothes",
-            s3_prefixes=(
-                "s3://shengshu-base2-test/ario/xingchen/xingchen3-Pretrain_XC03_叠短袖_260623_01/,"
-                "s3://shengshu-base2-test/ario/xingchen/xingchen3-Pretrain_XC03_叠短袖_260624_01/,"
-                "s3://shengshu-base2-test/ario/xingchen/xingchen3-Pretrain_XC03_叠短袖_260625_01/,"
-                "s3://shengshu-base2-test/ario/xingchen/xingchen3-Pretrain_XC03_叠短袖_260626_01/,"
-                "s3://shengshu-base2-test/ario/xingchen/xingchen3-Pretrain_XC03_叠短袖_260629_01/,"
-                "s3://shengshu-base2-test/ario/xingchen/xingchen3-Pretrain_XC03_叠短袖_260630_01/,"
-                "s3://shengshu-base2-test/ario/xingchen/xingchen3-Pretrain_XC03_叠短袖_260703_01/"
-            ),
+            repo_id="xingchen/new_blocks",
+            s3_prefixes="oss://shengshu-base2-test/xiaojun/新积木/",
+            min_frames=1,
+            load_instructions=True,
             use_delta_actions=True,
         ),
         pytorch_weight_path="./checkpoints/pi05_base_pytorch",
