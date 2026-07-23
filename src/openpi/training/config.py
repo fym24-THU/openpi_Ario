@@ -1075,8 +1075,8 @@ _CONFIGS = [
     # Xingchen (Astribot-S1) fold-clothes config — streaming from Ario/OSS directly.
     #
     TrainConfig(
-        name="pi05_xingchen_fold_ario",
-        exp_name="pi05_xingchen_fold_ario",
+        name="pi05_xingchen_ario",
+        exp_name="jianzhi_foldclothes",
         model=pi0_config.Pi0Config(
             pi05=True,
             action_dim=32,
@@ -1084,15 +1084,7 @@ _CONFIGS = [
         ),
         data=ArioXingchenDataConfig(
             repo_id="xingchen/fold_clothes",
-            s3_prefixes=(
-                "s3://shengshu-base2-test/ario/xingchen/xingchen3-Pretrain_XC03_叠短袖_260623_01/,"
-                "s3://shengshu-base2-test/ario/xingchen/xingchen3-Pretrain_XC03_叠短袖_260624_01/,"
-                "s3://shengshu-base2-test/ario/xingchen/xingchen3-Pretrain_XC03_叠短袖_260625_01/,"
-                "s3://shengshu-base2-test/ario/xingchen/xingchen3-Pretrain_XC03_叠短袖_260626_01/,"
-                "s3://shengshu-base2-test/ario/xingchen/xingchen3-Pretrain_XC03_叠短袖_260629_01/,"
-                "s3://shengshu-base2-test/ario/xingchen/xingchen3-Pretrain_XC03_叠短袖_260630_01/,"
-                "s3://shengshu-base2-test/ario/xingchen/xingchen3-Pretrain_XC03_叠短袖_260703_01/"
-            ),
+            s3_prefixes="s3://shengshu-world-model-data/ARIO-new/jianzhi/foldclothes/",
             use_delta_actions=True,
         ),
         pytorch_weight_path="./checkpoints/pi05_base_pytorch",

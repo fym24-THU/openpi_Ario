@@ -17,6 +17,9 @@ ACTION_DIM = 31
 PT_FILES = ["eef_torso.pt", "head.pt", "eef_left.pt", "gripper_cmd.pt", "eef_right.pt"]
 IMAGE_SIZE = (320, 240)
 
+# New data format: single state.pt file containing all state/action data [T, 31]
+STATE_PT_FILE = "state.pt"
+
 
 @dataclass
 class ArioConfig:
@@ -115,7 +118,7 @@ class ArioStreamingDataset:
         return episodes
 
     def _build_index(self):
-        """Download eef_torso.pt from each episode to determine its length."""
+        """Download state.pt from each episode to determine its length."""
         from tqdm import tqdm
 
         s3 = self._get_s3()
@@ -125,7 +128,7 @@ class ArioStreamingDataset:
 
         for bucket, prefix in tqdm(self._episodes, desc="Building frame index"):
             try:
-                data = self._s3_download_bytes(s3, bucket, prefix + "eef_torso.pt")
+                data = self._s3_download_bytes(s3, bucket, prefix + STATE_PT_FILE)
                 tensor = torch.load(io.BytesIO(data), map_location="cpu")
                 raw_len = tensor.shape[0]
             except Exception:
@@ -288,23 +291,9 @@ class ArioStreamingDataset:
             f.unlink(missing_ok=True)
 
     def _build_state_action(self, s3, bucket: str, prefix: str) -> np.ndarray:
-        tensors = {}
-        for fname in PT_FILES:
-            data = self._s3_download_bytes(s3, bucket, prefix + fname)
-            tensors[fname] = torch.load(io.BytesIO(data), map_location="cpu")
-
-        state_action = torch.cat(
-            [
-                tensors["eef_torso.pt"],
-                tensors["head.pt"],
-                tensors["eef_left.pt"],
-                tensors["gripper_cmd.pt"][:, 0:1],
-                tensors["eef_right.pt"],
-                tensors["gripper_cmd.pt"][:, 1:2],
-            ],
-            dim=-1,
-        )
-        return state_action.numpy()
+        data = self._s3_download_bytes(s3, bucket, prefix + STATE_PT_FILE)
+        tensor = torch.load(io.BytesIO(data), map_location="cpu")
+        return tensor.numpy()
 
     def _extract_video_frames(self, s3, bucket: str, video_key: str) -> list[np.ndarray]:
         data = self._s3_download_bytes(s3, bucket, video_key)
