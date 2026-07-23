@@ -1,0 +1,1536 @@
+switching to submit user: fanyiming
+Using 8 GPU(s)
+=== Step 1: Convert JAX weights to PyTorch (if not already done) ===
+PyTorch weights already exist at ./checkpoints/pi05_base_pytorch, skipping conversion.
+=== Step 2: Compute norm stats (if not already done) ===
+Norm stats already exist at ./assets/pi05_xingchen_ario/xingchen/new_blocks/norm_stats.json, skipping.
+=== Step 3: Training (PyTorch DDP) ===
+--- Multi-view training status ---
+/home/fanyiming/openpi_Ario/.venv/lib/python3.11/site-packages/torch/cuda/__init__.py:64: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+Multi-view (3-view) training: ENABLED
+  Camera views verified: cam_high, cam_left_wrist, cam_right_wrist
+  First episode: xiaojun/新积木/episode_000000/
+---
+Using MASTER_ADDR=192.168.1.123 MASTER_PORT=27429
+/home/fanyiming/openpi_Ario/.venv/lib/python3.11/site-packages/torch/cuda/__init__.py:64: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+W0723 05:52:24.611000 221 torch/distributed/run.py:874] 
+W0723 05:52:24.611000 221 torch/distributed/run.py:874] *****************************************
+W0723 05:52:24.611000 221 torch/distributed/run.py:874] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+W0723 05:52:24.611000 221 torch/distributed/run.py:874] *****************************************
+/home/fanyiming/openpi_Ario/.venv/lib/python3.11/site-packages/torch/cuda/__init__.py:64: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/home/fanyiming/openpi_Ario/.venv/lib/python3.11/site-packages/torch/cuda/__init__.py:64: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/home/fanyiming/openpi_Ario/.venv/lib/python3.11/site-packages/torch/cuda/__init__.py:64: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/home/fanyiming/openpi_Ario/.venv/lib/python3.11/site-packages/torch/cuda/__init__.py:64: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/home/fanyiming/openpi_Ario/.venv/lib/python3.11/site-packages/torch/cuda/__init__.py:64: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/home/fanyiming/openpi_Ario/.venv/lib/python3.11/site-packages/torch/cuda/__init__.py:64: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/home/fanyiming/openpi_Ario/.venv/lib/python3.11/site-packages/torch/cuda/__init__.py:64: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/home/fanyiming/openpi_Ario/.venv/lib/python3.11/site-packages/torch/cuda/__init__.py:64: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+05:52:43.016 [I] Overwriting checkpoint directory: /home/fanyiming/openpi_Ario/checkpoints/pi05_xingchen_ario/new_blocks (288:train_pytorch.py:422)
+05:52:43.017 [I] Created experiment checkpoint directory: /home/fanyiming/openpi_Ario/checkpoints/pi05_xingchen_ario/new_blocks (288:train_pytorch.py:430)
+/home/fanyiming/openpi_Ario/.venv/lib/python3.11/site-packages/torch/distributed/c10d_logger.py:83: UserWarning: barrier(): using the device under current context. You can specify `device_id` in `init_process_group` to mute this warning.
+  return func(*args, **kwargs)
+[rank0]:[W723 05:52:43.131618286 ProcessGroupNCCL.cpp:5276] Guessing device ID based on global rank. This can cause a hang if rank to GPU mapping is heterogeneous. You can specify device_id in init_process_group()
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO ENV/Plugin: Could not find: libnccl-env.so
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO NCCL_SOCKET_IFNAME set by environment to bond0
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Bootstrap: Using bond0:10.169.0.123<0>
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO cudaDriverVersion 13020
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO NCCL version 2.29.7+cuda13.2
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO NCCL git version stable b81d6a5a3
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Comm config Blocking set to 1
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO ENV/Plugin: Could not find: libnccl-env.so
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO cudaDriverVersion 13020
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO NCCL_SOCKET_IFNAME set by environment to bond0
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Bootstrap: Using bond0:10.169.0.123<0>
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO NCCL version 2.29.7+cuda13.2
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO NCCL git version stable b81d6a5a3
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Comm config Blocking set to 1
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO ENV/Plugin: Could not find: libnccl-env.so
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO cudaDriverVersion 13020
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO NCCL_SOCKET_IFNAME set by environment to bond0
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Bootstrap: Using bond0:10.169.0.123<0>
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO NCCL version 2.29.7+cuda13.2
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO NCCL git version stable b81d6a5a3
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Comm config Blocking set to 1
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO ENV/Plugin: Could not find: libnccl-env.so
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO cudaDriverVersion 13020
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO NCCL_SOCKET_IFNAME set by environment to bond0
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Bootstrap: Using bond0:10.169.0.123<0>
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO NCCL version 2.29.7+cuda13.2
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO NCCL git version stable b81d6a5a3
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Comm config Blocking set to 1
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO ENV/Plugin: Could not find: libnccl-env.so
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO cudaDriverVersion 13020
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO NCCL_SOCKET_IFNAME set by environment to bond0
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Bootstrap: Using bond0:10.169.0.123<0>
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO NCCL version 2.29.7+cuda13.2
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO NCCL git version stable b81d6a5a3
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Comm config Blocking set to 1
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO ENV/Plugin: Could not find: libnccl-env.so
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO cudaDriverVersion 13020
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO NCCL_SOCKET_IFNAME set by environment to bond0
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Bootstrap: Using bond0:10.169.0.123<0>
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO NCCL version 2.29.7+cuda13.2
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO NCCL git version stable b81d6a5a3
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Comm config Blocking set to 1
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO ENV/Plugin: Could not find: libnccl-env.so
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO cudaDriverVersion 13020
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO NCCL_SOCKET_IFNAME set by environment to bond0
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Bootstrap: Using bond0:10.169.0.123<0>
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO NCCL version 2.29.7+cuda13.2
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO NCCL git version stable b81d6a5a3
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Comm config Blocking set to 1
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO ENV/Plugin: Could not find: libnccl-env.so
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO cudaDriverVersion 13020
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO NCCL_SOCKET_IFNAME set by environment to bond0
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Bootstrap: Using bond0:10.169.0.123<0>
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO NCCL version 2.29.7+cuda13.2
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO NCCL git version stable b81d6a5a3
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Comm config Blocking set to 1
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO NET/Plugin: Loaded net plugin NCCL RDMA Plugin v9 (v9)
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO NET/Plugin: Loaded collnet plugin SHARP (v9)
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Successfully loaded external network plugin /opt/hpcx/nccl_rdma_sharp_plugin/lib/libnccl-net.so
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Plugin Path : /opt/hpcx/nccl_rdma_sharp_plugin/lib/libnccl-net.so
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO P2P plugin v9 IBext_v9
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO NCCL_SOCKET_IFNAME set by environment to bond0
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO NET/Plugin: Loaded net plugin NCCL RDMA Plugin v9 (v9)
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO NET/Plugin: Loaded collnet plugin SHARP (v9)
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Successfully loaded external network plugin /opt/hpcx/nccl_rdma_sharp_plugin/lib/libnccl-net.so
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Plugin Path : /opt/hpcx/nccl_rdma_sharp_plugin/lib/libnccl-net.so
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO P2P plugin v9 IBext_v9
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO NCCL_SOCKET_IFNAME set by environment to bond0
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO NET/Plugin: Loaded net plugin NCCL RDMA Plugin v9 (v9)
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO NET/Plugin: Loaded collnet plugin SHARP (v9)
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Successfully loaded external network plugin /opt/hpcx/nccl_rdma_sharp_plugin/lib/libnccl-net.so
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Plugin Path : /opt/hpcx/nccl_rdma_sharp_plugin/lib/libnccl-net.so
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO P2P plugin v9 IBext_v9
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO NCCL_SOCKET_IFNAME set by environment to bond0
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO NET/Plugin: Loaded net plugin NCCL RDMA Plugin v9 (v9)
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO NET/Plugin: Loaded collnet plugin SHARP (v9)
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Successfully loaded external network plugin /opt/hpcx/nccl_rdma_sharp_plugin/lib/libnccl-net.so
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Plugin Path : /opt/hpcx/nccl_rdma_sharp_plugin/lib/libnccl-net.so
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO P2P plugin v9 IBext_v9
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO NCCL_SOCKET_IFNAME set by environment to bond0
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO NET/Plugin: Loaded net plugin NCCL RDMA Plugin v9 (v9)
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO NET/Plugin: Loaded collnet plugin SHARP (v9)
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Successfully loaded external network plugin /opt/hpcx/nccl_rdma_sharp_plugin/lib/libnccl-net.so
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Plugin Path : /opt/hpcx/nccl_rdma_sharp_plugin/lib/libnccl-net.so
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO P2P plugin v9 IBext_v9
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO NCCL_SOCKET_IFNAME set by environment to bond0
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO NET/IB : Using [0]ib7s400p0:1/IB/SHARP [1]ib7s400p1:1/IB/SHARP [2]ib7s400p2:1/IB/SHARP [3]ib7s400p3:1/IB/SHARP [4]ib7s400p4:1/IB/SHARP [5]ib7s400p5:1/IB/SHARP [6]ib7s400p6:1/IB/SHARP [7]ib7s400p7:1/IB/SHARP [RO]; OOB bond0:10.169.0.123<0>
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Initialized NET plugin NCCL RDMA Plugin v9
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Assigned NET plugin NCCL RDMA Plugin v9 to comm
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO GIN/Plugin: Could not find: libnccl-gin.so
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Successfully loaded external gin plugin /opt/hpcx/nccl_rdma_sharp_plugin/lib/libnccl-net.so
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO NCCL_IB_DISABLE set by environment to 0.
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO NCCL_SOCKET_IFNAME set by environment to bond0
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO NCCL_IB_HCA set to ib7s400p0,ib7s400p1,ib7s400p2,ib7s400p3,ib7s400p4,ib7s400p5,ib7s400p6,ib7s400p7
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO NET/IB : Using [0]ib7s400p0:1/IB/SHARP [1]ib7s400p1:1/IB/SHARP [2]ib7s400p2:1/IB/SHARP [3]ib7s400p3:1/IB/SHARP [4]ib7s400p4:1/IB/SHARP [5]ib7s400p5:1/IB/SHARP [6]ib7s400p6:1/IB/SHARP [7]ib7s400p7:1/IB/SHARP [RO]; OOB bond0:10.169.0.123<0>
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Initialized NET plugin NCCL RDMA Plugin v9
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Assigned NET plugin NCCL RDMA Plugin v9 to comm
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO GIN/Plugin: Could not find: libnccl-gin.so
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Successfully loaded external gin plugin /opt/hpcx/nccl_rdma_sharp_plugin/lib/libnccl-net.so
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO NCCL_IB_DISABLE set by environment to 0.
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO NCCL_SOCKET_IFNAME set by environment to bond0
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO NCCL_IB_HCA set to ib7s400p0,ib7s400p1,ib7s400p2,ib7s400p3,ib7s400p4,ib7s400p5,ib7s400p6,ib7s400p7
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO NET/Plugin: Loaded net plugin NCCL RDMA Plugin v9 (v9)
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO NET/Plugin: Loaded collnet plugin SHARP (v9)
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Successfully loaded external network plugin /opt/hpcx/nccl_rdma_sharp_plugin/lib/libnccl-net.so
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Plugin Path : /opt/hpcx/nccl_rdma_sharp_plugin/lib/libnccl-net.so
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO P2P plugin v9 IBext_v9
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO NCCL_SOCKET_IFNAME set by environment to bond0
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO NET/Plugin: Loaded net plugin NCCL RDMA Plugin v9 (v9)
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO NET/Plugin: Loaded collnet plugin SHARP (v9)
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Successfully loaded external network plugin /opt/hpcx/nccl_rdma_sharp_plugin/lib/libnccl-net.so
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Plugin Path : /opt/hpcx/nccl_rdma_sharp_plugin/lib/libnccl-net.so
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO P2P plugin v9 IBext_v9
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO NCCL_SOCKET_IFNAME set by environment to bond0
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO NET/Plugin: Loaded net plugin NCCL RDMA Plugin v9 (v9)
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO NET/Plugin: Loaded collnet plugin SHARP (v9)
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Successfully loaded external network plugin /opt/hpcx/nccl_rdma_sharp_plugin/lib/libnccl-net.so
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Plugin Path : /opt/hpcx/nccl_rdma_sharp_plugin/lib/libnccl-net.so
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO P2P plugin v9 IBext_v9
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO NCCL_SOCKET_IFNAME set by environment to bond0
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO NET/IB : Using [0]ib7s400p0:1/IB/SHARP [1]ib7s400p1:1/IB/SHARP [2]ib7s400p2:1/IB/SHARP [3]ib7s400p3:1/IB/SHARP [4]ib7s400p4:1/IB/SHARP [5]ib7s400p5:1/IB/SHARP [6]ib7s400p6:1/IB/SHARP [7]ib7s400p7:1/IB/SHARP [RO]; OOB bond0:10.169.0.123<0>
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Initialized NET plugin NCCL RDMA Plugin v9
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Assigned NET plugin NCCL RDMA Plugin v9 to comm
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO GIN/Plugin: Could not find: libnccl-gin.so
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Successfully loaded external gin plugin /opt/hpcx/nccl_rdma_sharp_plugin/lib/libnccl-net.so
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO NCCL_IB_DISABLE set by environment to 0.
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO NCCL_SOCKET_IFNAME set by environment to bond0
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO NCCL_IB_HCA set to ib7s400p0,ib7s400p1,ib7s400p2,ib7s400p3,ib7s400p4,ib7s400p5,ib7s400p6,ib7s400p7
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO NET/IB : Using [0]ib7s400p0:1/IB/SHARP [1]ib7s400p1:1/IB/SHARP [2]ib7s400p2:1/IB/SHARP [3]ib7s400p3:1/IB/SHARP [4]ib7s400p4:1/IB/SHARP [5]ib7s400p5:1/IB/SHARP [6]ib7s400p6:1/IB/SHARP [7]ib7s400p7:1/IB/SHARP [RO]; OOB bond0:10.169.0.123<0>
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Initialized NET plugin NCCL RDMA Plugin v9
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Assigned NET plugin NCCL RDMA Plugin v9 to comm
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO GIN/Plugin: Could not find: libnccl-gin.so
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Successfully loaded external gin plugin /opt/hpcx/nccl_rdma_sharp_plugin/lib/libnccl-net.so
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO NCCL_IB_DISABLE set by environment to 0.
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO NET/IB : Using [0]ib7s400p0:1/IB/SHARP [1]ib7s400p1:1/IB/SHARP [2]ib7s400p2:1/IB/SHARP [3]ib7s400p3:1/IB/SHARP [4]ib7s400p4:1/IB/SHARP [5]ib7s400p5:1/IB/SHARP [6]ib7s400p6:1/IB/SHARP [7]ib7s400p7:1/IB/SHARP [RO]; OOB bond0:10.169.0.123<0>
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Initialized NET plugin NCCL RDMA Plugin v9
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO NCCL_SOCKET_IFNAME set by environment to bond0
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Assigned NET plugin NCCL RDMA Plugin v9 to comm
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO GIN/Plugin: Could not find: libnccl-gin.so
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Successfully loaded external gin plugin /opt/hpcx/nccl_rdma_sharp_plugin/lib/libnccl-net.so
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO NCCL_IB_DISABLE set by environment to 0.
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO NCCL_SOCKET_IFNAME set by environment to bond0
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO NCCL_IB_HCA set to ib7s400p0,ib7s400p1,ib7s400p2,ib7s400p3,ib7s400p4,ib7s400p5,ib7s400p6,ib7s400p7
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO NCCL_IB_HCA set to ib7s400p0,ib7s400p1,ib7s400p2,ib7s400p3,ib7s400p4,ib7s400p5,ib7s400p6,ib7s400p7
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO NET/IB : Using [0]ib7s400p0:1/IB [1]ib7s400p1:1/IB [2]ib7s400p2:1/IB [3]ib7s400p3:1/IB [4]ib7s400p4:1/IB [5]ib7s400p5:1/IB [6]ib7s400p6:1/IB [7]ib7s400p7:1/IB [RO]; OOB bond0:10.169.0.123<0>
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Assigned GIN plugin GIN_IB_GDAKI to comm
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Assigned RMA plugin GIN_IB_PROXY to comm
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Using network NCCL RDMA Plugin v9
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO NET/IB : Using [0]ib7s400p0:1/IB [1]ib7s400p1:1/IB [2]ib7s400p2:1/IB [3]ib7s400p3:1/IB [4]ib7s400p4:1/IB [5]ib7s400p5:1/IB [6]ib7s400p6:1/IB [7]ib7s400p7:1/IB [RO]; OOB bond0:10.169.0.123<0>
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Assigned GIN plugin GIN_IB_GDAKI to comm
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Assigned RMA plugin GIN_IB_PROXY to comm
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Using network NCCL RDMA Plugin v9
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO NET/IB : Using [0]ib7s400p0:1/IB/SHARP [1]ib7s400p1:1/IB/SHARP [2]ib7s400p2:1/IB/SHARP [3]ib7s400p3:1/IB/SHARP [4]ib7s400p4:1/IB/SHARP [5]ib7s400p5:1/IB/SHARP [6]ib7s400p6:1/IB/SHARP [7]ib7s400p7:1/IB/SHARP [RO]; OOB bond0:10.169.0.123<0>
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Initialized NET plugin NCCL RDMA Plugin v9
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Assigned NET plugin NCCL RDMA Plugin v9 to comm
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO GIN/Plugin: Could not find: libnccl-gin.so
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Successfully loaded external gin plugin /opt/hpcx/nccl_rdma_sharp_plugin/lib/libnccl-net.so
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO NCCL_IB_DISABLE set by environment to 0.
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO NCCL_SOCKET_IFNAME set by environment to bond0
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO NCCL_IB_HCA set to ib7s400p0,ib7s400p1,ib7s400p2,ib7s400p3,ib7s400p4,ib7s400p5,ib7s400p6,ib7s400p7
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO NET/IB : Using [0]ib7s400p0:1/IB [1]ib7s400p1:1/IB [2]ib7s400p2:1/IB [3]ib7s400p3:1/IB [4]ib7s400p4:1/IB [5]ib7s400p5:1/IB [6]ib7s400p6:1/IB [7]ib7s400p7:1/IB [RO]; OOB bond0:10.169.0.123<0>
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Assigned GIN plugin GIN_IB_GDAKI to comm
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Assigned RMA plugin GIN_IB_PROXY to comm
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Using network NCCL RDMA Plugin v9
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO NET/IB : Using [0]ib7s400p0:1/IB/SHARP [1]ib7s400p1:1/IB/SHARP [2]ib7s400p2:1/IB/SHARP [3]ib7s400p3:1/IB/SHARP [4]ib7s400p4:1/IB/SHARP [5]ib7s400p5:1/IB/SHARP [6]ib7s400p6:1/IB/SHARP [7]ib7s400p7:1/IB/SHARP [RO]; OOB bond0:10.169.0.123<0>
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Initialized NET plugin NCCL RDMA Plugin v9
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO NET/IB : Using [0]ib7s400p0:1/IB/SHARP [1]ib7s400p1:1/IB/SHARP [2]ib7s400p2:1/IB/SHARP [3]ib7s400p3:1/IB/SHARP [4]ib7s400p4:1/IB/SHARP [5]ib7s400p5:1/IB/SHARP [6]ib7s400p6:1/IB/SHARP [7]ib7s400p7:1/IB/SHARP [RO]; OOB bond0:10.169.0.123<0>
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Initialized NET plugin NCCL RDMA Plugin v9
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Assigned NET plugin NCCL RDMA Plugin v9 to comm
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Assigned NET plugin NCCL RDMA Plugin v9 to comm
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO GIN/Plugin: Could not find: libnccl-gin.so
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Successfully loaded external gin plugin /opt/hpcx/nccl_rdma_sharp_plugin/lib/libnccl-net.so
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO NCCL_IB_DISABLE set by environment to 0.
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO GIN/Plugin: Could not find: libnccl-gin.so
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Successfully loaded external gin plugin /opt/hpcx/nccl_rdma_sharp_plugin/lib/libnccl-net.so
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO NCCL_IB_DISABLE set by environment to 0.
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO NCCL_SOCKET_IFNAME set by environment to bond0
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO NCCL_SOCKET_IFNAME set by environment to bond0
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO NCCL_IB_HCA set to ib7s400p0,ib7s400p1,ib7s400p2,ib7s400p3,ib7s400p4,ib7s400p5,ib7s400p6,ib7s400p7
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO NCCL_IB_HCA set to ib7s400p0,ib7s400p1,ib7s400p2,ib7s400p3,ib7s400p4,ib7s400p5,ib7s400p6,ib7s400p7
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO NET/IB : Using [0]ib7s400p0:1/IB [1]ib7s400p1:1/IB [2]ib7s400p2:1/IB [3]ib7s400p3:1/IB [4]ib7s400p4:1/IB [5]ib7s400p5:1/IB [6]ib7s400p6:1/IB [7]ib7s400p7:1/IB [RO]; OOB bond0:10.169.0.123<0>
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Assigned GIN plugin GIN_IB_GDAKI to comm
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO NET/IB : Using [0]ib7s400p0:1/IB [1]ib7s400p1:1/IB [2]ib7s400p2:1/IB [3]ib7s400p3:1/IB [4]ib7s400p4:1/IB [5]ib7s400p5:1/IB [6]ib7s400p6:1/IB [7]ib7s400p7:1/IB [RO]; OOB bond0:10.169.0.123<0>
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Assigned GIN plugin GIN_IB_GDAKI to comm
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Assigned RMA plugin GIN_IB_PROXY to comm
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Using network NCCL RDMA Plugin v9
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Assigned RMA plugin GIN_IB_PROXY to comm
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Using network NCCL RDMA Plugin v9
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO NET/IB : Using [0]ib7s400p0:1/IB [1]ib7s400p1:1/IB [2]ib7s400p2:1/IB [3]ib7s400p3:1/IB [4]ib7s400p4:1/IB [5]ib7s400p5:1/IB [6]ib7s400p6:1/IB [7]ib7s400p7:1/IB [RO]; OOB bond0:10.169.0.123<0>
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Assigned GIN plugin GIN_IB_GDAKI to comm
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Assigned RMA plugin GIN_IB_PROXY to comm
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Using network NCCL RDMA Plugin v9
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO NET/IB : Using [0]ib7s400p0:1/IB [1]ib7s400p1:1/IB [2]ib7s400p2:1/IB [3]ib7s400p3:1/IB [4]ib7s400p4:1/IB [5]ib7s400p5:1/IB [6]ib7s400p6:1/IB [7]ib7s400p7:1/IB [RO]; OOB bond0:10.169.0.123<0>
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Assigned GIN plugin GIN_IB_GDAKI to comm
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Assigned RMA plugin GIN_IB_PROXY to comm
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Using network NCCL RDMA Plugin v9
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO NET/IB : Using [0]ib7s400p0:1/IB [1]ib7s400p1:1/IB [2]ib7s400p2:1/IB [3]ib7s400p3:1/IB [4]ib7s400p4:1/IB [5]ib7s400p5:1/IB [6]ib7s400p6:1/IB [7]ib7s400p7:1/IB [RO]; OOB bond0:10.169.0.123<0>
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Assigned GIN plugin GIN_IB_GDAKI to comm
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Assigned RMA plugin GIN_IB_PROXY to comm
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Using network NCCL RDMA Plugin v9
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO DMA-BUF is available on GPU device 7
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO [Rank 7] ncclCommInitRankConfig comm 0x606e1fac5da0 rank 7 nranks 8 cudaDev 7 nvmlDev 7 busId 1c1000 commId 0xaf41bdaa4496e4b2 - Init START
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO DMA-BUF is available on GPU device 5
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO [Rank 5] ncclCommInitRankConfig comm 0x5c344144d8a0 rank 5 nranks 8 cudaDev 5 nvmlDev 5 busId 16c000 commId 0xaf41bdaa4496e4b2 - Init START
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO DMA-BUF is available on GPU device 6
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO [Rank 6] ncclCommInitRankConfig comm 0x5a7fd41d2b70 rank 6 nranks 8 cudaDev 6 nvmlDev 6 busId 196000 commId 0xaf41bdaa4496e4b2 - Init START
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO RAS client listening socket at 127.0.0.1<28028>
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO DMA-BUF is available on GPU device 2
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO [Rank 2] ncclCommInitRankConfig comm 0x5953e098c590 rank 2 nranks 8 cudaDev 2 nvmlDev 2 busId 97000 commId 0xaf41bdaa4496e4b2 - Init START
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO DMA-BUF is available on GPU device 0
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO [Rank 0] ncclCommInitRankConfig comm 0x5b1d4031e930 rank 0 nranks 8 cudaDev 0 nvmlDev 0 busId 18000 commId 0xaf41bdaa4496e4b2 - Init START
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO RAS client listening socket at 127.0.0.1<28028>
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO DMA-BUF is available on GPU device 1
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO [Rank 1] ncclCommInitRankConfig comm 0x634d45ef4fb0 rank 1 nranks 8 cudaDev 1 nvmlDev 1 busId 6d000 commId 0xaf41bdaa4496e4b2 - Init START
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO RAS client listening socket at 127.0.0.1<28028>
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO RAS client listening socket at 127.0.0.1<28028>
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO DMA-BUF is available on GPU device 3
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO [Rank 3] ncclCommInitRankConfig comm 0x6261d7d8e380 rank 3 nranks 8 cudaDev 3 nvmlDev 3 busId c0000 commId 0xaf41bdaa4496e4b2 - Init START
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO RAS client listening socket at 127.0.0.1<28028>
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO DMA-BUF is available on GPU device 4
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO [Rank 4] ncclCommInitRankConfig comm 0x5e5b5b1e4dc0 rank 4 nranks 8 cudaDev 4 nvmlDev 4 busId 119000 commId 0xaf41bdaa4496e4b2 - Init START
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO RAS client listening socket at 127.0.0.1<28028>
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO RAS client listening socket at 127.0.0.1<28028>
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO RAS client listening socket at 127.0.0.1<28028>
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Bootstrap timings total 0.335315 (create 0.000157, send 0.000521, recv 0.318276, ring 0xb01-gpu-200b-0123:293:293 [5] NCCL INFO Bootstrap timings total 0.291080 (create 0.000102, send 0.000506, recv 0.014416, ring 0.015806, delay 0.000014)
+.000630, delay 0.000011)
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Bootstrap timings total 0.277313 (create 0.000125, send 0.000501, recv 0.000790, ring 0xb01-gpu-200b-0123:290:290 [2] NCCL INFO Bootstrap timings total 0.047536 (create 0.000095, send 0.000502, recv 0.042550, ring 0.274908, delay 0.000011)
+.003848, delay 0.000011)
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Bootstrap timings total 0.014743 (create 0.000101, send 0.000464, recv 0.000671, ring 0xb01-gpu-200b-0123:288:288 [0] NCCL INFO Bootstrap timings total 0.017096 (create 0.000074, send 0.000471, recv 0.002736, ring 0.012656, delay 0.000012)
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Bootstrap timings total 0.005114 (create 0.000099, send 0.000484, recv 0.003139, ring 0.012961, delay 0.000010)
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Bootstrap timings total 0.002106 (create 0.000097, send 0.000485, recv 0.000246, ring 0.000529, delay 0.000011)
+.000431, delay 0.000011)
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO MNNVL busId 0x16c000 fabric UUID 0.0 cliqueId 0x0 state 3 healthMask 0x80
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO MNNVL busId 0x1c1000 fabric UUID 0.0 cliqueId 0x0 state 3 healthMask 0x80
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO MNNVL busId 0x196000 fabric UUID 0.0 cliqueId 0x0 state 3 healthMask 0x80
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO MNNVL busId 0x97000 fabric UUID 0.0 cliqueId 0x0 state 3 healthMask 0x80
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO MNNVL busId 0x18000 fabric UUID 0.0 cliqueId 0x0 state 3 healthMask 0x80
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO MNNVL busId 0xc0000 fabric UUID 0.0 cliqueId 0x0 state 3 healthMask 0x80
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO MNNVL busId 0x6d000 fabric UUID 0.0 cliqueId 0x0 state 3 healthMask 0x80
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO MNNVL busId 0x119000 fabric UUID 0.0 cliqueId 0x0 state 3 healthMask 0x80
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO ncclTopoGetCpuAffinity: Affinity for GPU 6 is 56-111,168-223. (GPU affinity = 56-111,168-223 ; CPU affinity = 0-223).
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO NVLS multicast support is available on dev 6 (NVLS_NCHANNELS 24)
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO ncclTopoGetCpuAffinity: Affinity for GPU 7 is 56-111,168-223. (GPU affinity = 56-111,168-223 ; CPU affinity = 0-223).
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO NVLS multicast support is available on dev 7 (NVLS_NCHANNELS 24)
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO ncclTopoGetCpuAffinity: Affinity for GPU 5 is 56-111,168-223. (GPU affinity = 56-111,168-223 ; CPU affinity = 0-223).
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO NVLS multicast support is available on dev 5 (NVLS_NCHANNELS 24)
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO ncclTopoGetCpuAffinity: Affinity for GPU 4 is 56-111,168-223. (GPU affinity = 56-111,168-223 ; CPU affinity = 0-223).
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO NVLS multicast support is available on dev 4 (NVLS_NCHANNELS 24)
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO ncclTopoGetCpuAffinity: Affinity for GPU 1 is 0-55,112-167. (GPU affinity = 0-55,112-167 ; CPU affinity = 0-223).
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO NVLS multicast support is available on dev 1 (NVLS_NCHANNELS 24)
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO ncclTopoGetCpuAffinity: Affinity for GPU 0 is 0-55,112-167. (GPU affinity = 0-55,112-167 ; CPU affinity = 0-223).
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO ncclTopoGetCpuAffinity: Affinity for GPU 2 is 0-55,112-167. (GPU affinity = 0-55,112-167 ; CPU affinity = 0-223).
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO NVLS multicast support is available on dev 0 (NVLS_NCHANNELS 24)
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO NVLS multicast support is available on dev 2 (NVLS_NCHANNELS 24)
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO ncclTopoGetCpuAffinity: Affinity for GPU 3 is 0-55,112-167. (GPU affinity = 0-55,112-167 ; CPU affinity = 0-223).
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO NVLS multicast support is available on dev 3 (NVLS_NCHANNELS 24)
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO comm 0x5e5b5b1e4dc0 rank 4 nRanks 8 nNodes 1 localRanks 8 localRank 4 MNNVL 0
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO comm 0x5c344144d8a0 rank 5 nRanks 8 nNodes 1 localRanks 8 localRank 5 MNNVL 0
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO comm 0x6261d7d8e380 rank 3 nRanks 8 nNodes 1 localRanks 8 localRank 3 MNNVL 0
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO comm 0x5953e098c590 rank 2 nRanks 8 nNodes 1 localRanks 8 localRank 2 MNNVL 0
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO comm 0x606e1fac5da0 rank 7 nRanks 8 nNodes 1 localRanks 8 localRank 7 MNNVL 0
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO comm 0x5a7fd41d2b70 rank 6 nRanks 8 nNodes 1 localRanks 8 localRank 6 MNNVL 0
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO comm 0x634d45ef4fb0 rank 1 nRanks 8 nNodes 1 localRanks 8 localRank 1 MNNVL 0
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Trees [0] 5/-1/-1->4->3 [1] 5/-1/-1->4->3 [2] 5/-1/-1->4->3 [3] 5/-1/-1->4->3 [4] 5/-1/-1->4->3 [5] 5/-1/-1->4->3 [6] 5/-1/-1->4->3 [7] 5/-1/-1->4->3 [8] 5/-1/-1->4->3 [9] 5/-1/-1->4->3 [10] 5/-1/-1->4->3 [11] 5/-1/-1->4->3 [12] 5/-1/-1->4->3 [13] 5/-1/-1->4->3 [14] 5/-1/-1->4->3 [15] 5/-1/-1->4->3 [16] 5/-1/-1->4->3 [17] 5/-1/-1->4->3 [18] 5/-1/-1->4->3 [19] 5/-1/-1->4->3 [20] 5/-1/-1->4->3 [21] 5/-1/-1->4->3 [22] 5/-1/-1->4->3 [23] 5/-1/-1->4->3 [24] 5/-1/-1->4->3 xb01-gpu-200b-0123:291:291 [3] NCCL INFO Trees [0] 4/-1/-1->3->2 [1] 4/-1/-1->3->2 [2] 4/-1/-1->3->2 [3] 4/-1/-1->3->2 [4] 4/-1/[25] 5/-1/-1->4->3 [26] 5/-1/-1->4->3 [27] 5/-1/-1->4->3 [28] 5/-1/-1->4->3 [29] 5/-1/-1->4->3 [30] 5/-1/-1->4->3 [31] 5/-1/-1->xb01-gpu-200b-0123:288:288 [0] NCCL INFO comm 0x5b1d4031e930 rank 0 nRanks 8 nNodes 1 localRanks 8 localRank 0 MNNVL 0
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Trees [0] 6/-1/-1->5->4 [1] 6/-1/-1->5->4 [2] 6/-1/-1->5->4 [3] 6/-1/-1->5->4 [4] 6/-1/-1->3->2 [5] 4/-1/-1->3->2 [6] 4/-1/-1->3->2 [7] 4/-1/-1->3->2 [8] 4/-1/-1->3->2 [9] 4/-1/-1->3->2 [10] 4/-1/-1->3->2 [11] 4/-1/4->3
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Trees [0] 2/-1/-1->1->0 [1] 2/-1/-1->1->0 [2] 2/-1/-1->1->0 [3] 2/-1/-1->1->0 [4] 2/-1/-1->5->4 [5] 6/-1/-1->5->4 [6] 6/-1/-1->5->4 [7] 6/-1/-1->5->4 [8] 6/-1/-1->5->4 [9] 6/-1/-1->5->4 [10] 6/-1/-1->5->4 [11] 6/-1/xb01-gpu-200b-0123:294:294 [6] NCCL INFO Trees [0] 7/-1/-1->6->5 [1] 7/-1/-1->6->5 [2] 7/-1/-1->6->5 [3] 7/-1/-1->6->5 [4] 7/-1/-1->3->2 [12] 4/-1/-1->3->2 [13] 4/-1/-1->3->2 [14] 4/-1/-1->3->2 [15] 4/-1/-1->3->2 [16] 4/-1/-1->3->2 [17] 4/-1/-1->3->2 [18] xb01-gpu-200b-0123:290:290 [2] NCCL INFO Trees [0] 3/-1/-1->2->1 [1] 3/-1/-1->2->1 [2] 3/-1/-1->2->1 [3] 3/-1/-1->2->1 [4] 3/-1/xb01-gpu-200b-0123:295:295 [7] NCCL INFO Trees [0] -1/-1/-1->7->6 [1] -1/-1/-1->7->6 [2] -1/-1/-1->7->6 [3] -1/-1/-1->7->6 [4] --1->1->0 [5] 2/-1/-1->1->0 [6] 2/-1/-1->1->0 [7] 2/-1/-1->1->0 [8] 2/-1/-1->1->0 [9] 2/-1/-1->1->0 [10] 2/-1/-1->1->0 [11] 2/-1/-1->5->4 [12] 6/-1/-1->5->4 [13] 6/-1/-1->5->4 [14] 6/-1/-1->5->4 [15] 6/-1/-1->5->4 [16] 6/-1/-1->5->4 [17] 6/-1/-1->5->4 [18] xb01-gpu-200b-0123:292:292 [4] NCCL INFO P2P Chunksize set to 524288
+-1->6->5 [5] 7/-1/-1->6->5 [6] 7/-1/-1->6->5 [7] 7/-1/-1->6->5 [8] 7/-1/-1->6->5 [9] 7/-1/-1->6->5 [10] 7/-1/-1->6->5 [11] 7/-1/4/-1/-1->3->2 [19] 4/-1/-1->3->2 [20] 4/-1/-1->3->2 [21] 4/-1/-1->3->2 [22] 4/-1/-1->3->2 [23] 4/-1/-1->3->2 [24] 4/-1/-1->3->2 xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 00/32 : 0 1 2 3 4 5 6 7
+-1->2->1 [5] 3/-1/-1->2->1 [6] 3/-1/-1->2->1 [7] 3/-1/-1->2->1 [8] 3/-1/-1->2->1 [9] 3/-1/-1->2->1 [10] 3/-1/-1->2->1 [11] 3/-1/1/-1/-1->7->6 [5] -1/-1/-1->7->6 [6] -1/-1/-1->7->6 [7] -1/-1/-1->7->6 [8] -1/-1/-1->7->6 [9] -1/-1/-1->7->6 [10] -1/-1/-1->7->6-1->1->0 [12] 2/-1/-1->1->0 [13] 2/-1/-1->1->0 [14] 2/-1/-1->1->0 [15] 2/-1/-1->1->0 [16] 2/-1/-1->1->0 [17] 2/-1/-1->1->0 [18] 6/-1/-1->5->4 [19] 6/-1/-1->5->4 [20] 6/-1/-1->5->4 [21] 6/-1/-1->5->4 [22] 6/-1/-1->5->4 [23] 6/-1/-1->5->4 [24] 6/-1/-1->5->4 -1->6->5 [12] 7/-1/-1->6->5 [13] 7/-1/-1->6->5 [14] 7/-1/-1->6->5 [15] 7/-1/-1->6->5 [16] 7/-1/-1->6->5 [17] 7/-1/-1->6->5 [18] [25] 4/-1/-1->3->2 [26] 4/-1/-1->3->2 [27] 4/-1/-1->3->2 [28] 4/-1/-1->3->2 [29] 4/-1/-1->3->2 [30] 4/-1/-1->3->2 [31] 4/-1/-1->-1->2->1 [12] 3/-1/-1->2->1 [13] 3/-1/-1->2->1 [14] 3/-1/-1->2->1 [15] 3/-1/-1->2->1 [16] 3/-1/-1->2->1 [17] 3/-1/-1->2->1 [18] xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 01/32 : 0 1 2 3 4 5 6 7
+ [11] -1/-1/-1->7->6 [12] -1/-1/-1->7->6 [13] -1/-1/-1->7->6 [14] -1/-1/-1->7->6 [15] -1/-1/-1->7->6 [16] -1/-1/-1->7->6 [17] -12/-1/-1->1->0 [19] 2/-1/-1->1->0 [20] 2/-1/-1->1->0 [21] 2/-1/-1->1->0 [22] 2/-1/-1->1->0 [23] 2/-1/-1->1->0 [24] 2/-1/-1->1->0 [25] 6/-1/-1->5->4 [26] 6/-1/-1->5->4 [27] 6/-1/-1->5->4 [28] 6/-1/-1->5->4 [29] 6/-1/-1->5->4 [30] 6/-1/-1->5->4 [31] 6/-1/-1->7/-1/-1->6->5 [19] 7/-1/-1->6->5 [20] 7/-1/-1->6->5 [21] 7/-1/-1->6->5 [22] 7/-1/-1->6->5 [23] 7/-1/-1->6->5 [24] 7/-1/-1->6->5 3->2
+3/-1/-1->2->1 [19] 3/-1/-1->2->1 [20] 3/-1/-1->2->1 [21] 3/-1/-1->2->1 [22] 3/-1/-1->2->1 [23] 3/-1/-1->2->1 [24] 3/-1/-1->2->1 xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 02/32 : 0 1 2 3 4 5 6 7
+/-1/-1->7->6 [18] -1/-1/-1->7->6 [19] -1/-1/-1->7->6 [20] -1/-1/-1->7->6 [21] -1/-1/-1->7->6 [22] -1/-1/-1->7->6 [23] -1/-1/-1->[25] 2/-1/-1->1->0 [26] 2/-1/-1->1->0 [27] 2/-1/-1->1->0 [28] 2/-1/-1->1->0 [29] 2/-1/-1->1->0 [30] 2/-1/-1->1->0 [31] 2/-1/-1->5->4
+[25] 7/-1/-1->6->5 [26] 7/-1/-1->6->5 [27] 7/-1/-1->6->5 [28] 7/-1/-1->6->5 [29] 7/-1/-1->6->5 [30] 7/-1/-1->6->5 [31] 7/-1/-1->[25] 3/-1/-1->2->1 [26] 3/-1/-1->2->1 [27] 3/-1/-1->2->1 [28] 3/-1/-1->2->1 [29] 3/-1/-1->2->1 [30] 3/-1/-1->2->1 [31] 3/-1/-1->xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 03/32 : 0 1 2 3 4 5 6 7
+7->6 [24] -1/-1/-1->7->6 [25] -1/-1/-1->7->6 [26] -1/-1/-1->7->6 [27] -1/-1/-1->7->6 [28] -1/-1/-1->7->6 [29] -1/-1/-1->7->6 [30xb01-gpu-200b-0123:291:291 [3] NCCL INFO P2P Chunksize set to 524288
+1->0
+6->5
+2->1
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO P2P Chunksize set to 524288
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 04/32 : 0 1 2 3 4 5 6 7
+] -1/-1/-1->7->6 [31] -1/-1/-1->7->6
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO P2P Chunksize set to 524288
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO P2P Chunksize set to 524288
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO P2P Chunksize set to 524288
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 05/32 : 0 1 2 3 4 5 6 7
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO P2P Chunksize set to 524288
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 06/32 : 0 1 2 3 4 5 6 7
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 07/32 : 0 1 2 3 4 5 6 7
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 08/32 : 0 1 2 3 4 5 6 7
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 09/32 : 0 1 2 3 4 5 6 7
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 10/32 : 0 1 2 3 4 5 6 7
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 11/32 : 0 1 2 3 4 5 6 7
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 12/32 : 0 1 2 3 4 5 6 7
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 13/32 : 0 1 2 3 4 5 6 7
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 14/32 : 0 1 2 3 4 5 6 7
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 15/32 : 0 1 2 3 4 5 6 7
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 16/32 : 0 1 2 3 4 5 6 7
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 17/32 : 0 1 2 3 4 5 6 7
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 18/32 : 0 1 2 3 4 5 6 7
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 19/32 : 0 1 2 3 4 5 6 7
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 20/32 : 0 1 2 3 4 5 6 7
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO PROFILER/Plugin: Could not find: libnccl-profiler.so
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 21/32 : 0 1 2 3 4 5 6 7
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 22/32 : 0 1 2 3 4 5 6 7
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 23/32 : 0 1 2 3 4 5 6 7
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 24/32 : 0 1 2 3 4 5 6 7
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO PROFILER/Plugin: Could not find: libnccl-profiler.so
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 25/32 : 0 1 2 3 4 5 6 7
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO PROFILER/Plugin: Could not find: libnccl-profiler.so
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 26/32 : 0 1 2 3 4 5 6 7
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 27/32 : 0 1 2 3 4 5 6 7
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Check P2P Type isAllDirectP2p 1 directMode 0 isAllCudaP2p 1
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO PROFILER/Plugin: Could not find: libnccl-profiler.so
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 28/32 : 0 1 2 3 4 5 6 7
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Check P2P Type isAllDirectP2p 1 directMode 0 isAllCudaP2p 1
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO PROFILER/Plugin: Could not find: libnccl-profiler.so
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 29/32 : 0 1 2 3 4 5 6 7
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Check P2P Type isAllDirectP2p 1 directMode 0 isAllCudaP2p 1
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 30/32 : 0 1 2 3 4 5 6 7
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 31/32 : 0 1 2 3 4 5 6 7
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO PROFILER/Plugin: Could not find: libnccl-profiler.so
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Check P2P Type isAllDirectP2p 1 directMode 0 isAllCudaP2p 1
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Check P2P Type isAllDirectP2p 1 directMode 0 isAllCudaP2p 1
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Trees [0] 1/-1/-1->0->-1 [1] 1/-1/-1->0->-1 [2] 1/-1/-1->0->-1 [3] 1/-1/-1->0->-1 [4] 1/-1/-1->0->-1 [5] 1/-1/-1->0->-1 [6] 1/-1/-1->0->-1 [7] 1/-1/-1->0->-1 [8] 1/-1/-1->0->-1 [9] 1/-1/-1->0->-1 [10] 1/-1/-1->0->-1 [11] 1/-1/-1->0->-1 [12] 1/-1/-1->0->-1 [13] 1/-1/-1->0->-1 [14] 1/-1/-1->0->-1 [15] 1/-1/-1->0->-1 [16] 1/-1/-1->0->-1 [17] 1/-1/-1->0->-1 [18] 1/-1/-1->0->-1 [19] 1/-1/-1->0->-1 [20] 1/-1/-1->0->-1 [21] 1/-1/-1->0->-1 [22] 1/-1/-1->0->-1 [23] 1/-1/-1->0xb01-gpu-200b-0123:294:294 [6] NCCL INFO Check P2P Type isAllDirectP2p 1 directMode 0 isAllCudaP2p 1
+->-1 [24] 1/-1/-1->0->-1 [25] 1/-1/-1->0->-1 [26] 1/-1/-1->0->-1 [27] 1/-1/-1->0->-1 [28] 1/-1/-1->0->-1 [29] 1/-1/-1->0->-1 [30xb01-gpu-200b-0123:290:290 [2] NCCL INFO PROFILER/Plugin: Could not find: libnccl-profiler.so
+] 1/-1/-1->0->-1 [31] 1/-1/-1->0->-1
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO P2P Chunksize set to 524288
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Check P2P Type isAllDirectP2p 1 directMode 0 isAllCudaP2p 1
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO PROFILER/Plugin: Could not find: libnccl-profiler.so
+xb01-gpu-200b-0123:293:517 [0] NCCL INFO [Proxy Service UDS] Device 5 CPU core 88
+xb01-gpu-200b-0123:289:514 [0] NCCL INFO [Proxy Service] Device 1 CPU core 116
+xb01-gpu-200b-0123:292:519 [0] NCCL INFO [Proxy Service UDS] Device 4 CPU core 59
+xb01-gpu-200b-0123:295:516 [0] NCCL INFO [Proxy Service] Device 7 CPU core 63
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Check P2P Type isAllDirectP2p 1 directMode 0 isAllCudaP2p 1
+xb01-gpu-200b-0123:289:518 [0] NCCL INFO [Proxy Service UDS] Device 1 CPU core 6
+xb01-gpu-200b-0123:294:521 [0] NCCL INFO [Proxy Service] Device 6 CPU core 60
+xb01-gpu-200b-0123:293:515 [0] NCCL INFO [Proxy Service] Device 5 CPU core 87
+xb01-gpu-200b-0123:295:522 [0] NCCL INFO [Proxy Service UDS] Device 7 CPU core 64
+xb01-gpu-200b-0123:292:513 [0] NCCL INFO [Proxy Service] Device 4 CPU core 170
+xb01-gpu-200b-0123:291:523 [0] NCCL INFO [Proxy Service UDS] Device 3 CPU core 10
+xb01-gpu-200b-0123:294:524 [0] NCCL INFO [Proxy Service UDS] Device 6 CPU core 61
+xb01-gpu-200b-0123:291:520 [0] NCCL INFO [Proxy Service] Device 3 CPU core 119
+xb01-gpu-200b-0123:288:527 [0] NCCL INFO [Proxy Service] Device 0 CPU core 12
+xb01-gpu-200b-0123:290:525 [0] NCCL INFO [Proxy Service] Device 2 CPU core 1
+xb01-gpu-200b-0123:290:526 [0] NCCL INFO [Proxy Service UDS] Device 2 CPU core 118
+xb01-gpu-200b-0123:288:528 [0] NCCL INFO [Proxy Service UDS] Device 0 CPU core 13
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO TUNER/Plugin: Could not find: libnccl-tuner.so
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO threadThresholds 8/8/64 | 64/8/64 | 512 | 512
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO 32 coll channels, 32 collnet channels, 24 nvls channels, 32 p2p channels, 32 p2p channels per peer
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Symmetric VA size=180GB
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO TUNER/Plugin: Could not find: libnccl-tuner.so
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO threadThresholds 8/8/64 | 64/8/64 | 512 | 512
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO 32 coll channels, 32 collnet channels, 24 nvls channels, 32 p2p channels, 32 p2p channels per peer
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Symmetric VA size=180GB
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO TUNER/Plugin: Could not find: libnccl-tuner.so
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO threadThresholds 8/8/64 | 64/8/64 | 512 | 512
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO 32 coll channels, 32 collnet channels, 24 nvls channels, 32 p2p channels, 32 p2p channels per peer
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Symmetric VA size=180GB
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO TUNER/Plugin: Could not find: libnccl-tuner.so
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO threadThresholds 8/8/64 | 64/8/64 | 512 | 512
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO 32 coll channels, 32 collnet channels, 24 nvls channels, 32 p2p channels, 32 p2p channels per peer
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Symmetric VA size=180GB
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO TUNER/Plugin: Could not find: libnccl-tuner.so
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO threadThresholds 8/8/64 | 64/8/64 | 512 | 512
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO 32 coll channels, 32 collnet channels, 24 nvls channels, 32 p2p channels, 32 p2p channels per peer
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Symmetric VA size=180GB
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO TUNER/Plugin: Could not find: libnccl-tuner.so
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO TUNER/Plugin: Could not find: libnccl-tuner.so
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO threadThresholds 8/8/64 | 64/8/64 | 512 | 512
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO threadThresholds 8/8/64 | 64/8/64 | 512 | 512
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO 32 coll channels, 32 collnet channels, 24 nvls channels, 32 p2p channels, 32 p2p channexb01-gpu-200b-0123:295:295 [7] NCCL INFO 32 coll channels, 32 collnet channels, 24 nvls channels, 32 p2p channels, 32 p2p channels per peer
+ls per peer
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Symmetric VA size=180GB
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Symmetric VA size=180GB
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO CC Off, workFifoBytes 1048576
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO TUNER/Plugin: Could not find: libnccl-tuner.so
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO threadThresholds 8/8/64 | 64/8/64 | 512 | 512
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO 32 coll channels, 32 collnet channels, 24 nvls channels, 32 p2p channels, 32 p2p channels per peer
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Symmetric VA size=180GB
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO ncclCommInitRankConfig comm 0x606e1fac5da0 rank 7 nranks 8 cudaDev 7 nvmlDev 7 busId 1cxb01-gpu-200b-0123:289:289 [1] NCCL INFO ncclCommInitRankConfig comm 0x634d45ef4fb0 rank 1 nranks 8 cudaDev 1 nvmlDev 1 busId 6dxb01-gpu-200b-0123:291:291 [3] NCCL INFO ncclCommInitRankConfig comm 0x6261d7d8e380 rank 3 nranks 8 cudaDev 3 nvmlDev 3 busId c0xb01-gpu-200b-0123:293:293 [5] NCCL INFO ncclCommInitRankConfig comm 0x5c344144d8a0 rank 5 nranks 8 cudaDev 5 nvmlDev 5 busId 161000 commId 0xaf41bdaa4496e4b2 - Init COMPLETE
+000 commId 0xaf41bdaa4496e4b2 - Init COMPLETE
+000 commId 0xaf41bdaa4496e4b2 - Init COMPLETE
+c000 commId 0xaf41bdaa4496e4b2 - Init COMPLETE
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Init timings - ncclCommInitRankConfig: rank 7 nranks 8 total 3.29 (kernels 0.35, alloc xb01-gpu-200b-0123:289:289 [1] NCCL INFO Init timings - ncclCommInitRankConfig: rank 1 nranks 8 total 3.25 (kernels 0.39, alloc xb01-gpu-200b-0123:291:291 [3] NCCL INFO Init timings - ncclCommInitRankConfig: rank 3 nranks 8 total 3.27 (kernels 0.41, alloc 0.94, bootstrap 0.34, allgathers 0.04, topo 1.05, graphs 0.05, connections 0.52, rest 0.00)
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Init timings - ncclCommInitRankConfig: rank 5 nranks 8 total 3.28 (kernels 0.36, alloc 1.18, bootstrap 0.01, allgathers 0.04, topo 1.06, graphs 0.05, connections 0.52, rest 0.00)
+1.19, bootstrap 0.01, allgathers 0.03, topo 1.06, graphs 0.05, connections 0.52, rest 0.00)
+0.97, bootstrap 0.29, allgathers 0.04, topo 1.05, graphs 0.05, connections 0.52, rest 0.00)
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO ncclCommInitRankConfig comm 0x5e5b5b1e4dc0 rank 4 nranks 8 cudaDev 4 nvmlDev 4 busId 11xb01-gpu-200b-0123:288:288 [0] NCCL INFO ncclCommInitRankConfig comm 0x5b1d4031e930 rank 0 nranks 8 cudaDev 0 nvmlDev 0 busId 189000 commId 0xaf41bdaa4496e4b2 - Init COMPLETE
+000 commId 0xaf41bdaa4496e4b2 - Init COMPLETE
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Init timings - ncclCommInitRankConfig: rank 4 nranks 8 total 3.26 (kernels 0.40, alloc xb01-gpu-200b-0123:288:288 [0] NCCL INFO Init timings - ncclCommInitRankConfig: rank 0 nranks 8 total 3.32 (kernels 0.43, alloc 1.19, bootstrap 0.00, allgathers 0.04, topo 1.06, graphs 0.05, connections 0.52, rest 0.00)
+1.21, bootstrap 0.02, allgathers 0.00, topo 1.06, graphs 0.08, connections 0.52, rest 0.00)
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO ncclCommInitRankConfig comm 0x5953e098c590 rank 2 nranks 8 cudaDev 2 nvmlDev 2 busId 97000 commId 0xaf41bdaa4496e4b2 - Init COMPLETE
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Init timings - ncclCommInitRankConfig: rank 2 nranks 8 total 3.30 (kernels 0.41, alloc 1.18, bootstrap 0.05, allgathers 0.00, topo 1.06, graphs 0.08, connections 0.52, rest 0.00)
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO ncclCommInitRankConfig comm 0x5a7fd41d2b70 rank 6 nranks 8 cudaDev 6 nvmlDev 6 busId 196000 commId 0xaf41bdaa4496e4b2 - Init COMPLETE
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Init timings - ncclCommInitRankConfig: rank 6 nranks 8 total 3.24 (kernels 0.33, alloc 0.97, bootstrap 0.28, allgathers 0.04, topo 1.05, graphs 0.05, connections 0.52, rest 0.00)
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Symmetric VA size=180GB
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Symmetric VA size=180GB
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Symmetric VA size=180GB
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Symmetric VA size=180GB
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Symmetric VA size=180GB
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Symmetric VA size=180GB
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Symmetric VA size=180GB
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Symmetric VA size=180GB
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Channel 00/0 : 2[2] -> 3[3] via P2P/CUMEM
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Channel 01/0 : 2[2] -> 3[3] via P2P/CUMEM
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Channel 02/0 : 2[2] -> 3[3] via P2P/CUMEM
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Channel 03/0 : 2[2] -> 3[3] via P2P/CUMEM
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Channel 00/0 : 3[3] -> 4[4] via P2P/CUMEM
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Channel 04/0 : 2[2] -> 3[3] via P2P/CUMEM
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Channel 05/0 : 2[2] -> 3[3] via P2P/CUMEM
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Channel 01/0 : 3[3] -> 4[4] via P2P/CUMEM
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Channel 02/0 : 3[3] -> 4[4] via P2P/CUMEM
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Channel 00/0 : 4[4] -> 5[5] via P2P/CUMEM
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 00/0 : 0[0] -> 1[1] via P2P/CUMEM
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Channel 06/0 : 2[2] -> 3[3] via P2P/CUMEM
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Channel 03/0 : 3[3] -> 4[4] via P2P/CUMEM
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Channel 01/0 : 4[4] -> 5[5] via P2P/CUMEM
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 01/0 : 0[0] -> 1[1] via P2P/CUMEM
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Channel 07/0 : 2[2] -> 3[3] via P2P/CUMEM
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Channel 08/0 : 2[2] -> 3[3] via P2P/CUMEM
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Channel 02/0 : 4[4] -> 5[5] via P2P/CUMEM
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Channel 04/0 : 3[3] -> 4[4] via P2P/CUMEM
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 02/0 : 0[0] -> 1[1] via P2P/CUMEM
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Channel 09/0 : 2[2] -> 3[3] via P2P/CUMEM
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Channel 05/0 : 3[3] -> 4[4] via P2P/CUMEM
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Channel 03/0 : 4[4] -> 5[5] via P2P/CUMEM
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Channel 00/0 : 1[1] -> 2[2] via P2P/CUMEM
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Channel 10/0 : 2[2] -> 3[3] via P2P/CUMEM
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Channel 00/0 : 7[7] -> 0[0] via P2P/CUMEM
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 03/0 : 0[0] -> 1[1] via P2P/CUMEM
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Channel 00/0 : 5[5] -> 6[6] via P2P/CUMEM
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Channel 11/0 : 2[2] -> 3[3] via P2P/CUMEM
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Channel 06/0 : 3[3] -> 4[4] via P2P/CUMEM
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Channel 04/0 : 4[4] -> 5[5] via P2P/CUMEM
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Channel 01/0 : 1[1] -> 2[2] via P2P/CUMEM
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Channel 12/0 : 2[2] -> 3[3] via P2P/CUMEM
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 04/0 : 0[0] -> 1[1] via P2P/CUMEM
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Channel 07/0 : 3[3] -> 4[4] via P2P/CUMEM
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Channel 01/0 : 5[5] -> 6[6] via P2P/CUMEM
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Channel 05/0 : 4[4] -> 5[5] via P2P/CUMEM
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Channel 01/0 : 7[7] -> 0[0] via P2P/CUMEM
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Channel 02/0 : 1[1] -> 2[2] via P2P/CUMEM
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Channel 13/0 : 2[2] -> 3[3] via P2P/CUMEM
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Channel 14/0 : 2[2] -> 3[3] via P2P/CUMEM
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Channel 08/0 : 3[3] -> 4[4] via P2P/CUMEM
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 05/0 : 0[0] -> 1[1] via P2P/CUMEM
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Channel 06/0 : 4[4] -> 5[5] via P2P/CUMEM
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Channel 02/0 : 5[5] -> 6[6] via P2P/CUMEM
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Channel 02/0 : 7[7] -> 0[0] via P2P/CUMEM
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Channel 03/0 : 1[1] -> 2[2] via P2P/CUMEM
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Channel 15/0 : 2[2] -> 3[3] via P2P/CUMEM
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Channel 16/0 : 2[2] -> 3[3] via P2P/CUMEM
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 06/0 : 0[0] -> 1[1] via P2P/CUMEM
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Channel 07/0 : 4[4] -> 5[5] via P2P/CUMEM
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Channel 03/0 : 7[7] -> 0[0] via P2P/CUMEM
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Channel 04/0 : 1[1] -> 2[2] via P2P/CUMEM
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Channel 03/0 : 5[5] -> 6[6] via P2P/CUMEM
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Channel 17/0 : 2[2] -> 3[3] via P2P/CUMEM
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Channel 09/0 : 3[3] -> 4[4] via P2P/CUMEM
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Channel 08/0 : 4[4] -> 5[5] via P2P/CUMEM
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 07/0 : 0[0] -> 1[1] via P2P/CUMEM
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Channel 04/0 : 7[7] -> 0[0] via P2P/CUMEM
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Channel 05/0 : 1[1] -> 2[2] via P2P/CUMEM
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Channel 04/0 : 5[5] -> 6[6] via P2P/CUMEM
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Channel 18/0 : 2[2] -> 3[3] via P2P/CUMEM
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Channel 10/0 : 3[3] -> 4[4] via P2P/CUMEM
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Channel 09/0 : 4[4] -> 5[5] via P2P/CUMEM
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Channel 05/0 : 7[7] -> 0[0] via P2P/CUMEM
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 08/0 : 0[0] -> 1[1] via P2P/CUMEM
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Channel 19/0 : 2[2] -> 3[3] via P2P/CUMEM
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Channel 06/0 : 1[1] -> 2[2] via P2P/CUMEM
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Channel 11/0 : 3[3] -> 4[4] via P2P/CUMEM
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Channel 10/0 : 4[4] -> 5[5] via P2P/CUMEM
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Channel 05/0 : 5[5] -> 6[6] via P2P/CUMEM
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Channel 06/0 : 7[7] -> 0[0] via P2P/CUMEM
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 09/0 : 0[0] -> 1[1] via P2P/CUMEM
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Channel 20/0 : 2[2] -> 3[3] via P2P/CUMEM
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Channel 06/0 : 5[5] -> 6[6] via P2P/CUMEM
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Channel 07/0 : 1[1] -> 2[2] via P2P/CUMEM
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Channel 21/0 : 2[2] -> 3[3] via P2P/CUMEM
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Channel 11/0 : 4[4] -> 5[5] via P2P/CUMEM
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Channel 12/0 : 3[3] -> 4[4] via P2P/CUMEM
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 10/0 : 0[0] -> 1[1] via P2P/CUMEM
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Channel 07/0 : 5[5] -> 6[6] via P2P/CUMEM
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Channel 07/0 : 7[7] -> 0[0] via P2P/CUMEM
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Channel 08/0 : 1[1] -> 2[2] via P2P/CUMEM
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Channel 09/0 : 1[1] -> 2[2] via P2P/CUMEM
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Channel 22/0 : 2[2] -> 3[3] via P2P/CUMEM
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 11/0 : 0[0] -> 1[1] via P2P/CUMEM
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Channel 08/0 : 5[5] -> 6[6] via P2P/CUMEM
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Channel 08/0 : 7[7] -> 0[0] via P2P/CUMEM
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Channel 12/0 : 4[4] -> 5[5] via P2P/CUMEM
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Channel 13/0 : 3[3] -> 4[4] via P2P/CUMEM
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Channel 14/0 : 3[3] -> 4[4] via P2P/CUMEM
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Channel 23/0 : 2[2] -> 3[3] via P2P/CUMEM
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Channel 10/0 : 1[1] -> 2[2] via P2P/CUMEM
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Channel 13/0 : 4[4] -> 5[5] via P2P/CUMEM
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Channel 09/0 : 7[7] -> 0[0] via P2P/CUMEM
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 12/0 : 0[0] -> 1[1] via P2P/CUMEM
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 13/0 : 0[0] -> 1[1] via P2P/CUMEM
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Channel 24/0 : 2[2] -> 3[3] via P2P/CUMEM
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Channel 09/0 : 5[5] -> 6[6] via P2P/CUMEM
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Channel 11/0 : 1[1] -> 2[2] via P2P/CUMEM
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Channel 14/0 : 4[4] -> 5[5] via P2P/CUMEM
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Channel 10/0 : 7[7] -> 0[0] via P2P/CUMEM
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Channel 00/0 : 6[6] -> 7[7] via P2P/CUMEM
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Channel 25/0 : 2[2] -> 3[3] via P2P/CUMEM
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Channel 15/0 : 3[3] -> 4[4] via P2P/CUMEM
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 14/0 : 0[0] -> 1[1] via P2P/CUMEM
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 15/0 : 0[0] -> 1[1] via P2P/CUMEM
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Channel 10/0 : 5[5] -> 6[6] via P2P/CUMEM
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Channel 15/0 : 4[4] -> 5[5] via P2P/CUMEM
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Channel 26/0 : 2[2] -> 3[3] via P2P/CUMEM
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Channel 12/0 : 1[1] -> 2[2] via P2P/CUMEM
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Channel 01/0 : 6[6] -> 7[7] via P2P/CUMEM
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Channel 11/0 : 7[7] -> 0[0] via P2P/CUMEM
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Channel 16/0 : 3[3] -> 4[4] via P2P/CUMEM
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Channel 11/0 : 5[5] -> 6[6] via P2P/CUMEM
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 16/0 : 0[0] -> 1[1] via P2P/CUMEM
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 17/0 : 0[0] -> 1[1] via P2P/CUMEM
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Channel 27/0 : 2[2] -> 3[3] via P2P/CUMEM
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Channel 16/0 : 4[4] -> 5[5] via P2P/CUMEM
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Channel 02/0 : 6[6] -> 7[7] via P2P/CUMEM
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Channel 12/0 : 7[7] -> 0[0] via P2P/CUMEM
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Channel 13/0 : 1[1] -> 2[2] via P2P/CUMEM
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Channel 12/0 : 5[5] -> 6[6] via P2P/CUMEM
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Channel 28/0 : 2[2] -> 3[3] via P2P/CUMEM
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Channel 17/0 : 3[3] -> 4[4] via P2P/CUMEM
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 18/0 : 0[0] -> 1[1] via P2P/CUMEM
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 19/0 : 0[0] -> 1[1] via P2P/CUMEM
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Channel 29/0 : 2[2] -> 3[3] via P2P/CUMEM
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Channel 13/0 : 7[7] -> 0[0] via P2P/CUMEM
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Channel 13/0 : 5[5] -> 6[6] via P2P/CUMEM
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Channel 17/0 : 4[4] -> 5[5] via P2P/CUMEM
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Channel 14/0 : 1[1] -> 2[2] via P2P/CUMEM
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Channel 18/0 : 3[3] -> 4[4] via P2P/CUMEM
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Channel 03/0 : 6[6] -> 7[7] via P2P/CUMEM
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Channel 30/0 : 2[2] -> 3[3] via P2P/CUMEM
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Channel 18/0 : 4[4] -> 5[5] via P2P/CUMEM
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Channel 14/0 : 7[7] -> 0[0] via P2P/CUMEM
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 20/0 : 0[0] -> 1[1] via P2P/CUMEM
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Channel 14/0 : 5[5] -> 6[6] via P2P/CUMEM
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Channel 15/0 : 1[1] -> 2[2] via P2P/CUMEM
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Channel 19/0 : 3[3] -> 4[4] via P2P/CUMEM
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Channel 04/0 : 6[6] -> 7[7] via P2P/CUMEM
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Channel 19/0 : 4[4] -> 5[5] via P2P/CUMEM
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Channel 31/0 : 2[2] -> 3[3] via P2P/CUMEM
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Channel 15/0 : 7[7] -> 0[0] via P2P/CUMEM
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Channel 15/0 : 5[5] -> 6[6] via P2P/CUMEM
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 21/0 : 0[0] -> 1[1] via P2P/CUMEM
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Channel 20/0 : 4[4] -> 5[5] via P2P/CUMEM
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Channel 05/0 : 6[6] -> 7[7] via P2P/CUMEM
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Channel 20/0 : 3[3] -> 4[4] via P2P/CUMEM
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Channel 16/0 : 1[1] -> 2[2] via P2P/CUMEM
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Channel 17/0 : 1[1] -> 2[2] via P2P/CUMEM
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Channel 21/0 : 4[4] -> 5[5] via P2P/CUMEM
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Channel 16/0 : 5[5] -> 6[6] via P2P/CUMEM
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 22/0 : 0[0] -> 1[1] via P2P/CUMEM
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Channel 16/0 : 7[7] -> 0[0] via P2P/CUMEM
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Channel 06/0 : 6[6] -> 7[7] via P2P/CUMEM
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Channel 21/0 : 3[3] -> 4[4] via P2P/CUMEM
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Channel 22/0 : 4[4] -> 5[5] via P2P/CUMEM
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Channel 18/0 : 1[1] -> 2[2] via P2P/CUMEM
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Channel 23/0 : 4[4] -> 5[5] via P2P/CUMEM
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Channel 07/0 : 6[6] -> 7[7] via P2P/CUMEM
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 23/0 : 0[0] -> 1[1] via P2P/CUMEM
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Channel 17/0 : 5[5] -> 6[6] via P2P/CUMEM
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Channel 17/0 : 7[7] -> 0[0] via P2P/CUMEM
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Channel 22/0 : 3[3] -> 4[4] via P2P/CUMEM
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Channel 24/0 : 4[4] -> 5[5] via P2P/CUMEM
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Channel 19/0 : 1[1] -> 2[2] via P2P/CUMEM
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Channel 25/0 : 4[4] -> 5[5] via P2P/CUMEM
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Channel 08/0 : 6[6] -> 7[7] via P2P/CUMEM
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Channel 18/0 : 5[5] -> 6[6] via P2P/CUMEM
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Channel 23/0 : 3[3] -> 4[4] via P2P/CUMEM
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Channel 24/0 : 3[3] -> 4[4] via P2P/CUMEM
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Channel 26/0 : 4[4] -> 5[5] via P2P/CUMEM
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Channel 20/0 : 1[1] -> 2[2] via P2P/CUMEM
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Channel 09/0 : 6[6] -> 7[7] via P2P/CUMEM
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 24/0 : 0[0] -> 1[1] via P2P/CUMEM
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Channel 19/0 : 5[5] -> 6[6] via P2P/CUMEM
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Channel 27/0 : 4[4] -> 5[5] via P2P/CUMEM
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Channel 18/0 : 7[7] -> 0[0] via P2P/CUMEM
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Channel 10/0 : 6[6] -> 7[7] via P2P/CUMEM
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Channel 20/0 : 5[5] -> 6[6] via P2P/CUMEM
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Channel 21/0 : 1[1] -> 2[2] via P2P/CUMEM
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Channel 25/0 : 3[3] -> 4[4] via P2P/CUMEM
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 25/0 : 0[0] -> 1[1] via P2P/CUMEM
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Channel 28/0 : 4[4] -> 5[5] via P2P/CUMEM
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Channel 11/0 : 6[6] -> 7[7] via P2P/CUMEM
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Channel 19/0 : 7[7] -> 0[0] via P2P/CUMEM
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Channel 22/0 : 1[1] -> 2[2] via P2P/CUMEM
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Channel 29/0 : 4[4] -> 5[5] via P2P/CUMEM
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 26/0 : 0[0] -> 1[1] via P2P/CUMEM
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Channel 26/0 : 3[3] -> 4[4] via P2P/CUMEM
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Channel 21/0 : 5[5] -> 6[6] via P2P/CUMEM
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Channel 30/0 : 4[4] -> 5[5] via P2P/CUMEM
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Channel 23/0 : 1[1] -> 2[2] via P2P/CUMEM
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Channel 12/0 : 6[6] -> 7[7] via P2P/CUMEM
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Channel 20/0 : 7[7] -> 0[0] via P2P/CUMEM
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 27/0 : 0[0] -> 1[1] via P2P/CUMEM
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Channel 27/0 : 3[3] -> 4[4] via P2P/CUMEM
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Channel 22/0 : 5[5] -> 6[6] via P2P/CUMEM
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Channel 31/0 : 4[4] -> 5[5] via P2P/CUMEM
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Channel 24/0 : 1[1] -> 2[2] via P2P/CUMEM
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Channel 21/0 : 7[7] -> 0[0] via P2P/CUMEM
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Channel 13/0 : 6[6] -> 7[7] via P2P/CUMEM
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 28/0 : 0[0] -> 1[1] via P2P/CUMEM
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Channel 28/0 : 3[3] -> 4[4] via P2P/CUMEM
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Channel 23/0 : 5[5] -> 6[6] via P2P/CUMEM
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Channel 14/0 : 6[6] -> 7[7] via P2P/CUMEM
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Channel 25/0 : 1[1] -> 2[2] via P2P/CUMEM
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Channel 22/0 : 7[7] -> 0[0] via P2P/CUMEM
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 29/0 : 0[0] -> 1[1] via P2P/CUMEM
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Channel 29/0 : 3[3] -> 4[4] via P2P/CUMEM
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Channel 24/0 : 5[5] -> 6[6] via P2P/CUMEM
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Channel 15/0 : 6[6] -> 7[7] via P2P/CUMEM
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Channel 25/0 : 5[5] -> 6[6] via P2P/CUMEM
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Channel 23/0 : 7[7] -> 0[0] via P2P/CUMEM
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Channel 26/0 : 1[1] -> 2[2] via P2P/CUMEM
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Channel 30/0 : 3[3] -> 4[4] via P2P/CUMEM
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 30/0 : 0[0] -> 1[1] via P2P/CUMEM
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Channel 31/0 : 0[0] -> 1[1] via P2P/CUMEM
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Channel 26/0 : 5[5] -> 6[6] via P2P/CUMEM
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Channel 27/0 : 1[1] -> 2[2] via P2P/CUMEM
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Channel 16/0 : 6[6] -> 7[7] via P2P/CUMEM
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Channel 24/0 : 7[7] -> 0[0] via P2P/CUMEM
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Channel 31/0 : 3[3] -> 4[4] via P2P/CUMEM
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Channel 28/0 : 1[1] -> 2[2] via P2P/CUMEM
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Channel 17/0 : 6[6] -> 7[7] via P2P/CUMEM
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Channel 25/0 : 7[7] -> 0[0] via P2P/CUMEM
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Channel 27/0 : 5[5] -> 6[6] via P2P/CUMEM
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Channel 28/0 : 5[5] -> 6[6] via P2P/CUMEM
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Channel 18/0 : 6[6] -> 7[7] via P2P/CUMEM
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Channel 29/0 : 1[1] -> 2[2] via P2P/CUMEM
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Channel 26/0 : 7[7] -> 0[0] via P2P/CUMEM
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Channel 27/0 : 7[7] -> 0[0] via P2P/CUMEM
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Channel 29/0 : 5[5] -> 6[6] via P2P/CUMEM
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Channel 19/0 : 6[6] -> 7[7] via P2P/CUMEM
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Channel 30/0 : 1[1] -> 2[2] via P2P/CUMEM
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Channel 30/0 : 5[5] -> 6[6] via P2P/CUMEM
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Channel 28/0 : 7[7] -> 0[0] via P2P/CUMEM
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Channel 31/0 : 1[1] -> 2[2] via P2P/CUMEM
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Channel 20/0 : 6[6] -> 7[7] via P2P/CUMEM
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Channel 31/0 : 5[5] -> 6[6] via P2P/CUMEM
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Channel 29/0 : 7[7] -> 0[0] via P2P/CUMEM
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Channel 30/0 : 7[7] -> 0[0] via P2P/CUMEM
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Channel 21/0 : 6[6] -> 7[7] via P2P/CUMEM
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Channel 31/0 : 7[7] -> 0[0] via P2P/CUMEM
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Channel 22/0 : 6[6] -> 7[7] via P2P/CUMEM
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Channel 23/0 : 6[6] -> 7[7] via P2P/CUMEM
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Channel 24/0 : 6[6] -> 7[7] via P2P/CUMEM
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Channel 25/0 : 6[6] -> 7[7] via P2P/CUMEM
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Channel 26/0 : 6[6] -> 7[7] via P2P/CUMEM
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Channel 27/0 : 6[6] -> 7[7] via P2P/CUMEM
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Channel 28/0 : 6[6] -> 7[7] via P2P/CUMEM
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Channel 29/0 : 6[6] -> 7[7] via P2P/CUMEM
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Channel 30/0 : 6[6] -> 7[7] via P2P/CUMEM
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Channel 31/0 : 6[6] -> 7[7] via P2P/CUMEM
+xb01-gpu-200b-0123:294:294 [6] NCCL INFO Connected all rings, use ring PXN 0 GDR 1
+xb01-gpu-200b-0123:292:292 [4] NCCL INFO Connected all rings, use ring PXN 0 GDR 1
+xb01-gpu-200b-0123:290:290 [2] NCCL INFO Connected all rings, use ring PXN 0 GDR 1
+xb01-gpu-200b-0123:289:289 [1] NCCL INFO Connected all rings, use ring PXN 0 GDR 1
+xb01-gpu-200b-0123:293:293 [5] NCCL INFO Connected all rings, use ring PXN 0 GDR 1
+xb01-gpu-200b-0123:295:295 [7] NCCL INFO Connected all rings, use ring PXN 0 GDR 1
+xb01-gpu-200b-0123:291:291 [3] NCCL INFO Connected all rings, use ring PXN 0 GDR 1
+xb01-gpu-200b-0123:288:288 [0] NCCL INFO Connected all rings, use ring PXN 0 GDR 1
+05:52:47.517 [I] Using batch size per GPU: 8 (total batch size across 8 GPUs: 64)                 (292:train_pytorch.py:446)
+05:52:47.517 [I] Using batch size per GPU: 8 (total batch size across 8 GPUs: 64)                 (289:train_pytorch.py:446)
+05:52:47.517 [I] Using batch size per GPU: 8 (total batch size across 8 GPUs: 64)                 (293:train_pytorch.py:446)
+05:52:47.517 [I] Using batch size per GPU: 8 (total batch size across 8 GPUs: 64)                 (295:train_pytorch.py:446)
+05:52:47.517 [I] Using batch size per GPU: 8 (total batch size across 8 GPUs: 64)                 (294:train_pytorch.py:446)
+05:52:47.518 [I] Using batch size per GPU: 8 (total batch size across 8 GPUs: 64)                 (290:train_pytorch.py:446)
+05:52:47.518 [I] Using batch size per GPU: 8 (total batch size across 8 GPUs: 64)                 (291:train_pytorch.py:446)
+05:52:47.599 [I] Loaded norm stats from /home/fanyiming/openpi_Ario/assets/pi05_xingchen_ario/xingchen/new_blocks (292:config.py:200)
+05:52:47.600 [I] Loaded norm stats from /home/fanyiming/openpi_Ario/assets/pi05_xingchen_ario/xingchen/new_blocks (294:config.py:200)
+05:52:47.600 [I] Loaded norm stats from /home/fanyiming/openpi_Ario/assets/pi05_xingchen_ario/xingchen/new_blocks (295:config.py:200)
+05:52:47.600 [I] Loaded norm stats from /home/fanyiming/openpi_Ario/assets/pi05_xingchen_ario/xingchen/new_blocks (293:config.py:200)
+05:52:47.602 [I] Loaded norm stats from /home/fanyiming/openpi_Ario/assets/pi05_xingchen_ario/xingchen/new_blocks (291:config.py:200)
+05:52:47.603 [I] data_config: DataConfig(repo_id='xingchen/new_blocks', asset_id='xingchen/new_blocks', norm_stats={'state': NormStats(mean=array([ 2.20847651e-02, -1.18522985e-06,  1.20495403e+00,  9.85297918e-01,
+        1.21378601e-02, -1.28115878e-01, -1.16447043e-02,  9.97563422e-01,
+        3.30995675e-03,  3.02200317e-02,  7.48334408e-01,  4.09842104e-01,
+        2.02170476e-01,  9.25543129e-01,  2.65509009e-01,  9.02321279e-01,
+        6.61183298e-02, -8.51911724e-01,  2.35766068e-01,  2.62049586e-01,
+        2.09507847e+01,  4.14393038e-01, -1.52961522e-01,  9.40256119e-01,
+       -2.32361659e-01,  9.05517757e-01, -1.78680327e-02, -8.27372134e-01,
+       -2.09802061e-01,  3.19369316e-01,  2.36732559e+01]), std=array([3.88681851e-02, 1.42761067e-07, 7.78957829e-03, 1.79389380e-02,
+       6.86017647e-02, 8.71694684e-02, 6.69223741e-02, 3.64579703e-03,
+       1.51119335e-02, 6.78372756e-02, 5.36498688e-02, 8.20233449e-02,
+       7.12918341e-02, 4.21133749e-02, 2.97947675e-01, 1.25658214e-01,
+       7.99169540e-02, 1.20723531e-01, 2.75310427e-01, 2.44174212e-01,
+       4.03854675e+01, 8.53527263e-02, 7.88544118e-02, 5.20723984e-02,
+       3.15798014e-01, 1.38367221e-01, 8.27809200e-02, 1.44427076e-01,
+       2.83274055e-01, 2.61416018e-01, 4.20147705e+01]), q01=array([-4.66113442e-02, -1.43756348e-06,  1.18525463e+00,  9.17606957e-01,
+       -1.18207240e-01, -3.73113066e-01, -1.77967872e-01,  9.82263224e-01,
+       -2.70079036e-02, -1.20732251e-01,  6.11518292e-01,  3.02456839e-01,
+        8.66095046e-03,  8.35414250e-01, -1.81826195e-01,  5.28264604e-01,
+       -1.16861237e-01, -9.99730510e-01, -1.87620057e-01, -2.08596493e-01,
+        0.00000000e+00,  3.04519836e-01, -2.62818241e-01,  8.35710764e-01,
+       -8.98140239e-01,  4.37475792e-01, -2.37369937e-01, -9.99998629e-01,
+       -8.53196700e-01, -2.06621114e-01,  0.00000000e+00]), q99=array([ 1.47291163e-01, -7.25319700e-07,  1.22340253e+00,  9.99864632e-01,
+        1.84984191e-01,  1.90299895e-02,  1.15343787e-01,  9.99993543e-01,
+        5.61993590e-02,  2.19592865e-01,  8.46610579e-01,  6.69676126e-01,
+        2.98000444e-01,  1.01027742e+00,  8.31963817e-01,  9.99713969e-01,
+        2.69562216e-01, -5.30491931e-01,  8.02459871e-01,  6.76083419e-01,
+        9.99800000e+01,  6.68849502e-01,  5.26526766e-02,  1.02860024e+00,
+        2.18634181e-01,  9.99784047e-01,  1.73789295e-01, -4.15739473e-01,
+        1.96545822e-01,  7.90248334e-01,  9.99800000e+01])), 'actions': NormStats(mean=array([-6.49306085e-03, -2.38503350e-08, -1.56284333e-03,  1.92240486e-03,
+       -4.54068137e-03,  1.54021475e-02,  4.47505992e-03,  1.87959085e-04,
+       -4.63750737e-04,  2.61930525e-02,  7.46363580e-01, -2.10558088e-03,
+        4.81350534e-03,  3.57841188e-03, -5.24529368e-02,  1.86805874e-02,
+       -3.55149852e-03, -2.80216988e-02, -4.51642536e-02, -8.10984224e-02,
+        1.91005039e+01, -6.66468823e-03, -1.16741844e-02,  3.75163625e-03,
+        5.96900620e-02,  1.91851445e-02,  6.76474581e-03, -3.23513076e-02,
+        5.36604933e-02, -8.65430310e-02,  2.18271427e+01]), std=array([3.56703997e-02, 1.31024706e-07, 6.59533776e-03, 1.77792646e-02,
+       5.20261750e-02, 9.25870091e-02, 5.06177694e-02, 3.63478693e-03,
+       1.27337081e-02, 6.43182546e-02, 4.88635115e-02, 6.35818467e-02,
+       6.52325079e-02, 4.54031564e-02, 2.47516662e-01, 1.03794225e-01,
+       6.87522143e-02, 1.25289276e-01, 2.19776168e-01, 2.91962266e-01,
+       3.90673180e+01, 7.04032853e-02, 8.83272141e-02, 4.89339121e-02,
+       2.53568262e-01, 1.04032911e-01, 6.47988319e-02, 1.48807555e-01,
+       2.28228733e-01, 3.26122224e-01, 4.09069901e+01]), q01=array([-1.12521454e-01, -4.13313968e-07, -2.15468840e-02, -5.45229257e-02,
+       -1.60066478e-01, -2.46577991e-01, -1.18624991e-01, -1.06231285e-02,
+       -4.33016631e-02, -1.17417088e-01,  6.14300872e-01, -1.95900865e-01,
+       -1.81883554e-01, -1.04301783e-01, -7.47231585e-01, -2.88805264e-01,
+       -1.96068779e-01, -3.82926766e-01, -6.78332465e-01, -7.55650204e-01,
+        0.00000000e+00, -2.03877818e-01, -2.57987383e-01, -1.13886339e-01,
+       -6.97663406e-01, -2.99262141e-01, -1.65287990e-01, -4.24869234e-01,
+       -6.16496017e-01, -8.84330195e-01,  0.00000000e+00]), q99=array([1.02531573e-01, 3.76619837e-07, 1.53846693e-02, 5.63681107e-02,
+       1.22860417e-01, 2.50484991e-01, 1.55189151e-01, 1.27332322e-02,
+       3.69014105e-02, 2.14856919e-01, 8.39404412e-01, 2.03661734e-01,
+       2.02942027e-01, 1.38240851e-01, 6.54051143e-01, 3.66878386e-01,
+       1.80737032e-01, 3.03517997e-01, 5.83652037e-01, 6.41801402e-01,
+       9.99800000e+01, 2.27667007e-01, 2.13029897e-01, 1.37937403e-01,
+       7.88007178e-01, 3.88678465e-01, 1.94419951e-01, 3.58080227e-01,
+       7.40218581e-01, 6.75764420e-01, 9.99800000e+01]))}, repack_transforms=Group(inputs=[RepackTransform(structure={'observation/image': 'observation/image', 'observation/cam_high': 'observation/cam_high', 'observation/cam_left_wrist': 'observation/cam_left_wrist', 'observation/cam_right_wrist': 'observation/cam_right_wrist', 'observation/state': 'observation/state', 'actions': 'actions', 'prompt': 'prompt'})], outputs=()), data_transforms=Group(inputs=(XingchenInputs(model_type=<ModelType.PI05: 'pi05'>), DeltaActions(mask=(True, True, True, True, True, True, True, True, True, False, False, True, True, True, True, True, True, True, True, True, False, True, True, True, True, True, True, True, True, True, False))), outputs=(AbsoluteActions(mask=(True, True, True, True, True, True, True, True, True, False, False, True, True, True, True, True, True, True, True, True, False, True, True, True, True, True, True, True, True, True, False)), XingchenOutputs())), model_transforms=Group(inputs=[InjectDefaultPrompt(prompt='fold clothes'), ResizeImages(height=224, width=224), TokenizePrompt(tokenizer=<openpi.models.tokenizer.PaligemmaTokenizer object at 0x7e2af465bd10>, discrete_state_input=True), PadStatesAndActions(model_action_dim=32)], outputs=()), use_quantile_norm=True, action_sequence_keys=('actions',), prompt_from_task=False, ario_config=ArioConfig(s3_prefixes='oss://shengshu-base2-test/xiaojun/新积木/', s3_endpoint='https://oss-cn-wulanchabu-internal.aliyuncs.com', video_downsample_rate=6, min_frames=1, image_size=(320, 240), task='fold clothes', load_instructions=True, skip_video=False, cache_size=32, max_episodes=None, disk_cache_dir='/tmp/ario_disk_cache', disk_cache_max_gb=200.0, multi_view=True), rlds_data_dir=None, action_space=None, datasets=()) (292:data_loader.py:248)
+05:52:47.603 [I] data_config: DataConfig(repo_id='xingchen/new_blocks', asset_id='xingchen/new_blocks', norm_stats={'state': NormStats(mean=array([ 2.20847651e-02, -1.18522985e-06,  1.20495403e+00,  9.85297918e-01,
+        1.21378601e-02, -1.28115878e-01, -1.16447043e-02,  9.97563422e-01,
+        3.30995675e-03,  3.02200317e-02,  7.48334408e-01,  4.09842104e-01,
+        2.02170476e-01,  9.25543129e-01,  2.65509009e-01,  9.02321279e-01,
+        6.61183298e-02, -8.51911724e-01,  2.35766068e-01,  2.62049586e-01,
+        2.09507847e+01,  4.14393038e-01, -1.52961522e-01,  9.40256119e-01,
+       -2.32361659e-01,  9.05517757e-01, -1.78680327e-02, -8.27372134e-01,
+       -2.09802061e-01,  3.19369316e-01,  2.36732559e+01]), std=array([3.88681851e-02, 1.42761067e-07, 7.78957829e-03, 1.79389380e-02,
+       6.86017647e-02, 8.71694684e-02, 6.69223741e-02, 3.64579703e-03,
+       1.51119335e-02, 6.78372756e-02, 5.36498688e-02, 8.20233449e-02,
+       7.12918341e-02, 4.21133749e-02, 2.97947675e-01, 1.25658214e-01,
+       7.99169540e-02, 1.20723531e-01, 2.75310427e-01, 2.44174212e-01,
+       4.03854675e+01, 8.53527263e-02, 7.88544118e-02, 5.20723984e-02,
+       3.15798014e-01, 1.38367221e-01, 8.27809200e-02, 1.44427076e-01,
+       2.83274055e-01, 2.61416018e-01, 4.20147705e+01]), q01=array([-4.66113442e-02, -1.43756348e-06,  1.18525463e+00,  9.17606957e-01,
+       -1.18207240e-01, -3.73113066e-01, -1.77967872e-01,  9.82263224e-01,
+       -2.70079036e-02, -1.20732251e-01,  6.11518292e-01,  3.02456839e-01,
+        8.66095046e-03,  8.35414250e-01, -1.81826195e-01,  5.28264604e-01,
+       -1.16861237e-01, -9.99730510e-01, -1.87620057e-01, -2.08596493e-01,
+        0.00000000e+00,  3.04519836e-01, -2.62818241e-01,  8.35710764e-01,
+       -8.98140239e-01,  4.37475792e-01, -2.37369937e-01, -9.99998629e-01,
+       -8.53196700e-01, -2.06621114e-01,  0.00000000e+00]), q99=array([ 1.47291163e-01, -7.25319700e-07,  1.22340253e+00,  9.99864632e-01,
+        1.84984191e-01,  1.90299895e-02,  1.15343787e-01,  9.99993543e-01,
+        5.61993590e-02,  2.19592865e-01,  8.46610579e-01,  6.69676126e-01,
+        2.98000444e-01,  1.01027742e+00,  8.31963817e-01,  9.99713969e-01,
+        2.69562216e-01, -5.30491931e-01,  8.02459871e-01,  6.76083419e-01,
+        9.99800000e+01,  6.68849502e-01,  5.26526766e-02,  1.02860024e+00,
+        2.18634181e-01,  9.99784047e-01,  1.73789295e-01, -4.15739473e-01,
+        1.96545822e-01,  7.90248334e-01,  9.99800000e+01])), 'actions': NormStats(mean=array([-6.49306085e-03, -2.38503350e-08, -1.56284333e-03,  1.92240486e-03,
+       -4.54068137e-03,  1.54021475e-02,  4.47505992e-03,  1.87959085e-04,
+       -4.63750737e-04,  2.61930525e-02,  7.46363580e-01, -2.10558088e-03,
+        4.81350534e-03,  3.57841188e-03, -5.24529368e-02,  1.86805874e-02,
+       -3.55149852e-03, -2.80216988e-02, -4.51642536e-02, -8.10984224e-02,
+        1.91005039e+01, -6.66468823e-03, -1.16741844e-02,  3.75163625e-03,
+        5.96900620e-02,  1.91851445e-02,  6.76474581e-03, -3.23513076e-02,
+        5.36604933e-02, -8.65430310e-02,  2.18271427e+01]), std=array([3.56703997e-02, 1.31024706e-07, 6.59533776e-03, 1.77792646e-02,
+       5.20261750e-02, 9.25870091e-02, 5.06177694e-02, 3.63478693e-03,
+       1.27337081e-02, 6.43182546e-02, 4.88635115e-02, 6.35818467e-02,
+       6.52325079e-02, 4.54031564e-02, 2.47516662e-01, 1.03794225e-01,
+       6.87522143e-02, 1.25289276e-01, 2.19776168e-01, 2.91962266e-01,
+       3.90673180e+01, 7.04032853e-02, 8.83272141e-02, 4.89339121e-02,
+       2.53568262e-01, 1.04032911e-01, 6.47988319e-02, 1.48807555e-01,
+       2.28228733e-01, 3.26122224e-01, 4.09069901e+01]), q01=array([-1.12521454e-01, -4.13313968e-07, -2.15468840e-02, -5.45229257e-02,
+       -1.60066478e-01, -2.46577991e-01, -1.18624991e-01, -1.06231285e-02,
+       -4.33016631e-02, -1.17417088e-01,  6.14300872e-01, -1.95900865e-01,
+       -1.81883554e-01, -1.04301783e-01, -7.47231585e-01, -2.88805264e-01,
+       -1.96068779e-01, -3.82926766e-01, -6.78332465e-01, -7.55650204e-01,
+        0.00000000e+00, -2.03877818e-01, -2.57987383e-01, -1.13886339e-01,
+       -6.97663406e-01, -2.99262141e-01, -1.65287990e-01, -4.24869234e-01,
+       -6.16496017e-01, -8.84330195e-01,  0.00000000e+00]), q99=array([1.02531573e-01, 3.76619837e-07, 1.53846693e-02, 5.63681107e-02,
+       1.22860417e-01, 2.50484991e-01, 1.55189151e-01, 1.27332322e-02,
+       3.69014105e-02, 2.14856919e-01, 8.39404412e-01, 2.03661734e-01,
+       2.02942027e-01, 1.38240851e-01, 6.54051143e-01, 3.66878386e-01,
+       1.80737032e-01, 3.03517997e-01, 5.83652037e-01, 6.41801402e-01,
+       9.99800000e+01, 2.27667007e-01, 2.13029897e-01, 1.37937403e-01,
+       7.88007178e-01, 3.88678465e-01, 1.94419951e-01, 3.58080227e-01,
+       7.40218581e-01, 6.75764420e-01, 9.99800000e+01]))}, repack_transforms=Group(inputs=[RepackTransform(structure={'observation/image': 'observation/image', 'observation/cam_high': 'observation/cam_high', 'observation/cam_left_wrist': 'observation/cam_left_wrist', 'observation/cam_right_wrist': 'observation/cam_right_wrist', 'observation/state': 'observation/state', 'actions': 'actions', 'prompt': 'prompt'})], outputs=()), data_transforms=Group(inputs=(XingchenInputs(model_type=<ModelType.PI05: 'pi05'>), DeltaActions(mask=(True, True, True, True, True, True, True, True, True, False, False, True, True, True, True, True, True, True, True, True, False, True, True, True, True, True, True, True, True, True, False))), outputs=(AbsoluteActions(mask=(True, True, True, True, True, True, True, True, True, False, False, True, True, True, True, True, True, True, True, True, False, True, True, True, True, True, True, True, True, True, False)), XingchenOutputs())), model_transforms=Group(inputs=[InjectDefaultPrompt(prompt='fold clothes'), ResizeImages(height=224, width=224), TokenizePrompt(tokenizer=<openpi.models.tokenizer.PaligemmaTokenizer object at 0x7e037e814250>, discrete_state_input=True), PadStatesAndActions(model_action_dim=32)], outputs=()), use_quantile_norm=True, action_sequence_keys=('actions',), prompt_from_task=False, ario_config=ArioConfig(s3_prefixes='oss://shengshu-base2-test/xiaojun/新积木/', s3_endpoint='https://oss-cn-wulanchabu-internal.aliyuncs.com', video_downsample_rate=6, min_frames=1, image_size=(320, 240), task='fold clothes', load_instructions=True, skip_video=False, cache_size=32, max_episodes=None, disk_cache_dir='/tmp/ario_disk_cache', disk_cache_max_gb=200.0, multi_view=True), rlds_data_dir=None, action_space=None, datasets=()) (295:data_loader.py:248)
+05:52:47.603 [I] data_config: DataConfig(repo_id='xingchen/new_blocks', asset_id='xingchen/new_blocks', norm_stats={'state': NormStats(mean=array([ 2.20847651e-02, -1.18522985e-06,  1.20495403e+00,  9.85297918e-01,
+        1.21378601e-02, -1.28115878e-01, -1.16447043e-02,  9.97563422e-01,
+        3.30995675e-03,  3.02200317e-02,  7.48334408e-01,  4.09842104e-01,
+        2.02170476e-01,  9.25543129e-01,  2.65509009e-01,  9.02321279e-01,
+        6.61183298e-02, -8.51911724e-01,  2.35766068e-01,  2.62049586e-01,
+        2.09507847e+01,  4.14393038e-01, -1.52961522e-01,  9.40256119e-01,
+       -2.32361659e-01,  9.05517757e-01, -1.78680327e-02, -8.27372134e-01,
+       -2.09802061e-01,  3.19369316e-01,  2.36732559e+01]), std=array([3.88681851e-02, 1.42761067e-07, 7.78957829e-03, 1.79389380e-02,
+       6.86017647e-02, 8.71694684e-02, 6.69223741e-02, 3.64579703e-03,
+       1.51119335e-02, 6.78372756e-02, 5.36498688e-02, 8.20233449e-02,
+       7.12918341e-02, 4.21133749e-02, 2.97947675e-01, 1.25658214e-01,
+       7.99169540e-02, 1.20723531e-01, 2.75310427e-01, 2.44174212e-01,
+       4.03854675e+01, 8.53527263e-02, 7.88544118e-02, 5.20723984e-02,
+       3.15798014e-01, 1.38367221e-01, 8.27809200e-02, 1.44427076e-01,
+       2.83274055e-01, 2.61416018e-01, 4.20147705e+01]), q01=array([-4.66113442e-02, -1.43756348e-06,  1.18525463e+00,  9.17606957e-01,
+       -1.18207240e-01, -3.73113066e-01, -1.77967872e-01,  9.82263224e-01,
+       -2.70079036e-02, -1.20732251e-01,  6.11518292e-01,  3.02456839e-01,
+        8.66095046e-03,  8.35414250e-01, -1.81826195e-01,  5.28264604e-01,
+       -1.16861237e-01, -9.99730510e-01, -1.87620057e-01, -2.08596493e-01,
+        0.00000000e+00,  3.04519836e-01, -2.62818241e-01,  8.35710764e-01,
+       -8.98140239e-01,  4.37475792e-01, -2.37369937e-01, -9.99998629e-01,
+       -8.53196700e-01, -2.06621114e-01,  0.00000000e+00]), q99=array([ 1.47291163e-01, -7.25319700e-07,  1.22340253e+00,  9.99864632e-01,
+        1.84984191e-01,  1.90299895e-02,  1.15343787e-01,  9.99993543e-01,
+        5.61993590e-02,  2.19592865e-01,  8.46610579e-01,  6.69676126e-01,
+        2.98000444e-01,  1.01027742e+00,  8.31963817e-01,  9.99713969e-01,
+        2.69562216e-01, -5.30491931e-01,  8.02459871e-01,  6.76083419e-01,
+        9.99800000e+01,  6.68849502e-01,  5.26526766e-02,  1.02860024e+00,
+        2.18634181e-01,  9.99784047e-01,  1.73789295e-01, -4.15739473e-01,
+        1.96545822e-01,  7.90248334e-01,  9.99800000e+01])), 'actions': NormStats(mean=array([-6.49306085e-03, -2.38503350e-08, -1.56284333e-03,  1.92240486e-03,
+       -4.54068137e-03,  1.54021475e-02,  4.47505992e-03,  1.87959085e-04,
+       -4.63750737e-04,  2.61930525e-02,  7.46363580e-01, -2.10558088e-03,
+        4.81350534e-03,  3.57841188e-03, -5.24529368e-02,  1.86805874e-02,
+       -3.55149852e-03, -2.80216988e-02, -4.51642536e-02, -8.10984224e-02,
+        1.91005039e+01, -6.66468823e-03, -1.16741844e-02,  3.75163625e-03,
+        5.96900620e-02,  1.91851445e-02,  6.76474581e-03, -3.23513076e-02,
+        5.36604933e-02, -8.65430310e-02,  2.18271427e+01]), std=array([3.56703997e-02, 1.31024706e-07, 6.59533776e-03, 1.77792646e-02,
+       5.20261750e-02, 9.25870091e-02, 5.06177694e-02, 3.63478693e-03,
+       1.27337081e-02, 6.43182546e-02, 4.88635115e-02, 6.35818467e-02,
+       6.52325079e-02, 4.54031564e-02, 2.47516662e-01, 1.03794225e-01,
+       6.87522143e-02, 1.25289276e-01, 2.19776168e-01, 2.91962266e-01,
+       3.90673180e+01, 7.04032853e-02, 8.83272141e-02, 4.89339121e-02,
+       2.53568262e-01, 1.04032911e-01, 6.47988319e-02, 1.48807555e-01,
+       2.28228733e-01, 3.26122224e-01, 4.09069901e+01]), q01=array([-1.12521454e-01, -4.13313968e-07, -2.15468840e-02, -5.45229257e-02,
+       -1.60066478e-01, -2.46577991e-01, -1.18624991e-01, -1.06231285e-02,
+       -4.33016631e-02, -1.17417088e-01,  6.14300872e-01, -1.95900865e-01,
+       -1.81883554e-01, -1.04301783e-01, -7.47231585e-01, -2.88805264e-01,
+       -1.96068779e-01, -3.82926766e-01, -6.78332465e-01, -7.55650204e-01,
+        0.00000000e+00, -2.03877818e-01, -2.57987383e-01, -1.13886339e-01,
+       -6.97663406e-01, -2.99262141e-01, -1.65287990e-01, -4.24869234e-01,
+       -6.16496017e-01, -8.84330195e-01,  0.00000000e+00]), q99=array([1.02531573e-01, 3.76619837e-07, 1.53846693e-02, 5.63681107e-02,
+       1.22860417e-01, 2.50484991e-01, 1.55189151e-01, 1.27332322e-02,
+       3.69014105e-02, 2.14856919e-01, 8.39404412e-01, 2.03661734e-01,
+       2.02942027e-01, 1.38240851e-01, 6.54051143e-01, 3.66878386e-01,
+       1.80737032e-01, 3.03517997e-01, 5.83652037e-01, 6.41801402e-01,
+       9.99800000e+01, 2.27667007e-01, 2.13029897e-01, 1.37937403e-01,
+       7.88007178e-01, 3.88678465e-01, 1.94419951e-01, 3.58080227e-01,
+       7.40218581e-01, 6.75764420e-01, 9.99800000e+01]))}, repack_transforms=Group(inputs=[RepackTransform(structure={'observation/image': 'observation/image', 'observation/cam_high': 'observation/cam_high', 'observation/cam_left_wrist': 'observation/cam_left_wrist', 'observation/cam_right_wrist': 'observation/cam_right_wrist', 'observation/state': 'observation/state', 'actions': 'actions', 'prompt': 'prompt'})], outputs=()), data_transforms=Group(inputs=(XingchenInputs(model_type=<ModelType.PI05: 'pi05'>), DeltaActions(mask=(True, True, True, True, True, True, True, True, True, False, False, True, True, True, True, True, True, True, True, True, False, True, True, True, True, True, True, True, True, True, False))), outputs=(AbsoluteActions(mask=(True, True, True, True, True, True, True, True, True, False, False, True, True, True, True, True, True, True, True, True, False, True, True, True, True, True, True, True, True, True, False)), XingchenOutputs())), model_transforms=Group(inputs=[InjectDefaultPrompt(prompt='fold clothes'), ResizeImages(height=224, width=224), TokenizePrompt(tokenizer=<openpi.models.tokenizer.PaligemmaTokenizer object at 0x7c9ef7c3b410>, discrete_state_input=True), PadStatesAndActions(model_action_dim=32)], outputs=()), use_quantile_norm=True, action_sequence_keys=('actions',), prompt_from_task=False, ario_config=ArioConfig(s3_prefixes='oss://shengshu-base2-test/xiaojun/新积木/', s3_endpoint='https://oss-cn-wulanchabu-internal.aliyuncs.com', video_downsample_rate=6, min_frames=1, image_size=(320, 240), task='fold clothes', load_instructions=True, skip_video=False, cache_size=32, max_episodes=None, disk_cache_dir='/tmp/ario_disk_cache', disk_cache_max_gb=200.0, multi_view=True), rlds_data_dir=None, action_space=None, datasets=()) (293:data_loader.py:248)
+05:52:47.603 [I] data_config: DataConfig(repo_id='xingchen/new_blocks', asset_id='xingchen/new_blocks', norm_stats={'state': NormStats(mean=array([ 2.20847651e-02, -1.18522985e-06,  1.20495403e+00,  9.85297918e-01,
+        1.21378601e-02, -1.28115878e-01, -1.16447043e-02,  9.97563422e-01,
+        3.30995675e-03,  3.02200317e-02,  7.48334408e-01,  4.09842104e-01,
+        2.02170476e-01,  9.25543129e-01,  2.65509009e-01,  9.02321279e-01,
+        6.61183298e-02, -8.51911724e-01,  2.35766068e-01,  2.62049586e-01,
+        2.09507847e+01,  4.14393038e-01, -1.52961522e-01,  9.40256119e-01,
+       -2.32361659e-01,  9.05517757e-01, -1.78680327e-02, -8.27372134e-01,
+       -2.09802061e-01,  3.19369316e-01,  2.36732559e+01]), std=array([3.88681851e-02, 1.42761067e-07, 7.78957829e-03, 1.79389380e-02,
+       6.86017647e-02, 8.71694684e-02, 6.69223741e-02, 3.64579703e-03,
+       1.51119335e-02, 6.78372756e-02, 5.36498688e-02, 8.20233449e-02,
+       7.12918341e-02, 4.21133749e-02, 2.97947675e-01, 1.25658214e-01,
+       7.99169540e-02, 1.20723531e-01, 2.75310427e-01, 2.44174212e-01,
+       4.03854675e+01, 8.53527263e-02, 7.88544118e-02, 5.20723984e-02,
+       3.15798014e-01, 1.38367221e-01, 8.27809200e-02, 1.44427076e-01,
+       2.83274055e-01, 2.61416018e-01, 4.20147705e+01]), q01=array([-4.66113442e-02, -1.43756348e-06,  1.18525463e+00,  9.17606957e-01,
+       -1.18207240e-01, -3.73113066e-01, -1.77967872e-01,  9.82263224e-01,
+       -2.70079036e-02, -1.20732251e-01,  6.11518292e-01,  3.02456839e-01,
+        8.66095046e-03,  8.35414250e-01, -1.81826195e-01,  5.28264604e-01,
+       -1.16861237e-01, -9.99730510e-01, -1.87620057e-01, -2.08596493e-01,
+        0.00000000e+00,  3.04519836e-01, -2.62818241e-01,  8.35710764e-01,
+       -8.98140239e-01,  4.37475792e-01, -2.37369937e-01, -9.99998629e-01,
+       -8.53196700e-01, -2.06621114e-01,  0.00000000e+00]), q99=array([ 1.47291163e-01, -7.25319700e-07,  1.22340253e+00,  9.99864632e-01,
+        1.84984191e-01,  1.90299895e-02,  1.15343787e-01,  9.99993543e-01,
+        5.61993590e-02,  2.19592865e-01,  8.46610579e-01,  6.69676126e-01,
+        2.98000444e-01,  1.01027742e+00,  8.31963817e-01,  9.99713969e-01,
+        2.69562216e-01, -5.30491931e-01,  8.02459871e-01,  6.76083419e-01,
+        9.99800000e+01,  6.68849502e-01,  5.26526766e-02,  1.02860024e+00,
+        2.18634181e-01,  9.99784047e-01,  1.73789295e-01, -4.15739473e-01,
+        1.96545822e-01,  7.90248334e-01,  9.99800000e+01])), 'actions': NormStats(mean=array([-6.49306085e-03, -2.38503350e-08, -1.56284333e-03,  1.92240486e-03,
+       -4.54068137e-03,  1.54021475e-02,  4.47505992e-03,  1.87959085e-04,
+       -4.63750737e-04,  2.61930525e-02,  7.46363580e-01, -2.10558088e-03,
+        4.81350534e-03,  3.57841188e-03, -5.24529368e-02,  1.86805874e-02,
+       -3.55149852e-03, -2.80216988e-02, -4.51642536e-02, -8.10984224e-02,
+        1.91005039e+01, -6.66468823e-03, -1.16741844e-02,  3.75163625e-03,
+        5.96900620e-02,  1.91851445e-02,  6.76474581e-03, -3.23513076e-02,
+        5.36604933e-02, -8.65430310e-02,  2.18271427e+01]), std=array([3.56703997e-02, 1.31024706e-07, 6.59533776e-03, 1.77792646e-02,
+       5.20261750e-02, 9.25870091e-02, 5.06177694e-02, 3.63478693e-03,
+       1.27337081e-02, 6.43182546e-02, 4.88635115e-02, 6.35818467e-02,
+       6.52325079e-02, 4.54031564e-02, 2.47516662e-01, 1.03794225e-01,
+       6.87522143e-02, 1.25289276e-01, 2.19776168e-01, 2.91962266e-01,
+       3.90673180e+01, 7.04032853e-02, 8.83272141e-02, 4.89339121e-02,
+       2.53568262e-01, 1.04032911e-01, 6.47988319e-02, 1.48807555e-01,
+       2.28228733e-01, 3.26122224e-01, 4.09069901e+01]), q01=array([-1.12521454e-01, -4.13313968e-07, -2.15468840e-02, -5.45229257e-02,
+       -1.60066478e-01, -2.46577991e-01, -1.18624991e-01, -1.06231285e-02,
+       -4.33016631e-02, -1.17417088e-01,  6.14300872e-01, -1.95900865e-01,
+       -1.81883554e-01, -1.04301783e-01, -7.47231585e-01, -2.88805264e-01,
+       -1.96068779e-01, -3.82926766e-01, -6.78332465e-01, -7.55650204e-01,
+        0.00000000e+00, -2.03877818e-01, -2.57987383e-01, -1.13886339e-01,
+       -6.97663406e-01, -2.99262141e-01, -1.65287990e-01, -4.24869234e-01,
+       -6.16496017e-01, -8.84330195e-01,  0.00000000e+00]), q99=array([1.02531573e-01, 3.76619837e-07, 1.53846693e-02, 5.63681107e-02,
+       1.22860417e-01, 2.50484991e-01, 1.55189151e-01, 1.27332322e-02,
+       3.69014105e-02, 2.14856919e-01, 8.39404412e-01, 2.03661734e-01,
+       2.02942027e-01, 1.38240851e-01, 6.54051143e-01, 3.66878386e-01,
+       1.80737032e-01, 3.03517997e-01, 5.83652037e-01, 6.41801402e-01,
+       9.99800000e+01, 2.27667007e-01, 2.13029897e-01, 1.37937403e-01,
+       7.88007178e-01, 3.88678465e-01, 1.94419951e-01, 3.58080227e-01,
+       7.40218581e-01, 6.75764420e-01, 9.99800000e+01]))}, repack_transforms=Group(inputs=[RepackTransform(structure={'observation/image': 'observation/image', 'observation/cam_high': 'observation/cam_high', 'observation/cam_left_wrist': 'observation/cam_left_wrist', 'observation/cam_right_wrist': 'observation/cam_right_wrist', 'observation/state': 'observation/state', 'actions': 'actions', 'prompt': 'prompt'})], outputs=()), data_transforms=Group(inputs=(XingchenInputs(model_type=<ModelType.PI05: 'pi05'>), DeltaActions(mask=(True, True, True, True, True, True, True, True, True, False, False, True, True, True, True, True, True, True, True, True, False, True, True, True, True, True, True, True, True, True, False))), outputs=(AbsoluteActions(mask=(True, True, True, True, True, True, True, True, True, False, False, True, True, True, True, True, True, True, True, True, False, True, True, True, True, True, True, True, True, True, False)), XingchenOutputs())), model_transforms=Group(inputs=[InjectDefaultPrompt(prompt='fold clothes'), ResizeImages(height=224, width=224), TokenizePrompt(tokenizer=<openpi.models.tokenizer.PaligemmaTokenizer object at 0x767868befad0>, discrete_state_input=True), PadStatesAndActions(model_action_dim=32)], outputs=()), use_quantile_norm=True, action_sequence_keys=('actions',), prompt_from_task=False, ario_config=ArioConfig(s3_prefixes='oss://shengshu-base2-test/xiaojun/新积木/', s3_endpoint='https://oss-cn-wulanchabu-internal.aliyuncs.com', video_downsample_rate=6, min_frames=1, image_size=(320, 240), task='fold clothes', load_instructions=True, skip_video=False, cache_size=32, max_episodes=None, disk_cache_dir='/tmp/ario_disk_cache', disk_cache_max_gb=200.0, multi_view=True), rlds_data_dir=None, action_space=None, datasets=()) (294:data_loader.py:248)
+05:52:47.603 [I] Loaded norm stats from /home/fanyiming/openpi_Ario/assets/pi05_xingchen_ario/xingchen/new_blocks (290:config.py:200)
+05:52:47.605 [I] data_config: DataConfig(repo_id='xingchen/new_blocks', asset_id='xingchen/new_blocks', norm_stats={'state': NormStats(mean=array([ 2.20847651e-02, -1.18522985e-06,  1.20495403e+00,  9.85297918e-01,
+        1.21378601e-02, -1.28115878e-01, -1.16447043e-02,  9.97563422e-01,
+        3.30995675e-03,  3.02200317e-02,  7.48334408e-01,  4.09842104e-01,
+        2.02170476e-01,  9.25543129e-01,  2.65509009e-01,  9.02321279e-01,
+        6.61183298e-02, -8.51911724e-01,  2.35766068e-01,  2.62049586e-01,
+        2.09507847e+01,  4.14393038e-01, -1.52961522e-01,  9.40256119e-01,
+       -2.32361659e-01,  9.05517757e-01, -1.78680327e-02, -8.27372134e-01,
+       -2.09802061e-01,  3.19369316e-01,  2.36732559e+01]), std=array([3.88681851e-02, 1.42761067e-07, 7.78957829e-03, 1.79389380e-02,
+       6.86017647e-02, 8.71694684e-02, 6.69223741e-02, 3.64579703e-03,
+       1.51119335e-02, 6.78372756e-02, 5.36498688e-02, 8.20233449e-02,
+       7.12918341e-02, 4.21133749e-02, 2.97947675e-01, 1.25658214e-01,
+       7.99169540e-02, 1.20723531e-01, 2.75310427e-01, 2.44174212e-01,
+       4.03854675e+01, 8.53527263e-02, 7.88544118e-02, 5.20723984e-02,
+       3.15798014e-01, 1.38367221e-01, 8.27809200e-02, 1.44427076e-01,
+       2.83274055e-01, 2.61416018e-01, 4.20147705e+01]), q01=array([-4.66113442e-02, -1.43756348e-06,  1.18525463e+00,  9.17606957e-01,
+       -1.18207240e-01, -3.73113066e-01, -1.77967872e-01,  9.82263224e-01,
+       -2.70079036e-02, -1.20732251e-01,  6.11518292e-01,  3.02456839e-01,
+        8.66095046e-03,  8.35414250e-01, -1.81826195e-01,  5.28264604e-01,
+       -1.16861237e-01, -9.99730510e-01, -1.87620057e-01, -2.08596493e-01,
+        0.00000000e+00,  3.04519836e-01, -2.62818241e-01,  8.35710764e-01,
+       -8.98140239e-01,  4.37475792e-01, -2.37369937e-01, -9.99998629e-01,
+       -8.53196700e-01, -2.06621114e-01,  0.00000000e+00]), q99=array([ 1.47291163e-01, -7.25319700e-07,  1.22340253e+00,  9.99864632e-01,
+        1.84984191e-01,  1.90299895e-02,  1.15343787e-01,  9.99993543e-01,
+        5.61993590e-02,  2.19592865e-01,  8.46610579e-01,  6.69676126e-01,
+        2.98000444e-01,  1.01027742e+00,  8.31963817e-01,  9.99713969e-01,
+        2.69562216e-01, -5.30491931e-01,  8.02459871e-01,  6.76083419e-01,
+        9.99800000e+01,  6.68849502e-01,  5.26526766e-02,  1.02860024e+00,
+        2.18634181e-01,  9.99784047e-01,  1.73789295e-01, -4.15739473e-01,
+        1.96545822e-01,  7.90248334e-01,  9.99800000e+01])), 'actions': NormStats(mean=array([-6.49306085e-03, -2.38503350e-08, -1.56284333e-03,  1.92240486e-03,
+       -4.54068137e-03,  1.54021475e-02,  4.47505992e-03,  1.87959085e-04,
+       -4.63750737e-04,  2.61930525e-02,  7.46363580e-01, -2.10558088e-03,
+        4.81350534e-03,  3.57841188e-03, -5.24529368e-02,  1.86805874e-02,
+       -3.55149852e-03, -2.80216988e-02, -4.51642536e-02, -8.10984224e-02,
+        1.91005039e+01, -6.66468823e-03, -1.16741844e-02,  3.75163625e-03,
+        5.96900620e-02,  1.91851445e-02,  6.76474581e-03, -3.23513076e-02,
+        5.36604933e-02, -8.65430310e-02,  2.18271427e+01]), std=array([3.56703997e-02, 1.31024706e-07, 6.59533776e-03, 1.77792646e-02,
+       5.20261750e-02, 9.25870091e-02, 5.06177694e-02, 3.63478693e-03,
+       1.27337081e-02, 6.43182546e-02, 4.88635115e-02, 6.35818467e-02,
+       6.52325079e-02, 4.54031564e-02, 2.47516662e-01, 1.03794225e-01,
+       6.87522143e-02, 1.25289276e-01, 2.19776168e-01, 2.91962266e-01,
+       3.90673180e+01, 7.04032853e-02, 8.83272141e-02, 4.89339121e-02,
+       2.53568262e-01, 1.04032911e-01, 6.47988319e-02, 1.48807555e-01,
+       2.28228733e-01, 3.26122224e-01, 4.09069901e+01]), q01=array([-1.12521454e-01, -4.13313968e-07, -2.15468840e-02, -5.45229257e-02,
+       -1.60066478e-01, -2.46577991e-01, -1.18624991e-01, -1.06231285e-02,
+       -4.33016631e-02, -1.17417088e-01,  6.14300872e-01, -1.95900865e-01,
+       -1.81883554e-01, -1.04301783e-01, -7.47231585e-01, -2.88805264e-01,
+       -1.96068779e-01, -3.82926766e-01, -6.78332465e-01, -7.55650204e-01,
+        0.00000000e+00, -2.03877818e-01, -2.57987383e-01, -1.13886339e-01,
+       -6.97663406e-01, -2.99262141e-01, -1.65287990e-01, -4.24869234e-01,
+       -6.16496017e-01, -8.84330195e-01,  0.00000000e+00]), q99=array([1.02531573e-01, 3.76619837e-07, 1.53846693e-02, 5.63681107e-02,
+       1.22860417e-01, 2.50484991e-01, 1.55189151e-01, 1.27332322e-02,
+       3.69014105e-02, 2.14856919e-01, 8.39404412e-01, 2.03661734e-01,
+       2.02942027e-01, 1.38240851e-01, 6.54051143e-01, 3.66878386e-01,
+       1.80737032e-01, 3.03517997e-01, 5.83652037e-01, 6.41801402e-01,
+       9.99800000e+01, 2.27667007e-01, 2.13029897e-01, 1.37937403e-01,
+       7.88007178e-01, 3.88678465e-01, 1.94419951e-01, 3.58080227e-01,
+       7.40218581e-01, 6.75764420e-01, 9.99800000e+01]))}, repack_transforms=Group(inputs=[RepackTransform(structure={'observation/image': 'observation/image', 'observation/cam_high': 'observation/cam_high', 'observation/cam_left_wrist': 'observation/cam_left_wrist', 'observation/cam_right_wrist': 'observation/cam_right_wrist', 'observation/state': 'observation/state', 'actions': 'actions', 'prompt': 'prompt'})], outputs=()), data_transforms=Group(inputs=(XingchenInputs(model_type=<ModelType.PI05: 'pi05'>), DeltaActions(mask=(True, True, True, True, True, True, True, True, True, False, False, True, True, True, True, True, True, True, True, True, False, True, True, True, True, True, True, True, True, True, False))), outputs=(AbsoluteActions(mask=(True, True, True, True, True, True, True, True, True, False, False, True, True, True, True, True, True, True, True, True, False, True, True, True, True, True, True, True, True, True, False)), XingchenOutputs())), model_transforms=Group(inputs=[InjectDefaultPrompt(prompt='fold clothes'), ResizeImages(height=224, width=224), TokenizePrompt(tokenizer=<openpi.models.tokenizer.PaligemmaTokenizer object at 0x73381072ba10>, discrete_state_input=True), PadStatesAndActions(model_action_dim=32)], outputs=()), use_quantile_norm=True, action_sequence_keys=('actions',), prompt_from_task=False, ario_config=ArioConfig(s3_prefixes='oss://shengshu-base2-test/xiaojun/新积木/', s3_endpoint='https://oss-cn-wulanchabu-internal.aliyuncs.com', video_downsample_rate=6, min_frames=1, image_size=(320, 240), task='fold clothes', load_instructions=True, skip_video=False, cache_size=32, max_episodes=None, disk_cache_dir='/tmp/ario_disk_cache', disk_cache_max_gb=200.0, multi_view=True), rlds_data_dir=None, action_space=None, datasets=()) (291:data_loader.py:248)
+05:52:47.606 [I] data_config: DataConfig(repo_id='xingchen/new_blocks', asset_id='xingchen/new_blocks', norm_stats={'state': NormStats(mean=array([ 2.20847651e-02, -1.18522985e-06,  1.20495403e+00,  9.85297918e-01,
+        1.21378601e-02, -1.28115878e-01, -1.16447043e-02,  9.97563422e-01,
+        3.30995675e-03,  3.02200317e-02,  7.48334408e-01,  4.09842104e-01,
+        2.02170476e-01,  9.25543129e-01,  2.65509009e-01,  9.02321279e-01,
+        6.61183298e-02, -8.51911724e-01,  2.35766068e-01,  2.62049586e-01,
+        2.09507847e+01,  4.14393038e-01, -1.52961522e-01,  9.40256119e-01,
+       -2.32361659e-01,  9.05517757e-01, -1.78680327e-02, -8.27372134e-01,
+       -2.09802061e-01,  3.19369316e-01,  2.36732559e+01]), std=array([3.88681851e-02, 1.42761067e-07, 7.78957829e-03, 1.79389380e-02,
+       6.86017647e-02, 8.71694684e-02, 6.69223741e-02, 3.64579703e-03,
+       1.51119335e-02, 6.78372756e-02, 5.36498688e-02, 8.20233449e-02,
+       7.12918341e-02, 4.21133749e-02, 2.97947675e-01, 1.25658214e-01,
+       7.99169540e-02, 1.20723531e-01, 2.75310427e-01, 2.44174212e-01,
+       4.03854675e+01, 8.53527263e-02, 7.88544118e-02, 5.20723984e-02,
+       3.15798014e-01, 1.38367221e-01, 8.27809200e-02, 1.44427076e-01,
+       2.83274055e-01, 2.61416018e-01, 4.20147705e+01]), q01=array([-4.66113442e-02, -1.43756348e-06,  1.18525463e+00,  9.17606957e-01,
+       -1.18207240e-01, -3.73113066e-01, -1.77967872e-01,  9.82263224e-01,
+       -2.70079036e-02, -1.20732251e-01,  6.11518292e-01,  3.02456839e-01,
+        8.66095046e-03,  8.35414250e-01, -1.81826195e-01,  5.28264604e-01,
+       -1.16861237e-01, -9.99730510e-01, -1.87620057e-01, -2.08596493e-01,
+        0.00000000e+00,  3.04519836e-01, -2.62818241e-01,  8.35710764e-01,
+       -8.98140239e-01,  4.37475792e-01, -2.37369937e-01, -9.99998629e-01,
+       -8.53196700e-01, -2.06621114e-01,  0.00000000e+00]), q99=array([ 1.47291163e-01, -7.25319700e-07,  1.22340253e+00,  9.99864632e-01,
+        1.84984191e-01,  1.90299895e-02,  1.15343787e-01,  9.99993543e-01,
+        5.61993590e-02,  2.19592865e-01,  8.46610579e-01,  6.69676126e-01,
+        2.98000444e-01,  1.01027742e+00,  8.31963817e-01,  9.99713969e-01,
+        2.69562216e-01, -5.30491931e-01,  8.02459871e-01,  6.76083419e-01,
+        9.99800000e+01,  6.68849502e-01,  5.26526766e-02,  1.02860024e+00,
+        2.18634181e-01,  9.99784047e-01,  1.73789295e-01, -4.15739473e-01,
+        1.96545822e-01,  7.90248334e-01,  9.99800000e+01])), 'actions': NormStats(mean=array([-6.49306085e-03, -2.38503350e-08, -1.56284333e-03,  1.92240486e-03,
+       -4.54068137e-03,  1.54021475e-02,  4.47505992e-03,  1.87959085e-04,
+       -4.63750737e-04,  2.61930525e-02,  7.46363580e-01, -2.10558088e-03,
+        4.81350534e-03,  3.57841188e-03, -5.24529368e-02,  1.86805874e-02,
+       -3.55149852e-03, -2.80216988e-02, -4.51642536e-02, -8.10984224e-02,
+        1.91005039e+01, -6.66468823e-03, -1.16741844e-02,  3.75163625e-03,
+        5.96900620e-02,  1.91851445e-02,  6.76474581e-03, -3.23513076e-02,
+        5.36604933e-02, -8.65430310e-02,  2.18271427e+01]), std=array([3.56703997e-02, 1.31024706e-07, 6.59533776e-03, 1.77792646e-02,
+       5.20261750e-02, 9.25870091e-02, 5.06177694e-02, 3.63478693e-03,
+       1.27337081e-02, 6.43182546e-02, 4.88635115e-02, 6.35818467e-02,
+       6.52325079e-02, 4.54031564e-02, 2.47516662e-01, 1.03794225e-01,
+       6.87522143e-02, 1.25289276e-01, 2.19776168e-01, 2.91962266e-01,
+       3.90673180e+01, 7.04032853e-02, 8.83272141e-02, 4.89339121e-02,
+       2.53568262e-01, 1.04032911e-01, 6.47988319e-02, 1.48807555e-01,
+       2.28228733e-01, 3.26122224e-01, 4.09069901e+01]), q01=array([-1.12521454e-01, -4.13313968e-07, -2.15468840e-02, -5.45229257e-02,
+       -1.60066478e-01, -2.46577991e-01, -1.18624991e-01, -1.06231285e-02,
+       -4.33016631e-02, -1.17417088e-01,  6.14300872e-01, -1.95900865e-01,
+       -1.81883554e-01, -1.04301783e-01, -7.47231585e-01, -2.88805264e-01,
+       -1.96068779e-01, -3.82926766e-01, -6.78332465e-01, -7.55650204e-01,
+        0.00000000e+00, -2.03877818e-01, -2.57987383e-01, -1.13886339e-01,
+       -6.97663406e-01, -2.99262141e-01, -1.65287990e-01, -4.24869234e-01,
+       -6.16496017e-01, -8.84330195e-01,  0.00000000e+00]), q99=array([1.02531573e-01, 3.76619837e-07, 1.53846693e-02, 5.63681107e-02,
+       1.22860417e-01, 2.50484991e-01, 1.55189151e-01, 1.27332322e-02,
+       3.69014105e-02, 2.14856919e-01, 8.39404412e-01, 2.03661734e-01,
+       2.02942027e-01, 1.38240851e-01, 6.54051143e-01, 3.66878386e-01,
+       1.80737032e-01, 3.03517997e-01, 5.83652037e-01, 6.41801402e-01,
+       9.99800000e+01, 2.27667007e-01, 2.13029897e-01, 1.37937403e-01,
+       7.88007178e-01, 3.88678465e-01, 1.94419951e-01, 3.58080227e-01,
+       7.40218581e-01, 6.75764420e-01, 9.99800000e+01]))}, repack_transforms=Group(inputs=[RepackTransform(structure={'observation/image': 'observation/image', 'observation/cam_high': 'observation/cam_high', 'observation/cam_left_wrist': 'observation/cam_left_wrist', 'observation/cam_right_wrist': 'observation/cam_right_wrist', 'observation/state': 'observation/state', 'actions': 'actions', 'prompt': 'prompt'})], outputs=()), data_transforms=Group(inputs=(XingchenInputs(model_type=<ModelType.PI05: 'pi05'>), DeltaActions(mask=(True, True, True, True, True, True, True, True, True, False, False, True, True, True, True, True, True, True, True, True, False, True, True, True, True, True, True, True, True, True, False))), outputs=(AbsoluteActions(mask=(True, True, True, True, True, True, True, True, True, False, False, True, True, True, True, True, True, True, True, True, False, True, True, True, True, True, True, True, True, True, False)), XingchenOutputs())), model_transforms=Group(inputs=[InjectDefaultPrompt(prompt='fold clothes'), ResizeImages(height=224, width=224), TokenizePrompt(tokenizer=<openpi.models.tokenizer.PaligemmaTokenizer object at 0x77fa3b41bbd0>, discrete_state_input=True), PadStatesAndActions(model_action_dim=32)], outputs=()), use_quantile_norm=True, action_sequence_keys=('actions',), prompt_from_task=False, ario_config=ArioConfig(s3_prefixes='oss://shengshu-base2-test/xiaojun/新积木/', s3_endpoint='https://oss-cn-wulanchabu-internal.aliyuncs.com', video_downsample_rate=6, min_frames=1, image_size=(320, 240), task='fold clothes', load_instructions=True, skip_video=False, cache_size=32, max_episodes=None, disk_cache_dir='/tmp/ario_disk_cache', disk_cache_max_gb=200.0, multi_view=True), rlds_data_dir=None, action_space=None, datasets=()) (290:data_loader.py:248)
+05:52:47.607 [I] Loaded norm stats from /home/fanyiming/openpi_Ario/assets/pi05_xingchen_ario/xingchen/new_blocks (289:config.py:200)
+05:52:47.610 [I] data_config: DataConfig(repo_id='xingchen/new_blocks', asset_id='xingchen/new_blocks', norm_stats={'state': NormStats(mean=array([ 2.20847651e-02, -1.18522985e-06,  1.20495403e+00,  9.85297918e-01,
+        1.21378601e-02, -1.28115878e-01, -1.16447043e-02,  9.97563422e-01,
+        3.30995675e-03,  3.02200317e-02,  7.48334408e-01,  4.09842104e-01,
+        2.02170476e-01,  9.25543129e-01,  2.65509009e-01,  9.02321279e-01,
+        6.61183298e-02, -8.51911724e-01,  2.35766068e-01,  2.62049586e-01,
+        2.09507847e+01,  4.14393038e-01, -1.52961522e-01,  9.40256119e-01,
+       -2.32361659e-01,  9.05517757e-01, -1.78680327e-02, -8.27372134e-01,
+       -2.09802061e-01,  3.19369316e-01,  2.36732559e+01]), std=array([3.88681851e-02, 1.42761067e-07, 7.78957829e-03, 1.79389380e-02,
+       6.86017647e-02, 8.71694684e-02, 6.69223741e-02, 3.64579703e-03,
+       1.51119335e-02, 6.78372756e-02, 5.36498688e-02, 8.20233449e-02,
+       7.12918341e-02, 4.21133749e-02, 2.97947675e-01, 1.25658214e-01,
+       7.99169540e-02, 1.20723531e-01, 2.75310427e-01, 2.44174212e-01,
+       4.03854675e+01, 8.53527263e-02, 7.88544118e-02, 5.20723984e-02,
+       3.15798014e-01, 1.38367221e-01, 8.27809200e-02, 1.44427076e-01,
+       2.83274055e-01, 2.61416018e-01, 4.20147705e+01]), q01=array([-4.66113442e-02, -1.43756348e-06,  1.18525463e+00,  9.17606957e-01,
+       -1.18207240e-01, -3.73113066e-01, -1.77967872e-01,  9.82263224e-01,
+       -2.70079036e-02, -1.20732251e-01,  6.11518292e-01,  3.02456839e-01,
+        8.66095046e-03,  8.35414250e-01, -1.81826195e-01,  5.28264604e-01,
+       -1.16861237e-01, -9.99730510e-01, -1.87620057e-01, -2.08596493e-01,
+        0.00000000e+00,  3.04519836e-01, -2.62818241e-01,  8.35710764e-01,
+       -8.98140239e-01,  4.37475792e-01, -2.37369937e-01, -9.99998629e-01,
+       -8.53196700e-01, -2.06621114e-01,  0.00000000e+00]), q99=array([ 1.47291163e-01, -7.25319700e-07,  1.22340253e+00,  9.99864632e-01,
+        1.84984191e-01,  1.90299895e-02,  1.15343787e-01,  9.99993543e-01,
+        5.61993590e-02,  2.19592865e-01,  8.46610579e-01,  6.69676126e-01,
+        2.98000444e-01,  1.01027742e+00,  8.31963817e-01,  9.99713969e-01,
+        2.69562216e-01, -5.30491931e-01,  8.02459871e-01,  6.76083419e-01,
+        9.99800000e+01,  6.68849502e-01,  5.26526766e-02,  1.02860024e+00,
+        2.18634181e-01,  9.99784047e-01,  1.73789295e-01, -4.15739473e-01,
+        1.96545822e-01,  7.90248334e-01,  9.99800000e+01])), 'actions': NormStats(mean=array([-6.49306085e-03, -2.38503350e-08, -1.56284333e-03,  1.92240486e-03,
+       -4.54068137e-03,  1.54021475e-02,  4.47505992e-03,  1.87959085e-04,
+       -4.63750737e-04,  2.61930525e-02,  7.46363580e-01, -2.10558088e-03,
+        4.81350534e-03,  3.57841188e-03, -5.24529368e-02,  1.86805874e-02,
+       -3.55149852e-03, -2.80216988e-02, -4.51642536e-02, -8.10984224e-02,
+        1.91005039e+01, -6.66468823e-03, -1.16741844e-02,  3.75163625e-03,
+        5.96900620e-02,  1.91851445e-02,  6.76474581e-03, -3.23513076e-02,
+        5.36604933e-02, -8.65430310e-02,  2.18271427e+01]), std=array([3.56703997e-02, 1.31024706e-07, 6.59533776e-03, 1.77792646e-02,
+       5.20261750e-02, 9.25870091e-02, 5.06177694e-02, 3.63478693e-03,
+       1.27337081e-02, 6.43182546e-02, 4.88635115e-02, 6.35818467e-02,
+       6.52325079e-02, 4.54031564e-02, 2.47516662e-01, 1.03794225e-01,
+       6.87522143e-02, 1.25289276e-01, 2.19776168e-01, 2.91962266e-01,
+       3.90673180e+01, 7.04032853e-02, 8.83272141e-02, 4.89339121e-02,
+       2.53568262e-01, 1.04032911e-01, 6.47988319e-02, 1.48807555e-01,
+       2.28228733e-01, 3.26122224e-01, 4.09069901e+01]), q01=array([-1.12521454e-01, -4.13313968e-07, -2.15468840e-02, -5.45229257e-02,
+       -1.60066478e-01, -2.46577991e-01, -1.18624991e-01, -1.06231285e-02,
+       -4.33016631e-02, -1.17417088e-01,  6.14300872e-01, -1.95900865e-01,
+       -1.81883554e-01, -1.04301783e-01, -7.47231585e-01, -2.88805264e-01,
+       -1.96068779e-01, -3.82926766e-01, -6.78332465e-01, -7.55650204e-01,
+        0.00000000e+00, -2.03877818e-01, -2.57987383e-01, -1.13886339e-01,
+       -6.97663406e-01, -2.99262141e-01, -1.65287990e-01, -4.24869234e-01,
+       -6.16496017e-01, -8.84330195e-01,  0.00000000e+00]), q99=array([1.02531573e-01, 3.76619837e-07, 1.53846693e-02, 5.63681107e-02,
+       1.22860417e-01, 2.50484991e-01, 1.55189151e-01, 1.27332322e-02,
+       3.69014105e-02, 2.14856919e-01, 8.39404412e-01, 2.03661734e-01,
+       2.02942027e-01, 1.38240851e-01, 6.54051143e-01, 3.66878386e-01,
+       1.80737032e-01, 3.03517997e-01, 5.83652037e-01, 6.41801402e-01,
+       9.99800000e+01, 2.27667007e-01, 2.13029897e-01, 1.37937403e-01,
+       7.88007178e-01, 3.88678465e-01, 1.94419951e-01, 3.58080227e-01,
+       7.40218581e-01, 6.75764420e-01, 9.99800000e+01]))}, repack_transforms=Group(inputs=[RepackTransform(structure={'observation/image': 'observation/image', 'observation/cam_high': 'observation/cam_high', 'observation/cam_left_wrist': 'observation/cam_left_wrist', 'observation/cam_right_wrist': 'observation/cam_right_wrist', 'observation/state': 'observation/state', 'actions': 'actions', 'prompt': 'prompt'})], outputs=()), data_transforms=Group(inputs=(XingchenInputs(model_type=<ModelType.PI05: 'pi05'>), DeltaActions(mask=(True, True, True, True, True, True, True, True, True, False, False, True, True, True, True, True, True, True, True, True, False, True, True, True, True, True, True, True, True, True, False))), outputs=(AbsoluteActions(mask=(True, True, True, True, True, True, True, True, True, False, False, True, True, True, True, True, True, True, True, True, False, True, True, True, True, True, True, True, True, True, False)), XingchenOutputs())), model_transforms=Group(inputs=[InjectDefaultPrompt(prompt='fold clothes'), ResizeImages(height=224, width=224), TokenizePrompt(tokenizer=<openpi.models.tokenizer.PaligemmaTokenizer object at 0x7b9cf6141590>, discrete_state_input=True), PadStatesAndActions(model_action_dim=32)], outputs=()), use_quantile_norm=True, action_sequence_keys=('actions',), prompt_from_task=False, ario_config=ArioConfig(s3_prefixes='oss://shengshu-base2-test/xiaojun/新积木/', s3_endpoint='https://oss-cn-wulanchabu-internal.aliyuncs.com', video_downsample_rate=6, min_frames=1, image_size=(320, 240), task='fold clothes', load_instructions=True, skip_video=False, cache_size=32, max_episodes=None, disk_cache_dir='/tmp/ario_disk_cache', disk_cache_max_gb=200.0, multi_view=True), rlds_data_dir=None, action_space=None, datasets=()) (289:data_loader.py:248)
+05:52:47.666 [I] Using batch size per GPU: 8 (total batch size across 8 GPUs: 64)                 (288:train_pytorch.py:446)
+05:52:47.738 [I] Loaded norm stats from /home/fanyiming/openpi_Ario/assets/pi05_xingchen_ario/xingchen/new_blocks (288:config.py:200)
+05:52:47.741 [I] data_config: DataConfig(repo_id='xingchen/new_blocks', asset_id='xingchen/new_blocks', norm_stats={'state': NormStats(mean=array([ 2.20847651e-02, -1.18522985e-06,  1.20495403e+00,  9.85297918e-01,
+        1.21378601e-02, -1.28115878e-01, -1.16447043e-02,  9.97563422e-01,
+        3.30995675e-03,  3.02200317e-02,  7.48334408e-01,  4.09842104e-01,
+        2.02170476e-01,  9.25543129e-01,  2.65509009e-01,  9.02321279e-01,
+        6.61183298e-02, -8.51911724e-01,  2.35766068e-01,  2.62049586e-01,
+        2.09507847e+01,  4.14393038e-01, -1.52961522e-01,  9.40256119e-01,
+       -2.32361659e-01,  9.05517757e-01, -1.78680327e-02, -8.27372134e-01,
+       -2.09802061e-01,  3.19369316e-01,  2.36732559e+01]), std=array([3.88681851e-02, 1.42761067e-07, 7.78957829e-03, 1.79389380e-02,
+       6.86017647e-02, 8.71694684e-02, 6.69223741e-02, 3.64579703e-03,
+       1.51119335e-02, 6.78372756e-02, 5.36498688e-02, 8.20233449e-02,
+       7.12918341e-02, 4.21133749e-02, 2.97947675e-01, 1.25658214e-01,
+       7.99169540e-02, 1.20723531e-01, 2.75310427e-01, 2.44174212e-01,
+       4.03854675e+01, 8.53527263e-02, 7.88544118e-02, 5.20723984e-02,
+       3.15798014e-01, 1.38367221e-01, 8.27809200e-02, 1.44427076e-01,
+       2.83274055e-01, 2.61416018e-01, 4.20147705e+01]), q01=array([-4.66113442e-02, -1.43756348e-06,  1.18525463e+00,  9.17606957e-01,
+       -1.18207240e-01, -3.73113066e-01, -1.77967872e-01,  9.82263224e-01,
+       -2.70079036e-02, -1.20732251e-01,  6.11518292e-01,  3.02456839e-01,
+        8.66095046e-03,  8.35414250e-01, -1.81826195e-01,  5.28264604e-01,
+       -1.16861237e-01, -9.99730510e-01, -1.87620057e-01, -2.08596493e-01,
+        0.00000000e+00,  3.04519836e-01, -2.62818241e-01,  8.35710764e-01,
+       -8.98140239e-01,  4.37475792e-01, -2.37369937e-01, -9.99998629e-01,
+       -8.53196700e-01, -2.06621114e-01,  0.00000000e+00]), q99=array([ 1.47291163e-01, -7.25319700e-07,  1.22340253e+00,  9.99864632e-01,
+        1.84984191e-01,  1.90299895e-02,  1.15343787e-01,  9.99993543e-01,
+        5.61993590e-02,  2.19592865e-01,  8.46610579e-01,  6.69676126e-01,
+        2.98000444e-01,  1.01027742e+00,  8.31963817e-01,  9.99713969e-01,
+        2.69562216e-01, -5.30491931e-01,  8.02459871e-01,  6.76083419e-01,
+        9.99800000e+01,  6.68849502e-01,  5.26526766e-02,  1.02860024e+00,
+        2.18634181e-01,  9.99784047e-01,  1.73789295e-01, -4.15739473e-01,
+        1.96545822e-01,  7.90248334e-01,  9.99800000e+01])), 'actions': NormStats(mean=array([-6.49306085e-03, -2.38503350e-08, -1.56284333e-03,  1.92240486e-03,
+       -4.54068137e-03,  1.54021475e-02,  4.47505992e-03,  1.87959085e-04,
+       -4.63750737e-04,  2.61930525e-02,  7.46363580e-01, -2.10558088e-03,
+        4.81350534e-03,  3.57841188e-03, -5.24529368e-02,  1.86805874e-02,
+       -3.55149852e-03, -2.80216988e-02, -4.51642536e-02, -8.10984224e-02,
+        1.91005039e+01, -6.66468823e-03, -1.16741844e-02,  3.75163625e-03,
+        5.96900620e-02,  1.91851445e-02,  6.76474581e-03, -3.23513076e-02,
+        5.36604933e-02, -8.65430310e-02,  2.18271427e+01]), std=array([3.56703997e-02, 1.31024706e-07, 6.59533776e-03, 1.77792646e-02,
+       5.20261750e-02, 9.25870091e-02, 5.06177694e-02, 3.63478693e-03,
+       1.27337081e-02, 6.43182546e-02, 4.88635115e-02, 6.35818467e-02,
+       6.52325079e-02, 4.54031564e-02, 2.47516662e-01, 1.03794225e-01,
+       6.87522143e-02, 1.25289276e-01, 2.19776168e-01, 2.91962266e-01,
+       3.90673180e+01, 7.04032853e-02, 8.83272141e-02, 4.89339121e-02,
+       2.53568262e-01, 1.04032911e-01, 6.47988319e-02, 1.48807555e-01,
+       2.28228733e-01, 3.26122224e-01, 4.09069901e+01]), q01=array([-1.12521454e-01, -4.13313968e-07, -2.15468840e-02, -5.45229257e-02,
+       -1.60066478e-01, -2.46577991e-01, -1.18624991e-01, -1.06231285e-02,
+       -4.33016631e-02, -1.17417088e-01,  6.14300872e-01, -1.95900865e-01,
+       -1.81883554e-01, -1.04301783e-01, -7.47231585e-01, -2.88805264e-01,
+       -1.96068779e-01, -3.82926766e-01, -6.78332465e-01, -7.55650204e-01,
+        0.00000000e+00, -2.03877818e-01, -2.57987383e-01, -1.13886339e-01,
+       -6.97663406e-01, -2.99262141e-01, -1.65287990e-01, -4.24869234e-01,
+       -6.16496017e-01, -8.84330195e-01,  0.00000000e+00]), q99=array([1.02531573e-01, 3.76619837e-07, 1.53846693e-02, 5.63681107e-02,
+       1.22860417e-01, 2.50484991e-01, 1.55189151e-01, 1.27332322e-02,
+       3.69014105e-02, 2.14856919e-01, 8.39404412e-01, 2.03661734e-01,
+       2.02942027e-01, 1.38240851e-01, 6.54051143e-01, 3.66878386e-01,
+       1.80737032e-01, 3.03517997e-01, 5.83652037e-01, 6.41801402e-01,
+       9.99800000e+01, 2.27667007e-01, 2.13029897e-01, 1.37937403e-01,
+       7.88007178e-01, 3.88678465e-01, 1.94419951e-01, 3.58080227e-01,
+       7.40218581e-01, 6.75764420e-01, 9.99800000e+01]))}, repack_transforms=Group(inputs=[RepackTransform(structure={'observation/image': 'observation/image', 'observation/cam_high': 'observation/cam_high', 'observation/cam_left_wrist': 'observation/cam_left_wrist', 'observation/cam_right_wrist': 'observation/cam_right_wrist', 'observation/state': 'observation/state', 'actions': 'actions', 'prompt': 'prompt'})], outputs=()), data_transforms=Group(inputs=(XingchenInputs(model_type=<ModelType.PI05: 'pi05'>), DeltaActions(mask=(True, True, True, True, True, True, True, True, True, False, False, True, True, True, True, True, True, True, True, True, False, True, True, True, True, True, True, True, True, True, False))), outputs=(AbsoluteActions(mask=(True, True, True, True, True, True, True, True, True, False, False, True, True, True, True, True, True, True, True, True, False, True, True, True, True, True, True, True, True, True, False)), XingchenOutputs())), model_transforms=Group(inputs=[InjectDefaultPrompt(prompt='fold clothes'), ResizeImages(height=224, width=224), TokenizePrompt(tokenizer=<openpi.models.tokenizer.PaligemmaTokenizer object at 0x76587046f0d0>, discrete_state_input=True), PadStatesAndActions(model_action_dim=32)], outputs=()), use_quantile_norm=True, action_sequence_keys=('actions',), prompt_from_task=False, ario_config=ArioConfig(s3_prefixes='oss://shengshu-base2-test/xiaojun/新积木/', s3_endpoint='https://oss-cn-wulanchabu-internal.aliyuncs.com', video_downsample_rate=6, min_frames=1, image_size=(320, 240), task='fold clothes', load_instructions=True, skip_video=False, cache_size=32, max_episodes=None, disk_cache_dir='/tmp/ario_disk_cache', disk_cache_max_gb=200.0, multi_view=True), rlds_data_dir=None, action_space=None, datasets=()) (288:data_loader.py:248)
+ArioStreamingDataset: found 795 episodes on S3
+ArioStreamingDataset: found 795 episodes on S3
+ArioStreamingDataset: found 795 episodes on S3
+ArioStreamingDataset: found 795 episodes on S3
+ArioStreamingDataset: found 795 episodes on S3
+ArioStreamingDataset: found 795 episodes on S3
+ArioStreamingDataset: found 795 episodes on S3
+ArioStreamingDataset: found 795 episodes on S3
+
+ArioStreamingDataset: 795 valid episodes, 72526 total frames
+05:54:14.614 [I] local_batch_size: 8                                                              (290:data_loader.py:329)
+INFO:2026-07-23 05:54:14,701:jax._src.xla_bridge:925: Unable to initialize backend 'cuda': 
+05:54:14.701 [I] Unable to initialize backend 'cuda':                                             (290:xla_bridge.py:925)
+INFO:2026-07-23 05:54:14,701:jax._src.xla_bridge:925: Unable to initialize backend 'rocm': module 'jaxlib.xla_extension' has no attribute 'GpuAllocatorConfig'
+05:54:14.701 [I] Unable to initialize backend 'rocm': module 'jaxlib.xla_extension' has no attribute 'GpuAllocatorConfig' (290:xla_bridge.py:925)
+INFO:2026-07-23 05:54:14,706:jax._src.xla_bridge:925: Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+05:54:14.706 [I] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory (290:xla_bridge.py:925)
+WARNING:2026-07-23 05:54:14,707:jax._src.xla_bridge:967: An NVIDIA GPU may be present on this machine, but a CUDA-enabled jaxlib is not installed. Falling back to cpu.
+05:54:14.707 [W] An NVIDIA GPU may be present on this machine, but a CUDA-enabled jaxlib is not installed. Falling back to cpu. (290:xla_bridge.py:967)
+
+ArioStreamingDataset: 795 valid episodes, 72526 total frames
+05:54:15.085 [I] local_batch_size: 8                                                              (289:data_loader.py:329)
+INFO:2026-07-23 05:54:15,145:jax._src.xla_bridge:925: Unable to initialize backend 'cuda': 
+05:54:15.145 [I] Unable to initialize backend 'cuda':                                             (289:xla_bridge.py:925)
+INFO:2026-07-23 05:54:15,146:jax._src.xla_bridge:925: Unable to initialize backend 'rocm': module 'jaxlib.xla_extension' has no attribute 'GpuAllocatorConfig'
+05:54:15.146 [I] Unable to initialize backend 'rocm': module 'jaxlib.xla_extension' has no attribute 'GpuAllocatorConfig' (289:xla_bridge.py:925)
+INFO:2026-07-23 05:54:15,148:jax._src.xla_bridge:925: Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+05:54:15.148 [I] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory (289:xla_bridge.py:925)
+WARNING:2026-07-23 05:54:15,149:jax._src.xla_bridge:967: An NVIDIA GPU may be present on this machine, but a CUDA-enabled jaxlib is not installed. Falling back to cpu.
+05:54:15.149 [W] An NVIDIA GPU may be present on this machine, but a CUDA-enabled jaxlib is not installed. Falling back to cpu. (289:xla_bridge.py:967)
+
+ArioStreamingDataset: 795 valid episodes, 72526 total frames
+05:54:19.369 [I] local_batch_size: 8                                                              (292:data_loader.py:329)
+INFO:2026-07-23 05:54:19,430:jax._src.xla_bridge:925: Unable to initialize backend 'cuda': 
+05:54:19.430 [I] Unable to initialize backend 'cuda':                                             (292:xla_bridge.py:925)
+INFO:2026-07-23 05:54:19,431:jax._src.xla_bridge:925: Unable to initialize backend 'rocm': module 'jaxlib.xla_extension' has no attribute 'GpuAllocatorConfig'
+05:54:19.431 [I] Unable to initialize backend 'rocm': module 'jaxlib.xla_extension' has no attribute 'GpuAllocatorConfig' (292:xla_bridge.py:925)
+INFO:2026-07-23 05:54:19,433:jax._src.xla_bridge:925: Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+05:54:19.433 [I] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory (292:xla_bridge.py:925)
+WARNING:2026-07-23 05:54:19,433:jax._src.xla_bridge:967: An NVIDIA GPU may be present on this machine, but a CUDA-enabled jaxlib is not installed. Falling back to cpu.
+05:54:19.433 [W] An NVIDIA GPU may be present on this machine, but a CUDA-enabled jaxlib is not installed. Falling back to cpu. (292:xla_bridge.py:967)
+
+ArioStreamingDataset: 795 valid episodes, 72526 total frames
+05:54:21.270 [I] local_batch_size: 8                                                              (293:data_loader.py:329)
+INFO:2026-07-23 05:54:21,327:jax._src.xla_bridge:925: Unable to initialize backend 'cuda': 
+05:54:21.327 [I] Unable to initialize backend 'cuda':                                             (293:xla_bridge.py:925)
+INFO:2026-07-23 05:54:21,327:jax._src.xla_bridge:925: Unable to initialize backend 'rocm': module 'jaxlib.xla_extension' has no attribute 'GpuAllocatorConfig'
+05:54:21.327 [I] Unable to initialize backend 'rocm': module 'jaxlib.xla_extension' has no attribute 'GpuAllocatorConfig' (293:xla_bridge.py:925)
+INFO:2026-07-23 05:54:21,329:jax._src.xla_bridge:925: Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+05:54:21.329 [I] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory (293:xla_bridge.py:925)
+WARNING:2026-07-23 05:54:21,329:jax._src.xla_bridge:967: An NVIDIA GPU may be present on this machine, but a CUDA-enabled jaxlib is not installed. Falling back to cpu.
+05:54:21.329 [W] An NVIDIA GPU may be present on this machine, but a CUDA-enabled jaxlib is not installed. Falling back to cpu. (293:xla_bridge.py:967)
+
+ArioStreamingDataset: 795 valid episodes, 72526 total frames
+05:54:21.420 [I] local_batch_size: 8                                                              (295:data_loader.py:329)
+INFO:2026-07-23 05:54:21,460:jax._src.xla_bridge:925: Unable to initialize backend 'cuda': 
+05:54:21.460 [I] Unable to initialize backend 'cuda':                                             (295:xla_bridge.py:925)
+INFO:2026-07-23 05:54:21,461:jax._src.xla_bridge:925: Unable to initialize backend 'rocm': module 'jaxlib.xla_extension' has no attribute 'GpuAllocatorConfig'
+05:54:21.461 [I] Unable to initialize backend 'rocm': module 'jaxlib.xla_extension' has no attribute 'GpuAllocatorConfig' (295:xla_bridge.py:925)
+INFO:2026-07-23 05:54:21,462:jax._src.xla_bridge:925: Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+05:54:21.462 [I] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory (295:xla_bridge.py:925)
+WARNING:2026-07-23 05:54:21,462:jax._src.xla_bridge:967: An NVIDIA GPU may be present on this machine, but a CUDA-enabled jaxlib is not installed. Falling back to cpu.
+05:54:21.462 [W] An NVIDIA GPU may be present on this machine, but a CUDA-enabled jaxlib is not installed. Falling back to cpu. (295:xla_bridge.py:967)
+
+ArioStreamingDataset: 795 valid episodes, 72526 total frames
+05:54:21.474 [I] local_batch_size: 8                                                              (291:data_loader.py:329)
+INFO:2026-07-23 05:54:21,536:jax._src.xla_bridge:925: Unable to initialize backend 'cuda': 
+05:54:21.536 [I] Unable to initialize backend 'cuda':                                             (291:xla_bridge.py:925)
+INFO:2026-07-23 05:54:21,536:jax._src.xla_bridge:925: Unable to initialize backend 'rocm': module 'jaxlib.xla_extension' has no attribute 'GpuAllocatorConfig'
+05:54:21.536 [I] Unable to initialize backend 'rocm': module 'jaxlib.xla_extension' has no attribute 'GpuAllocatorConfig' (291:xla_bridge.py:925)
+INFO:2026-07-23 05:54:21,539:jax._src.xla_bridge:925: Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+05:54:21.539 [I] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory (291:xla_bridge.py:925)
+WARNING:2026-07-23 05:54:21,540:jax._src.xla_bridge:967: An NVIDIA GPU may be present on this machine, but a CUDA-enabled jaxlib is not installed. Falling back to cpu.
+05:54:21.540 [W] An NVIDIA GPU may be present on this machine, but a CUDA-enabled jaxlib is not installed. Falling back to cpu. (291:xla_bridge.py:967)
+
+ArioStreamingDataset: 795 valid episodes, 72526 total frames
+05:54:21.626 [I] local_batch_size: 8                                                              (288:data_loader.py:329)
+INFO:2026-07-23 05:54:21,668:jax._src.xla_bridge:925: Unable to initialize backend 'cuda': 
+05:54:21.668 [I] Unable to initialize backend 'cuda':                                             (288:xla_bridge.py:925)
+INFO:2026-07-23 05:54:21,668:jax._src.xla_bridge:925: Unable to initialize backend 'rocm': module 'jaxlib.xla_extension' has no attribute 'GpuAllocatorConfig'
+05:54:21.668 [I] Unable to initialize backend 'rocm': module 'jaxlib.xla_extension' has no attribute 'GpuAllocatorConfig' (288:xla_bridge.py:925)
+INFO:2026-07-23 05:54:21,670:jax._src.xla_bridge:925: Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+05:54:21.670 [I] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory (288:xla_bridge.py:925)
+WARNING:2026-07-23 05:54:21,671:jax._src.xla_bridge:967: An NVIDIA GPU may be present on this machine, but a CUDA-enabled jaxlib is not installed. Falling back to cpu.
+05:54:21.671 [W] An NVIDIA GPU may be present on this machine, but a CUDA-enabled jaxlib is not installed. Falling back to cpu. (288:xla_bridge.py:967)
+05:54:21.744 [I] Loaded norm stats from /home/fanyiming/openpi_Ario/assets/pi05_xingchen_ario/xingchen/new_blocks (288:config.py:200)
+05:54:21.746 [I] data_config: DataConfig(repo_id='xingchen/new_blocks', asset_id='xingchen/new_blocks', norm_stats={'state': NormStats(mean=array([ 2.20847651e-02, -1.18522985e-06,  1.20495403e+00,  9.85297918e-01,
+        1.21378601e-02, -1.28115878e-01, -1.16447043e-02,  9.97563422e-01,
+        3.30995675e-03,  3.02200317e-02,  7.48334408e-01,  4.09842104e-01,
+        2.02170476e-01,  9.25543129e-01,  2.65509009e-01,  9.02321279e-01,
+        6.61183298e-02, -8.51911724e-01,  2.35766068e-01,  2.62049586e-01,
+        2.09507847e+01,  4.14393038e-01, -1.52961522e-01,  9.40256119e-01,
+       -2.32361659e-01,  9.05517757e-01, -1.78680327e-02, -8.27372134e-01,
+       -2.09802061e-01,  3.19369316e-01,  2.36732559e+01]), std=array([3.88681851e-02, 1.42761067e-07, 7.78957829e-03, 1.79389380e-02,
+       6.86017647e-02, 8.71694684e-02, 6.69223741e-02, 3.64579703e-03,
+       1.51119335e-02, 6.78372756e-02, 5.36498688e-02, 8.20233449e-02,
+       7.12918341e-02, 4.21133749e-02, 2.97947675e-01, 1.25658214e-01,
+       7.99169540e-02, 1.20723531e-01, 2.75310427e-01, 2.44174212e-01,
+       4.03854675e+01, 8.53527263e-02, 7.88544118e-02, 5.20723984e-02,
+       3.15798014e-01, 1.38367221e-01, 8.27809200e-02, 1.44427076e-01,
+       2.83274055e-01, 2.61416018e-01, 4.20147705e+01]), q01=array([-4.66113442e-02, -1.43756348e-06,  1.18525463e+00,  9.17606957e-01,
+       -1.18207240e-01, -3.73113066e-01, -1.77967872e-01,  9.82263224e-01,
+       -2.70079036e-02, -1.20732251e-01,  6.11518292e-01,  3.02456839e-01,
+        8.66095046e-03,  8.35414250e-01, -1.81826195e-01,  5.28264604e-01,
+       -1.16861237e-01, -9.99730510e-01, -1.87620057e-01, -2.08596493e-01,
+        0.00000000e+00,  3.04519836e-01, -2.62818241e-01,  8.35710764e-01,
+       -8.98140239e-01,  4.37475792e-01, -2.37369937e-01, -9.99998629e-01,
+       -8.53196700e-01, -2.06621114e-01,  0.00000000e+00]), q99=array([ 1.47291163e-01, -7.25319700e-07,  1.22340253e+00,  9.99864632e-01,
+        1.84984191e-01,  1.90299895e-02,  1.15343787e-01,  9.99993543e-01,
+        5.61993590e-02,  2.19592865e-01,  8.46610579e-01,  6.69676126e-01,
+        2.98000444e-01,  1.01027742e+00,  8.31963817e-01,  9.99713969e-01,
+        2.69562216e-01, -5.30491931e-01,  8.02459871e-01,  6.76083419e-01,
+        9.99800000e+01,  6.68849502e-01,  5.26526766e-02,  1.02860024e+00,
+        2.18634181e-01,  9.99784047e-01,  1.73789295e-01, -4.15739473e-01,
+        1.96545822e-01,  7.90248334e-01,  9.99800000e+01])), 'actions': NormStats(mean=array([-6.49306085e-03, -2.38503350e-08, -1.56284333e-03,  1.92240486e-03,
+       -4.54068137e-03,  1.54021475e-02,  4.47505992e-03,  1.87959085e-04,
+       -4.63750737e-04,  2.61930525e-02,  7.46363580e-01, -2.10558088e-03,
+        4.81350534e-03,  3.57841188e-03, -5.24529368e-02,  1.86805874e-02,
+       -3.55149852e-03, -2.80216988e-02, -4.51642536e-02, -8.10984224e-02,
+        1.91005039e+01, -6.66468823e-03, -1.16741844e-02,  3.75163625e-03,
+        5.96900620e-02,  1.91851445e-02,  6.76474581e-03, -3.23513076e-02,
+        5.36604933e-02, -8.65430310e-02,  2.18271427e+01]), std=array([3.56703997e-02, 1.31024706e-07, 6.59533776e-03, 1.77792646e-02,
+       5.20261750e-02, 9.25870091e-02, 5.06177694e-02, 3.63478693e-03,
+       1.27337081e-02, 6.43182546e-02, 4.88635115e-02, 6.35818467e-02,
+       6.52325079e-02, 4.54031564e-02, 2.47516662e-01, 1.03794225e-01,
+       6.87522143e-02, 1.25289276e-01, 2.19776168e-01, 2.91962266e-01,
+       3.90673180e+01, 7.04032853e-02, 8.83272141e-02, 4.89339121e-02,
+       2.53568262e-01, 1.04032911e-01, 6.47988319e-02, 1.48807555e-01,
+       2.28228733e-01, 3.26122224e-01, 4.09069901e+01]), q01=array([-1.12521454e-01, -4.13313968e-07, -2.15468840e-02, -5.45229257e-02,
+       -1.60066478e-01, -2.46577991e-01, -1.18624991e-01, -1.06231285e-02,
+       -4.33016631e-02, -1.17417088e-01,  6.14300872e-01, -1.95900865e-01,
+       -1.81883554e-01, -1.04301783e-01, -7.47231585e-01, -2.88805264e-01,
+       -1.96068779e-01, -3.82926766e-01, -6.78332465e-01, -7.55650204e-01,
+        0.00000000e+00, -2.03877818e-01, -2.57987383e-01, -1.13886339e-01,
+       -6.97663406e-01, -2.99262141e-01, -1.65287990e-01, -4.24869234e-01,
+       -6.16496017e-01, -8.84330195e-01,  0.00000000e+00]), q99=array([1.02531573e-01, 3.76619837e-07, 1.53846693e-02, 5.63681107e-02,
+       1.22860417e-01, 2.50484991e-01, 1.55189151e-01, 1.27332322e-02,
+       3.69014105e-02, 2.14856919e-01, 8.39404412e-01, 2.03661734e-01,
+       2.02942027e-01, 1.38240851e-01, 6.54051143e-01, 3.66878386e-01,
+       1.80737032e-01, 3.03517997e-01, 5.83652037e-01, 6.41801402e-01,
+       9.99800000e+01, 2.27667007e-01, 2.13029897e-01, 1.37937403e-01,
+       7.88007178e-01, 3.88678465e-01, 1.94419951e-01, 3.58080227e-01,
+       7.40218581e-01, 6.75764420e-01, 9.99800000e+01]))}, repack_transforms=Group(inputs=[RepackTransform(structure={'observation/image': 'observation/image', 'observation/cam_high': 'observation/cam_high', 'observation/cam_left_wrist': 'observation/cam_left_wrist', 'observation/cam_right_wrist': 'observation/cam_right_wrist', 'observation/state': 'observation/state', 'actions': 'actions', 'prompt': 'prompt'})], outputs=()), data_transforms=Group(inputs=(XingchenInputs(model_type=<ModelType.PI05: 'pi05'>), DeltaActions(mask=(True, True, True, True, True, True, True, True, True, False, False, True, True, True, True, True, True, True, True, True, False, True, True, True, True, True, True, True, True, True, False))), outputs=(AbsoluteActions(mask=(True, True, True, True, True, True, True, True, True, False, False, True, True, True, True, True, True, True, True, True, False, True, True, True, True, True, True, True, True, True, False)), XingchenOutputs())), model_transforms=Group(inputs=[InjectDefaultPrompt(prompt='fold clothes'), ResizeImages(height=224, width=224), TokenizePrompt(tokenizer=<openpi.models.tokenizer.PaligemmaTokenizer object at 0x765a8ed76fd0>, discrete_state_input=True), PadStatesAndActions(model_action_dim=32)], outputs=()), use_quantile_norm=True, action_sequence_keys=('actions',), prompt_from_task=False, ario_config=ArioConfig(s3_prefixes='oss://shengshu-base2-test/xiaojun/新积木/', s3_endpoint='https://oss-cn-wulanchabu-internal.aliyuncs.com', video_downsample_rate=6, min_frames=1, image_size=(320, 240), task='fold clothes', load_instructions=True, skip_video=False, cache_size=32, max_episodes=None, disk_cache_dir='/tmp/ario_disk_cache', disk_cache_max_gb=200.0, multi_view=True), rlds_data_dir=None, action_space=None, datasets=()) (288:data_loader.py:248)
+ArioStreamingDataset: found 795 episodes on S3
+
+ArioStreamingDataset: 795 valid episodes, 72526 total frames
+05:54:27.418 [I] local_batch_size: 8                                                              (294:data_loader.py:329)
+INFO:2026-07-23 05:54:27,483:jax._src.xla_bridge:925: Unable to initialize backend 'cuda': 
+05:54:27.483 [I] Unable to initialize backend 'cuda':                                             (294:xla_bridge.py:925)
+INFO:2026-07-23 05:54:27,483:jax._src.xla_bridge:925: Unable to initialize backend 'rocm': module 'jaxlib.xla_extension' has no attribute 'GpuAllocatorConfig'
+05:54:27.483 [I] Unable to initialize backend 'rocm': module 'jaxlib.xla_extension' has no attribute 'GpuAllocatorConfig' (294:xla_bridge.py:925)
+INFO:2026-07-23 05:54:27,486:jax._src.xla_bridge:925: Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+05:54:27.486 [I] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory (294:xla_bridge.py:925)
+WARNING:2026-07-23 05:54:27,487:jax._src.xla_bridge:967: An NVIDIA GPU may be present on this machine, but a CUDA-enabled jaxlib is not installed. Falling back to cpu.
+05:54:27.487 [W] An NVIDIA GPU may be present on this machine, but a CUDA-enabled jaxlib is not installed. Falling back to cpu. (294:xla_bridge.py:967)
+05:55:03.823 [I] Enabled gradient checkpointing for PI0Pytorch model                              (290:pi0_pytorch.py:134)
+05:55:03.823 [I] Enabled gradient checkpointing for memory optimization                           (290:train_pytorch.py:506)
+05:55:03.823 [I] Enabled memory optimizations for 8+ GPU training                                 (290:train_pytorch.py:522)
+05:55:03.900 [I] Enabled gradient checkpointing for PI0Pytorch model                              (289:pi0_pytorch.py:134)
+05:55:03.900 [I] Enabled gradient checkpointing for memory optimization                           (289:train_pytorch.py:506)
+05:55:03.900 [I] Enabled memory optimizations for 8+ GPU training                                 (289:train_pytorch.py:522)
+05:55:10.846 [I] Enabled gradient checkpointing for PI0Pytorch model                              (292:pi0_pytorch.py:134)
+05:55:10.846 [I] Enabled gradient checkpointing for memory optimization                           (292:train_pytorch.py:506)
+05:55:10.846 [I] Enabled memory optimizations for 8+ GPU training                                 (292:train_pytorch.py:522)
+05:55:10.928 [I] Enabled gradient checkpointing for PI0Pytorch model                              (293:pi0_pytorch.py:134)
+05:55:10.928 [I] Enabled gradient checkpointing for memory optimization                           (293:train_pytorch.py:506)
+05:55:10.928 [I] Enabled memory optimizations for 8+ GPU training                                 (293:train_pytorch.py:522)
+05:55:12.160 [I] Enabled gradient checkpointing for PI0Pytorch model                              (295:pi0_pytorch.py:134)
+05:55:12.161 [I] Enabled gradient checkpointing for memory optimization                           (295:train_pytorch.py:506)
+05:55:12.161 [I] Enabled memory optimizations for 8+ GPU training                                 (295:train_pytorch.py:522)
+05:55:12.417 [I] Enabled gradient checkpointing for PI0Pytorch model                              (291:pi0_pytorch.py:134)
+05:55:12.418 [I] Enabled gradient checkpointing for memory optimization                           (291:train_pytorch.py:506)
+05:55:12.418 [I] Enabled memory optimizations for 8+ GPU training                                 (291:train_pytorch.py:522)
+05:55:17.938 [I] Enabled gradient checkpointing for PI0Pytorch model                              (294:pi0_pytorch.py:134)
+05:55:17.938 [I] Enabled gradient checkpointing for memory optimization                           (294:train_pytorch.py:506)
+05:55:17.938 [I] Enabled memory optimizations for 8+ GPU training                                 (294:train_pytorch.py:522)
+
+ArioStreamingDataset: 795 valid episodes, 72526 total frames
+05:55:56.532 [I] local_batch_size: 8                                                              (288:data_loader.py:329)
+/home/fanyiming/openpi_Ario/.venv/lib/python3.11/site-packages/torch/cuda/__init__.py:64: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/home/fanyiming/openpi_Ario/.venv/lib/python3.11/site-packages/torch/cuda/__init__.py:64: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+[34m[1mwandb[0m: [33mWARNING[0m Data passed to `wandb.Image` should consist of values in the range [0, 255], image data will be normalized to this range, but behavior will be removed in a future version of wandb.
+05:56:18.683 [I] Cleared sample batch and data loader from memory                                 (288:train_pytorch.py:482)
+05:57:08.003 [I] Enabled gradient checkpointing for PI0Pytorch model                              (288:pi0_pytorch.py:134)
+05:57:08.003 [I] Enabled gradient checkpointing for memory optimization                           (288:train_pytorch.py:506)
+05:57:08.005 [I] Step 0 (after_model_creation): GPU memory - allocated: 7.49GB, reserved: 7.52GB, free: 0.03GB, peak_allocated: 7.49GB, peak_reserved: 7.52GB | DDP: rank=0, world_size=8 (288:train_pytorch.py:392)
+05:57:08.005 [I] Enabled memory optimizations for 8+ GPU training                                 (288:train_pytorch.py:522)
+/home/fanyiming/openpi_Ario/.venv/lib/python3.11/site-packages/torch/nn/parallel/distributed.py:1132: UserWarning: You passed find_unused_parameters=true to DistributedDataParallel, `_set_static_graph` will detect unused parameters automatically, so you do not need to set find_unused_parameters=true, just be sure these unused parameters will not change during training loop while calling `_set_static_graph`.
+  self._set_static_graph()
+05:57:08.045 [I] Loading weights from: ./checkpoints/pi05_base_pytorch                            (288:train_pytorch.py:535)
+/home/fanyiming/openpi_Ario/.venv/lib/python3.11/site-packages/torch/nn/parallel/distributed.py:1132: UserWarning: You passed find_unused_parameters=true to DistributedDataParallel, `_set_static_graph` will detect unused parameters automatically, so you do not need to set find_unused_parameters=true, just be sure these unused parameters will not change during training loop while calling `_set_static_graph`.
+  self._set_static_graph()
+05:57:08.047 [I] Loading weights from: ./checkpoints/pi05_base_pytorch                            (292:train_pytorch.py:535)
+/home/fanyiming/openpi_Ario/.venv/lib/python3.11/site-packages/torch/nn/parallel/distributed.py:1132: UserWarning: You passed find_unused_parameters=true to DistributedDataParallel, `_set_static_graph` will detect unused parameters automatically, so you do not need to set find_unused_parameters=true, just be sure these unused parameters will not change during training loop while calling `_set_static_graph`.
+  self._set_static_graph()
+05:57:08.048 [I] Loading weights from: ./checkpoints/pi05_base_pytorch                            (294:train_pytorch.py:535)
+/home/fanyiming/openpi_Ario/.venv/lib/python3.11/site-packages/torch/nn/parallel/distributed.py:1132: UserWarning: You passed find_unused_parameters=true to DistributedDataParallel, `_set_static_graph` will detect unused parameters automatically, so you do not need to set find_unused_parameters=true, just be sure these unused parameters will not change during training loop while calling `_set_static_graph`.
+  self._set_static_graph()
+/home/fanyiming/openpi_Ario/.venv/lib/python3.11/site-packages/torch/nn/parallel/distributed.py:1132: UserWarning: You passed find_unused_parameters=true to DistributedDataParallel, `_set_static_graph` will detect unused parameters automatically, so you do not need to set find_unused_parameters=true, just be sure these unused parameters will not change during training loop while calling `_set_static_graph`.
+  self._set_static_graph()
+05:57:08.051 [I] Loading weights from: ./checkpoints/pi05_base_pytorch                            (293:train_pytorch.py:535)
+/home/fanyiming/openpi_Ario/.venv/lib/python3.11/site-packages/torch/nn/parallel/distributed.py:1132: UserWarning: You passed find_unused_parameters=true to DistributedDataParallel, `_set_static_graph` will detect unused parameters automatically, so you do not need to set find_unused_parameters=true, just be sure these unused parameters will not change during training loop while calling `_set_static_graph`.
+  self._set_static_graph()
+05:57:08.051 [I] Loading weights from: ./checkpoints/pi05_base_pytorch                            (295:train_pytorch.py:535)
+/home/fanyiming/openpi_Ario/.venv/lib/python3.11/site-packages/torch/nn/parallel/distributed.py:1132: UserWarning: You passed find_unused_parameters=true to DistributedDataParallel, `_set_static_graph` will detect unused parameters automatically, so you do not need to set find_unused_parameters=true, just be sure these unused parameters will not change during training loop while calling `_set_static_graph`.
+  self._set_static_graph()
+/home/fanyiming/openpi_Ario/.venv/lib/python3.11/site-packages/torch/nn/parallel/distributed.py:1132: UserWarning: You passed find_unused_parameters=true to DistributedDataParallel, `_set_static_graph` will detect unused parameters automatically, so you do not need to set find_unused_parameters=true, just be sure these unused parameters will not change during training loop while calling `_set_static_graph`.
+  self._set_static_graph()
+05:57:08.052 [I] Loading weights from: ./checkpoints/pi05_base_pytorch                            (289:train_pytorch.py:535)
+05:57:08.052 [I] Loading weights from: ./checkpoints/pi05_base_pytorch                            (290:train_pytorch.py:535)
+05:57:08.052 [I] Loading weights from: ./checkpoints/pi05_base_pytorch                            (291:train_pytorch.py:535)
+05:57:41.618 [I] Loaded PyTorch weights from ./checkpoints/pi05_base_pytorch                      (292:train_pytorch.py:541)
+05:57:41.676 [I] Loaded PyTorch weights from ./checkpoints/pi05_base_pytorch                      (290:train_pytorch.py:541)
+05:57:41.676 [I] Loaded PyTorch weights from ./checkpoints/pi05_base_pytorch                      (288:train_pytorch.py:541)
+05:57:41.676 [I] Loaded PyTorch weights from ./checkpoints/pi05_base_pytorch                      (289:train_pytorch.py:541)
+05:57:41.677 [I] Loaded PyTorch weights from ./checkpoints/pi05_base_pytorch                      (291:train_pytorch.py:541)
+05:57:41.680 [I] Loaded PyTorch weights from ./checkpoints/pi05_base_pytorch                      (295:train_pytorch.py:541)
+05:57:41.680 [I] Loaded PyTorch weights from ./checkpoints/pi05_base_pytorch                      (293:train_pytorch.py:541)
+05:57:41.680 [I] Loaded PyTorch weights from ./checkpoints/pi05_base_pytorch                      (294:train_pytorch.py:541)
+05:57:41.682 [I] Running on: xb01-gpu-200b-0123 | world_size=8                                    (288:train_pytorch.py:578)
+05:57:41.682 [I] Training config: batch_size=64, effective_batch_size=8, num_train_steps=100000   (288:train_pytorch.py:581)
+05:57:41.683 [I] Memory optimizations: gradient_checkpointing=True                                (288:train_pytorch.py:584)
+05:57:41.683 [I] LR schedule: warmup=5000, peak_lr=5.00e-05, decay_steps=500000, end_lr=5.00e-05  (288:train_pytorch.py:585)
+05:57:41.683 [I] Optimizer: AdamW, weight_decay=1e-10, clip_norm=1.0                              (288:train_pytorch.py:588)
+05:57:41.683 [I] EMA is not supported for PyTorch training                                        (288:train_pytorch.py:591)
+05:57:41.683 [I] Training precision: bfloat16                                                     (288:train_pytorch.py:592)
+05:57:41.683 [I] Multi-view (3-view) training: ENABLED                                            (288:train_pytorch.py:596)
+05:57:41.683 [I]   Camera views: cam_high, cam_left_wrist, cam_right_wrist                        (288:train_pytorch.py:597)
+05:57:41.683 [I]   Primary view (observation/image): cam_high (source: raw_video/cam_high.mp4)    (288:train_pytorch.py:598)
+05:57:41.683 [I]   Only episodes containing all three raw camera videos are used                  (288:train_pytorch.py:599)
+/home/fanyiming/openpi_Ario/.venv/lib/python3.11/site-packages/torch/cuda/__init__.py:64: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/home/fanyiming/openpi_Ario/.venv/lib/python3.11/site-packages/torch/cuda/__init__.py:64: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/home/fanyiming/openpi_Ario/.venv/lib/python3.11/site-packages/torch/cuda/__init__.py:64: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/home/fanyiming/openpi_Ario/.venv/lib/python3.11/site-packages/torch/cuda/__init__.py:64: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/home/fanyiming/openpi_Ario/.venv/lib/python3.11/site-packages/torch/cuda/__init__.py:64: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/home/fanyiming/openpi_Ario/.venv/lib/python3.11/site-packages/torch/cuda/__init__.py:64: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/home/fanyiming/openpi_Ario/.venv/lib/python3.11/site-packages/torch/cuda/__init__.py:64: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/home/fanyiming/openpi_Ario/.venv/lib/python3.11/site-packages/torch/cuda/__init__.py:64: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/home/fanyiming/openpi_Ario/.venv/lib/python3.11/site-packages/torch/cuda/__init__.py:64: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/home/fanyiming/openpi_Ario/.venv/lib/python3.11/site-packages/torch/cuda/__init__.py:64: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/home/fanyiming/openpi_Ario/.venv/lib/python3.11/site-packages/torch/cuda/__init__.py:64: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/home/fanyiming/openpi_Ario/.venv/lib/python3.11/site-packages/torch/cuda/__init__.py:64: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/home/fanyiming/openpi_Ario/.venv/lib/python3.11/site-packages/torch/cuda/__init__.py:64: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/home/fanyiming/openpi_Ario/.venv/lib/python3.11/site-packages/torch/cuda/__init__.py:64: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/home/fanyiming/openpi_Ario/.venv/lib/python3.11/site-packages/torch/cuda/__init__.py:64: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/home/fanyiming/openpi_Ario/.venv/lib/python3.11/site-packages/torch/cuda/__init__.py:64: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+05:58:25.534 [I] First batch view base_0_rgb: shape=(8, 3, 224, 224) dtype=torch.float32 range=[-1.000, 1.000] std=0.581 mask_all_true=True (288:train_pytorch.py:113)
+05:58:25.561 [I] First batch view left_wrist_0_rgb: shape=(8, 3, 224, 224) dtype=torch.float32 range=[-1.000, 0.859] std=0.590 mask_all_true=True (288:train_pytorch.py:113)
+05:58:25.580 [I] First batch view right_wrist_0_rgb: shape=(8, 3, 224, 224) dtype=torch.float32 range=[-1.000, 0.875] std=0.585 mask_all_true=True (288:train_pytorch.py:113)
+05:58:25.588 [I] First batch view difference base_0_rgb vs left_wrist_0_rgb: mean_abs_diff=0.229  (288:train_pytorch.py:145)
+05:58:25.595 [I] First batch view difference base_0_rgb vs right_wrist_0_rgb: mean_abs_diff=0.234 (288:train_pytorch.py:145)
+05:58:25.602 [I] First batch view difference left_wrist_0_rgb vs right_wrist_0_rgb: mean_abs_diff=0.139 (288:train_pytorch.py:145)
+05:58:25.602 [I] MULTI-VIEW FIRST BATCH CHECK PASSED: batch=8 actions_shape=(8, 50, 32)           (288:train_pytorch.py:153)
+xb01-gpu-200b-0123:288:10980 [0] NCCL INFO NVLS comm 0x5b1d4031e930 headRank 0 nHeads 8 nvlsRanks 8 buffSize 1048576 nvlsPerRankSize 50331648 nvlsTotalSize 402653184
+xb01-gpu-200b-0123:292:12106 [4] NCCL INFO NVLS comm 0x5e5b5b1e4dc0 headRank 4 nHeads 8 nvlsRanks 8 buffSize 1048576 nvlsPerRankSize 50331648 nvlsTotalSize 402653184
+xb01-gpu-200b-0123:294:12048 [6] NCCL INFO NVLS comm 0x5a7fd41d2b70 headRank 6 nHeads 8 nvlsRanks 8 buffSize 1048576 nvlsPerRankSize 50331648 nvlsTotalSize 402653184
+xb01-gpu-200b-0123:295:12041 [7] NCCL INFO NVLS comm 0x606e1fac5da0 headRank 7 nHeads 8 nvlsRanks 8 buffSize 1048576 nvlsPerRankSize 50331648 nvlsTotalSize 402653184
+xb01-gpu-200b-0123:289:12153 [1] NCCL INFO NVLS comm 0x634d45ef4fb0 headRank 1 nHeads 8 nvlsRanks 8 buffSize 1048576 nvlsPerRankSize 50331648 nvlsTotalSize 402653184
+xb01-gpu-200b-0123:291:12147 [3] NCCL INFO NVLS comm 0x6261d7d8e380 headRank 3 nHeads 8 nvlsRanks 8 buffSize 1048576 nvlsPerRankSize 50331648 nvlsTotalSize 402653184
+xb01-gpu-200b-0123:290:12194 [2] NCCL INFO NVLS comm 0x5953e098c590 headRank 2 nHeads 8 nvlsRanks 8 buffSize 1048576 nvlsPerRankSize 50331648 nvlsTotalSize 402653184
+xb01-gpu-200b-0123:293:12271 [5] NCCL INFO NVLS comm 0x5c344144d8a0 headRank 5 nHeads 8 nvlsRanks 8 buffSize 1048576 nvlsPerRankSize 50331648 nvlsTotalSize 402653184
+05:58:43.125 [I] Step 0 (after_backward): GPU memory - allocated: 15.04GB, reserved: 23.41GB, free: 8.38GB, peak_allocated: 24.02GB, peak_reserved: 24.39GB | DDP: rank=0, world_size=8 (288:train_pytorch.py:392)
+05:58:44.021 [I] step=0 loss=0.5064 lr=1.00e-08 grad_norm=1.86 data_time=43.820s train_time=18.407s time=62.3s ETA=17h18m (288:train_pytorch.py:704)
+05:58:44.729 [I] Step 1 (after_backward): GPU memory - allocated: 28.54GB, reserved: 36.45GB, free: 7.92GB, peak_allocated: 35.29GB, peak_reserved: 36.45GB | DDP: rank=0, world_size=8 (288:train_pytorch.py:392)
+05:58:57.130 [I] Step 2 (after_backward): GPU memory - allocated: 28.54GB, reserved: 36.45GB, free: 7.92GB, peak_allocated: 35.29GB, peak_reserved: 36.45GB | DDP: rank=0, world_size=8 (288:train_pytorch.py:392)
+05:59:03.986 [I] Step 3 (after_backward): GPU memory - allocated: 28.54GB, reserved: 36.45GB, free: 7.92GB, peak_allocated: 35.29GB, peak_reserved: 36.45GB | DDP: rank=0, world_size=8 (288:train_pytorch.py:392)
+05:59:18.016 [I] Step 4 (after_backward): GPU memory - allocated: 28.54GB, reserved: 36.45GB, free: 7.92GB, peak_allocated: 35.29GB, peak_reserved: 36.45GB | DDP: rank=0, world_size=8 (288:train_pytorch.py:392)
+06:03:09.982 [I] step=100 loss=0.5316 lr=5.15e-07 grad_norm=1.96 data_time=0.013s train_time=0.514s time=266.0s ETA=73h48m (288:train_pytorch.py:704)
+06:04:05.087 [I] step=200 loss=0.4510 lr=1.51e-06 grad_norm=1.60 data_time=0.014s train_time=0.504s time=55.1s ETA=15h16m (288:train_pytorch.py:704)
+06:05:00.313 [I] step=300 loss=0.3285 lr=2.51e-06 grad_norm=0.97 data_time=0.014s train_time=0.496s time=55.2s ETA=15h17m (288:train_pytorch.py:704)
+06:05:55.390 [I] step=400 loss=0.2369 lr=3.51e-06 grad_norm=0.46 data_time=0.014s train_time=0.474s time=55.1s ETA=15h14m (288:train_pytorch.py:704)
+06:06:49.738 [I] step=500 loss=0.1794 lr=4.51e-06 grad_norm=0.27 data_time=0.012s train_time=0.747s time=54.3s ETA=15h01m (288:train_pytorch.py:704)
+06:07:44.110 [I] step=600 loss=0.1433 lr=5.51e-06 grad_norm=0.22 data_time=0.013s train_time=0.470s time=54.4s ETA=15h00m (288:train_pytorch.py:704)
+06:08:38.134 [I] step=700 loss=0.1190 lr=6.51e-06 grad_norm=0.22 data_time=0.015s train_time=0.496s time=54.0s ETA=14h54m (288:train_pytorch.py:704)
+06:09:33.211 [I] step=800 loss=0.1026 lr=7.51e-06 grad_norm=0.25 data_time=0.013s train_time=0.470s time=55.1s ETA=15h10m (288:train_pytorch.py:704)
+06:10:26.419 [I] step=900 loss=0.0887 lr=8.51e-06 grad_norm=0.32 data_time=0.012s train_time=0.478s time=53.2s ETA=14h38m (288:train_pytorch.py:704)
+06:11:19.353 [I] step=1000 loss=0.0791 lr=9.51e-06 grad_norm=0.33 data_time=0.014s train_time=0.470s time=52.9s ETA=14h33m (288:train_pytorch.py:704)
+06:12:13.643 [I] step=1100 loss=0.0767 lr=1.05e-05 grad_norm=0.35 data_time=0.013s train_time=0.472s time=54.3s ETA=14h54m (288:train_pytorch.py:704)
+06:13:08.515 [I] step=1200 loss=0.0666 lr=1.15e-05 grad_norm=0.35 data_time=0.009s train_time=0.470s time=54.9s ETA=15h03m (288:train_pytorch.py:704)
+06:14:03.319 [I] step=1300 loss=0.0662 lr=1.25e-05 grad_norm=0.35 data_time=0.008s train_time=0.477s time=54.8s ETA=15h01m (288:train_pytorch.py:704)
+06:14:57.696 [I] step=1400 loss=0.0577 lr=1.35e-05 grad_norm=0.36 data_time=0.008s train_time=0.728s time=54.4s ETA=14h53m (288:train_pytorch.py:704)
+06:15:51.708 [I] step=1500 loss=0.0579 lr=1.45e-05 grad_norm=0.33 data_time=0.008s train_time=0.478s time=54.0s ETA=14h46m (288:train_pytorch.py:704)
+06:16:46.504 [I] step=1600 loss=0.0574 lr=1.55e-05 grad_norm=0.35 data_time=0.008s train_time=0.478s time=54.8s ETA=14h58m (288:train_pytorch.py:704)
+06:17:40.733 [I] step=1700 loss=0.0546 lr=1.65e-05 grad_norm=0.34 data_time=0.008s train_time=0.734s time=54.2s ETA=14h48m (288:train_pytorch.py:704)
+06:18:36.311 [I] step=1800 loss=0.0519 lr=1.75e-05 grad_norm=0.31 data_time=0.008s train_time=0.477s time=55.6s ETA=15h09m (288:train_pytorch.py:704)
+06:19:30.725 [I] step=1900 loss=0.0526 lr=1.85e-05 grad_norm=0.32 data_time=0.008s train_time=0.746s time=54.4s ETA=14h49m (288:train_pytorch.py:704)
+06:20:24.609 [I] step=2000 loss=0.0504 lr=1.95e-05 grad_norm=0.33 data_time=0.008s train_time=0.494s time=53.9s ETA=14h40m (288:train_pytorch.py:704)
+06:21:19.214 [I] step=2100 loss=0.0504 lr=2.05e-05 grad_norm=0.30 data_time=0.009s train_time=0.740s time=54.6s ETA=14h50m (288:train_pytorch.py:704)
+06:22:11.775 [I] step=2200 loss=0.0494 lr=2.15e-05 grad_norm=0.29 data_time=0.008s train_time=0.476s time=52.6s ETA=14h16m (288:train_pytorch.py:704)
+06:23:06.725 [I] step=2300 loss=0.0477 lr=2.25e-05 grad_norm=0.29 data_time=0.015s train_time=0.718s time=55.0s ETA=14h54m (288:train_pytorch.py:704)
+06:24:01.223 [I] step=2400 loss=0.0454 lr=2.35e-05 grad_norm=0.28 data_time=0.013s train_time=0.480s time=54.5s ETA=14h46m (288:train_pytorch.py:704)
+06:24:56.645 [I] step=2500 loss=0.0405 lr=2.45e-05 grad_norm=0.28 data_time=0.013s train_time=0.536s time=55.4s ETA=15h00m (288:train_pytorch.py:704)
+06:25:51.655 [I] step=2600 loss=0.0435 lr=2.55e-05 grad_norm=0.27 data_time=0.014s train_time=0.516s time=55.0s ETA=14h52m (288:train_pytorch.py:704)
+06:26:45.981 [I] step=2700 loss=0.0415 lr=2.65e-05 grad_norm=0.28 data_time=0.014s train_time=0.476s time=54.3s ETA=14h40m (288:train_pytorch.py:704)
+06:27:39.876 [I] step=2800 loss=0.0424 lr=2.75e-05 grad_norm=0.26 data_time=0.013s train_time=0.472s time=53.9s ETA=14h33m (288:train_pytorch.py:704)
+06:28:34.583 [I] step=2900 loss=0.0386 lr=2.85e-05 grad_norm=0.26 data_time=0.015s train_time=0.521s time=54.7s ETA=14h45m (288:train_pytorch.py:704)
+06:29:28.634 [I] step=3000 loss=0.0437 lr=2.95e-05 grad_norm=0.23 data_time=0.014s train_time=0.471s time=54.1s ETA=14h33m (288:train_pytorch.py:704)
+06:30:23.120 [I] step=3100 loss=0.0424 lr=3.05e-05 grad_norm=0.25 data_time=0.013s train_time=0.473s time=54.5s ETA=14h39m (288:train_pytorch.py:704)
+06:31:17.682 [I] step=3200 loss=0.0398 lr=3.15e-05 grad_norm=0.23 data_time=0.014s train_time=0.698s time=54.6s ETA=14h40m (288:train_pytorch.py:704)
+06:32:12.896 [I] step=3300 loss=0.0388 lr=3.25e-05 grad_norm=0.22 data_time=0.013s train_time=0.473s time=55.2s ETA=14h49m (288:train_pytorch.py:704)
+06:33:05.139 [I] step=3400 loss=0.0391 lr=3.35e-05 grad_norm=0.22 data_time=0.009s train_time=0.478s time=52.2s ETA=14h01m (288:train_pytorch.py:704)
+06:33:58.948 [I] step=3500 loss=0.0396 lr=3.45e-05 grad_norm=0.22 data_time=0.008s train_time=0.477s time=53.8s ETA=14h25m (288:train_pytorch.py:704)
+06:34:53.392 [I] step=3600 loss=0.0376 lr=3.55e-05 grad_norm=0.23 data_time=0.008s train_time=0.542s time=54.4s ETA=14h34m (288:train_pytorch.py:704)
+06:35:47.848 [I] step=3700 loss=0.0351 lr=3.65e-05 grad_norm=0.22 data_time=0.009s train_time=0.477s time=54.5s ETA=14h34m (288:train_pytorch.py:704)
+06:36:41.893 [I] step=3800 loss=0.0365 lr=3.75e-05 grad_norm=0.21 data_time=0.008s train_time=0.476s time=54.0s ETA=14h26m (288:train_pytorch.py:704)
+06:37:38.542 [I] step=3900 loss=0.0361 lr=3.85e-05 grad_norm=0.20 data_time=0.009s train_time=0.468s time=56.6s ETA=15h07m (288:train_pytorch.py:704)
+06:38:33.464 [I] step=4000 loss=0.0333 lr=3.95e-05 grad_norm=0.19 data_time=0.008s train_time=0.745s time=54.9s ETA=14h38m (288:train_pytorch.py:704)
+06:39:27.118 [I] step=4100 loss=0.0334 lr=4.05e-05 grad_norm=0.19 data_time=0.008s train_time=0.476s time=53.7s ETA=14h17m (288:train_pytorch.py:704)
+06:40:21.999 [I] step=4200 loss=0.0346 lr=4.15e-05 grad_norm=0.20 data_time=0.009s train_time=0.491s time=54.9s ETA=14h36m (288:train_pytorch.py:704)
+06:41:16.392 [I] step=4300 loss=0.0345 lr=4.25e-05 grad_norm=0.19 data_time=0.009s train_time=0.473s time=54.4s ETA=14h27m (288:train_pytorch.py:704)
+06:42:10.732 [I] step=4400 loss=0.0338 lr=4.35e-05 grad_norm=0.18 data_time=0.009s train_time=0.479s time=54.3s ETA=14h25m (288:train_pytorch.py:704)
+06:43:05.239 [I] step=4500 loss=0.0334 lr=4.45e-05 grad_norm=0.19 data_time=0.008s train_time=0.475s time=54.5s ETA=14h27m (288:train_pytorch.py:704)
+06:43:58.256 [I] step=4600 loss=0.0323 lr=4.55e-05 grad_norm=0.17 data_time=0.019s train_time=0.488s time=53.0s ETA=14h02m (288:train_pytorch.py:704)
+06:44:51.500 [I] step=4700 loss=0.0330 lr=4.65e-05 grad_norm=0.17 data_time=0.019s train_time=0.469s time=53.2s ETA=14h05m (288:train_pytorch.py:704)
+06:45:45.685 [I] step=4800 loss=0.0304 lr=4.75e-05 grad_norm=0.16 data_time=0.019s train_time=0.734s time=54.2s ETA=14h19m (288:train_pytorch.py:704)
+06:46:40.407 [I] step=4900 loss=0.0319 lr=4.85e-05 grad_norm=0.18 data_time=0.018s train_time=0.534s time=54.7s ETA=14h27m (288:train_pytorch.py:704)
+06:47:51.793 [I] Saved checkpoint at step 5000 -> /home/fanyiming/openpi_Ario/checkpoints/pi05_xingchen_ario/new_blocks/5000 (288:train_pytorch.py:278)
+06:47:52.564 [I] step=5000 loss=0.0307 lr=4.95e-05 grad_norm=0.17 data_time=0.021s train_time=0.746s time=72.2s ETA=19h02m (288:train_pytorch.py:704)
+06:48:46.546 [I] step=5100 loss=0.0311 lr=5.00e-05 grad_norm=0.17 data_time=0.019s train_time=0.469s time=54.0s ETA=14h13m (288:train_pytorch.py:704)
+06:49:41.014 [I] step=5200 loss=0.0298 lr=5.00e-05 grad_norm=0.16 data_time=0.019s train_time=0.471s time=54.5s ETA=14h20m (288:train_pytorch.py:704)
+06:50:35.115 [I] step=5300 loss=0.0292 lr=5.00e-05 grad_norm=0.15 data_time=0.019s train_time=0.469s time=54.1s ETA=14h13m (288:train_pytorch.py:704)
+06:51:29.598 [I] step=5400 loss=0.0315 lr=5.00e-05 grad_norm=0.16 data_time=0.019s train_time=0.494s time=54.5s ETA=14h19m (288:train_pytorch.py:704)
+06:52:23.693 [I] step=5500 loss=0.0269 lr=5.00e-05 grad_norm=0.14 data_time=0.019s train_time=0.729s time=54.1s ETA=14h11m (288:train_pytorch.py:704)
+06:53:17.343 [I] step=5600 loss=0.0288 lr=5.00e-05 grad_norm=0.14 data_time=0.019s train_time=0.470s time=53.6s ETA=14h04m (288:train_pytorch.py:704)
+06:54:10.548 [I] step=5700 loss=0.0279 lr=5.00e-05 grad_norm=0.14 data_time=0.008s train_time=0.474s time=53.2s ETA=13h56m (288:train_pytorch.py:704)
+06:55:04.402 [I] step=5800 loss=0.0283 lr=5.00e-05 grad_norm=0.14 data_time=0.009s train_time=0.476s time=53.9s ETA=14h05m (288:train_pytorch.py:704)
+06:55:59.537 [I] step=5900 loss=0.0263 lr=5.00e-05 grad_norm=0.14 data_time=0.010s train_time=0.728s time=55.1s ETA=14h24m (288:train_pytorch.py:704)
+06:56:53.924 [I] step=6000 loss=0.0270 lr=5.00e-05 grad_norm=0.15 data_time=0.009s train_time=0.468s time=54.4s ETA=14h12m (288:train_pytorch.py:704)
+06:57:47.869 [I] step=6100 loss=0.0255 lr=5.00e-05 grad_norm=0.14 data_time=0.009s train_time=0.751s time=53.9s ETA=14h04m (288:train_pytorch.py:704)
+06:58:42.253 [I] step=6200 loss=0.0258 lr=5.00e-05 grad_norm=0.14 data_time=0.008s train_time=0.479s time=54.4s ETA=14h10m (288:train_pytorch.py:704)
+06:59:37.080 [I] step=6300 loss=0.0241 lr=5.00e-05 grad_norm=0.13 data_time=0.009s train_time=0.502s time=54.8s ETA=14h16m (288:train_pytorch.py:704)
+07:00:31.243 [I] step=6400 loss=0.0251 lr=5.00e-05 grad_norm=0.13 data_time=0.008s train_time=0.478s time=54.2s ETA=14h04m (288:train_pytorch.py:704)
+07:01:25.254 [I] step=6500 loss=0.0243 lr=5.00e-05 grad_norm=0.13 data_time=0.009s train_time=0.502s time=54.0s ETA=14h01m (288:train_pytorch.py:704)
+07:02:17.548 [I] step=6600 loss=0.0260 lr=5.00e-05 grad_norm=0.14 data_time=0.008s train_time=0.476s time=52.3s ETA=13h34m (288:train_pytorch.py:704)
+07:03:11.940 [I] step=6700 loss=0.0245 lr=5.00e-05 grad_norm=0.13 data_time=0.009s train_time=0.725s time=54.4s ETA=14h05m (288:train_pytorch.py:704)
+07:04:06.760 [I] step=6800 loss=0.0226 lr=5.00e-05 grad_norm=0.12 data_time=0.019s train_time=0.470s time=54.8s ETA=14h11m (288:train_pytorch.py:704)
+07:05:00.527 [I] step=6900 loss=0.0226 lr=5.00e-05 grad_norm=0.12 data_time=0.019s train_time=0.469s time=53.8s ETA=13h54m (288:train_pytorch.py:704)
+
+Log streaming interrupted for pod fanyiming-xingchen-train-openpi-n1-260723032722-master-0

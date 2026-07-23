@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import hashlib
 import io
+import json
 import os
 import tempfile
-from collections import OrderedDict
+import time
+from collections import Counter, OrderedDict
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -17,8 +20,12 @@ ACTION_DIM = 31
 PT_FILES = ["eef_torso.pt", "head.pt", "eef_left.pt", "gripper_cmd.pt", "eef_right.pt"]
 IMAGE_SIZE = (320, 240)
 
-# New data format: single state.pt file containing all state/action data [T, 31]
+# New data format: a single state.pt. It may be either a [T, 31] tensor or a
+# dict containing left/right end poses and gripper values.
 STATE_PT_FILE = "state.pt"
+STATE_DICT_KEYS = ("endpose_left", "endpose_right", "gripper_left", "gripper_right")
+INDEX_CACHE_VERSION = 1
+INDEX_CACHE_WAIT_SECONDS = 30 * 60
 
 
 @dataclass
@@ -33,6 +40,7 @@ class ArioConfig:
     max_episodes: int | None = None
     disk_cache_dir: str = "/tmp/ario_disk_cache"
     disk_cache_max_gb: float = 200.0
+    skip_video: bool = False
 
 
 class ArioStreamingDataset:
@@ -118,23 +126,56 @@ class ArioStreamingDataset:
         return episodes
 
     def _build_index(self):
-        """Download state.pt from each episode to determine its length."""
+        """Load a cached frame index or build it from episode state.pt files."""
         from tqdm import tqdm
+
+        discovery_hash = self._episode_list_hash(self._episodes)
+        cache_path = self._index_cache_path()
+        if self._load_index_cache(cache_path, discovery_hash):
+            return
+
+        # Under torchrun only local rank 0 builds the expensive OSS index. Other
+        # local ranks wait for its atomic cache write so they enter DDP together.
+        world_size = int(os.environ.get("WORLD_SIZE", "1"))
+        local_rank = int(os.environ.get("LOCAL_RANK", os.environ.get("RANK", "0")))
+        if world_size > 1 and local_rank != 0:
+            print(f"ArioStreamingDataset: local rank {local_rank} waiting for frame index cache: {cache_path}")
+            deadline = time.monotonic() + INDEX_CACHE_WAIT_SECONDS
+            while time.monotonic() < deadline:
+                if self._load_index_cache(cache_path, discovery_hash):
+                    return
+                time.sleep(2)
+            raise TimeoutError(
+                f"Timed out after {INDEX_CACHE_WAIT_SECONDS}s waiting for local rank 0 to build frame index cache: "
+                f"{cache_path}"
+            )
 
         s3 = self._get_s3()
         cumulative = 0
         valid_episodes = []
+        error_counts: Counter[str] = Counter()
+        error_examples: dict[str, tuple[str, str]] = {}
+        too_short_count = 0
+        too_short_min: int | None = None
+        too_short_max: int | None = None
         rate = self._config.video_downsample_rate
 
         for bucket, prefix in tqdm(self._episodes, desc="Building frame index"):
             try:
                 data = self._s3_download_bytes(s3, bucket, prefix + STATE_PT_FILE)
-                tensor = torch.load(io.BytesIO(data), map_location="cpu")
-                raw_len = tensor.shape[0]
-            except Exception:
+                state_action = self._deserialize_state_action(data)
+                raw_len = state_action.shape[0]
+            except Exception as exc:
+                error_type = type(exc).__name__
+                error_counts[error_type] += 1
+                state_uri = f"s3://{bucket}/{prefix}{STATE_PT_FILE}"
+                error_examples.setdefault(error_type, (state_uri, str(exc)))
                 continue
 
             if raw_len < self._config.min_frames:
+                too_short_count += 1
+                too_short_min = raw_len if too_short_min is None else min(too_short_min, raw_len)
+                too_short_max = raw_len if too_short_max is None else max(too_short_max, raw_len)
                 continue
 
             n_frames = len(range(0, raw_len, rate))
@@ -144,7 +185,106 @@ class ArioStreamingDataset:
             self._cumulative.append(cumulative)
 
         self._episodes = valid_episodes
+        self._write_index_cache(cache_path, discovery_hash)
         print(f"ArioStreamingDataset: {len(self._episodes)} valid episodes, {cumulative} total frames")
+        if error_counts:
+            print(
+                "ArioStreamingDataset: state.pt load failures: "
+                + ", ".join(f"{name}={count}" for name, count in error_counts.most_common())
+            )
+            for error_type, (state_uri, message) in error_examples.items():
+                print(f"  example {error_type}: {state_uri}: {message}")
+        if too_short_count:
+            print(
+                f"ArioStreamingDataset: {too_short_count} episodes shorter than min_frames="
+                f"{self._config.min_frames} (observed raw frame range: {too_short_min}-{too_short_max})"
+            )
+
+    def _index_cache_path(self) -> Path:
+        cache_identity = json.dumps(
+            {
+                "version": INDEX_CACHE_VERSION,
+                "s3_prefixes": self._config.s3_prefixes,
+                "s3_endpoint": self._config.s3_endpoint,
+                "video_downsample_rate": self._config.video_downsample_rate,
+                "min_frames": self._config.min_frames,
+                "max_episodes": self._config.max_episodes,
+            },
+            sort_keys=True,
+        )
+        digest = hashlib.sha256(cache_identity.encode()).hexdigest()[:16]
+        return Path(self._config.disk_cache_dir) / f"frame_index_{digest}.json"
+
+    @staticmethod
+    def _episode_list_hash(episodes: list[tuple[str, str]]) -> str:
+        digest = hashlib.sha256()
+        for bucket, prefix in episodes:
+            digest.update(bucket.encode())
+            digest.update(b"\0")
+            digest.update(prefix.encode())
+            digest.update(b"\0")
+        return digest.hexdigest()
+
+    def _load_index_cache(self, path: Path, discovery_hash: str) -> bool:
+        try:
+            with path.open() as cache_file:
+                cached = json.load(cache_file)
+            if not isinstance(cached, dict):
+                raise ValueError("Frame index cache root must be an object")
+            if cached.get("version") != INDEX_CACHE_VERSION:
+                return False
+            if cached.get("discovery_hash") != discovery_hash:
+                return False
+
+            entries = cached["episodes"]
+            episodes: list[tuple[str, str]] = []
+            lengths: list[int] = []
+            for bucket, prefix, length in entries:
+                if not isinstance(bucket, str) or not isinstance(prefix, str) or not isinstance(length, int):
+                    raise ValueError("Invalid frame index cache entry")
+                if length <= 0:
+                    raise ValueError(f"Invalid cached episode length: {length}")
+                episodes.append((bucket, prefix))
+                lengths.append(length)
+        except FileNotFoundError:
+            return False
+        except (KeyError, TypeError, ValueError, json.JSONDecodeError, OSError) as exc:
+            print(f"ArioStreamingDataset: ignoring invalid frame index cache {path}: {exc}")
+            return False
+
+        cumulative = 0
+        self._episodes = episodes
+        self._episode_lengths = lengths
+        self._cumulative = []
+        for length in lengths:
+            cumulative += length
+            self._cumulative.append(cumulative)
+        print(
+            f"ArioStreamingDataset: loaded frame index cache with {len(episodes)} valid episodes, "
+            f"{cumulative} total frames"
+        )
+        return True
+
+    def _write_index_cache(self, path: Path, discovery_hash: str) -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        payload = {
+            "version": INDEX_CACHE_VERSION,
+            "discovery_hash": discovery_hash,
+            "episodes": [
+                [bucket, prefix, length]
+                for (bucket, prefix), length in zip(self._episodes, self._episode_lengths, strict=True)
+            ],
+        }
+        temp_path = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+        try:
+            with temp_path.open("w") as cache_file:
+                json.dump(payload, cache_file, separators=(",", ":"))
+                cache_file.flush()
+                os.fsync(cache_file.fileno())
+            os.replace(temp_path, path)
+        finally:
+            temp_path.unlink(missing_ok=True)
+        print(f"ArioStreamingDataset: wrote frame index cache: {path}")
 
     def __len__(self) -> int:
         return self._cumulative[-1] if self._cumulative else 0
@@ -162,9 +302,14 @@ class ArioStreamingDataset:
             cache_key = prefix
 
             try:
-                state_action, frames = self._get_episode_with_timeout(bucket, prefix, cache_key, _timeout)
+                if self._config.skip_video:
+                    state_action = self._get_episode_state(bucket, prefix, cache_key, _timeout)
+                    h, w = self._config.image_size[1], self._config.image_size[0]
+                    image = np.zeros((h, w, 3), dtype=np.uint8)
+                else:
+                    state_action, frames = self._get_episode_with_timeout(bucket, prefix, cache_key, _timeout)
+                    image = frames[frame_idx]
 
-                image = frames[frame_idx]
                 state = state_action[frame_idx]
                 actions = self._get_action_chunk(state_action, frame_idx)
 
@@ -212,6 +357,29 @@ class ArioStreamingDataset:
         n = len(state_action)
         indices = [min(frame_idx + i, n - 1) for i in range(self._action_horizon)]
         return state_action[indices]
+
+    def _get_episode_state(
+        self, bucket: str, prefix: str, cache_key: str, timeout: float
+    ) -> np.ndarray:
+        """Get only state/action data (no video). Used when skip_video=True."""
+        state_key = cache_key + "__state"
+        if state_key in self._cache:
+            self._cache.move_to_end(state_key)
+            return self._cache[state_key]
+
+        s3 = self._get_s3()
+        state_action = self._build_state_action(s3, bucket, prefix)
+
+        rate = self._config.video_downsample_rate
+        raw_len = len(state_action)
+        indices = list(range(0, raw_len, rate))
+        state_action = state_action[indices].astype(np.float32)
+
+        self._cache[state_key] = state_action
+        if len(self._cache) > self._cache_size:
+            self._cache.popitem(last=False)
+
+        return state_action
 
     def _get_episode(
         self, bucket: str, prefix: str, cache_key: str
@@ -292,8 +460,58 @@ class ArioStreamingDataset:
 
     def _build_state_action(self, s3, bucket: str, prefix: str) -> np.ndarray:
         data = self._s3_download_bytes(s3, bucket, prefix + STATE_PT_FILE)
-        tensor = torch.load(io.BytesIO(data), map_location="cpu")
-        return tensor.numpy()
+        return self._deserialize_state_action(data)
+
+    @staticmethod
+    def _deserialize_state_action(data: bytes) -> np.ndarray:
+        """Convert supported state.pt formats to the model's [T, 31] layout."""
+        state = torch.load(io.BytesIO(data), map_location="cpu")
+
+        if isinstance(state, torch.Tensor):
+            if state.ndim != 2 or state.shape[1] != ACTION_DIM:
+                raise ValueError(f"Expected state tensor with shape [T, {ACTION_DIM}], got {tuple(state.shape)}")
+            return state.detach().cpu().numpy().astype(np.float32)
+
+        if not isinstance(state, dict):
+            raise TypeError(f"Expected state.pt to contain a tensor or dict, got {type(state).__name__}")
+
+        missing_keys = [key for key in STATE_DICT_KEYS if key not in state]
+        if missing_keys:
+            raise KeyError(f"state.pt is missing required keys: {missing_keys}")
+
+        tensors = [state[key] for key in STATE_DICT_KEYS]
+        if not all(isinstance(value, torch.Tensor) for value in tensors):
+            value_types = {key: type(state[key]).__name__ for key in STATE_DICT_KEYS}
+            raise TypeError(f"State dict values must be tensors, got {value_types}")
+
+        endpose_left, endpose_right, gripper_left, gripper_right = tensors
+        expected_widths = {
+            "endpose_left": 9,
+            "endpose_right": 9,
+            "gripper_left": 1,
+            "gripper_right": 1,
+        }
+        lengths = {value.shape[0] for value in tensors if value.ndim == 2}
+        invalid_shapes = {
+            key: tuple(state[key].shape)
+            for key, width in expected_widths.items()
+            if state[key].ndim != 2 or state[key].shape[1] != width
+        }
+        if invalid_shapes:
+            raise ValueError(f"Unexpected state dict tensor shapes: {invalid_shapes}")
+        if len(lengths) != 1:
+            raise ValueError(f"State dict tensors have inconsistent lengths: {[tuple(value.shape) for value in tensors]}")
+
+        # Existing Xingchen layout:
+        # torso(9) + head(2) + left(9) + left gripper(1) + right(9) + right gripper(1).
+        # The new dict format has no torso/head values, so those 11 dimensions are fixed at zero.
+        num_frames = endpose_left.shape[0]
+        torso_and_head = torch.zeros((num_frames, 11), dtype=endpose_left.dtype)
+        state_action = torch.cat(
+            [torso_and_head, endpose_left, gripper_left, endpose_right, gripper_right],
+            dim=-1,
+        )
+        return state_action.detach().cpu().numpy().astype(np.float32)
 
     def _extract_video_frames(self, s3, bucket: str, video_key: str) -> list[np.ndarray]:
         data = self._s3_download_bytes(s3, bucket, video_key)

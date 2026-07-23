@@ -94,6 +94,10 @@ def main(config_name: str, max_frames: int | None = None):
     data_config = config.data.create(config.assets_dirs, config.model)
     print(f"[DEBUG] Data config created. repo_id={data_config.repo_id}", flush=True)
 
+    # Skip video downloads — norm stats only need state and actions.
+    if data_config.ario_config is not None:
+        data_config.ario_config.skip_video = True
+
     if data_config.rlds_data_dir is not None:
         print("[DEBUG] Using RLDS dataloader", flush=True)
         data_loader, num_batches = create_rlds_dataloader(

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-cd /home/fanyiming/openpi
+cd /home/fanyiming/openpi_Ario
 export HOME=/home/fanyiming
 source .venv/bin/activate
 
@@ -27,7 +27,7 @@ if [ "$NUM_GPUS" -lt 1 ]; then
 fi
 echo "Using $NUM_GPUS GPU(s)"
 
-
+echo "=== Step 0: Single Vision ==="
 echo "=== Step 1: Convert JAX weights to PyTorch (if not already done) ==="
 PYTORCH_WEIGHT_DIR="./checkpoints/pi05_base_pytorch"
 if [ -f "$PYTORCH_WEIGHT_DIR/model.safetensors" ]; then
@@ -42,12 +42,19 @@ else
 fi
 
 echo "=== Step 2: Compute norm stats (if not already done) ==="
-NORM_STATS_PATH="./assets/pi05_xingchen_ario/xingchen/new_blocks/norm_stats.json"
+CONFIG_NAME="pi05_xingchen_ario"
+NORM_STATS_PATH=$(python -c "
+from openpi.training.config import get_config
+cfg = get_config('$CONFIG_NAME')
+data_cfg = cfg.data.create(cfg.assets_dirs, cfg.model)
+print(cfg.assets_dirs / data_cfg.repo_id / 'norm_stats.json')
+")
+echo "Norm stats path: $NORM_STATS_PATH"
 if [ -f "$NORM_STATS_PATH" ]; then
     echo "Norm stats already exist at $NORM_STATS_PATH, skipping."
 else
     echo "Computing normalization statistics for new data..."
-    python scripts/compute_norm_stats.py --config-name pi05_xingchen_ario
+    python scripts/compute_norm_stats.py --config-name "$CONFIG_NAME"
 fi
 
 echo "=== Step 3: Training (PyTorch DDP) ==="

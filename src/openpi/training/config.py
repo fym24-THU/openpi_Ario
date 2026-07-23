@@ -1083,8 +1083,9 @@ _CONFIGS = [
             action_horizon=50,
         ),
         data=ArioXingchenDataConfig(
-            repo_id="xingchen/fold_clothes",
+            repo_id="xingchen/jianzhi_fold_clothes",
             s3_prefixes="s3://shengshu-world-model-data/ARIO-new/jianzhi/foldclothes/",
+            s3_endpoint="https://oss-cn-wulanchabu.aliyuncs.com",
             use_delta_actions=True,
         ),
         pytorch_weight_path="./checkpoints/pi05_base_pytorch",
