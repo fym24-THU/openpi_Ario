@@ -51,7 +51,7 @@ else
 fi
 
 echo "=== Step 3: Training (PyTorch DDP) ==="
-# Probe the first episode on OSS to verify cam_high.mp4 availability
+# Probe the first episode on OSS to verify all required camera videos.
 echo "--- Multi-view training status ---"
 python -c "
 import boto3, botocore
@@ -76,20 +76,22 @@ else:
     resp = s3.list_objects_v2(Bucket=bucket, Prefix=base_prefix, Delimiter='/')
     episode_prefixes = [p['Prefix'] for p in resp.get('CommonPrefixes', [])]
     if not episode_prefixes:
-        print('WARNING: no episodes found under', base_prefix)
+        raise SystemExit('ERROR: no episodes found under ' + base_prefix)
     else:
         ep = episode_prefixes[0]
-        cam_high_key = ep + 'raw_video/cam_high.mp4'
-        try:
-            s3.head_object(Bucket=bucket, Key=cam_high_key)
-            print('Multi-view (3-view) training: ENABLED')
-            print('  Camera views: cam_high, cam_left_wrist, cam_right_wrist')
-            print('  Primary view: raw_video/cam_high.mp4 [VERIFIED on OSS]')
-        except s3.exceptions.ClientError:
-            print('WARNING: raw_video/cam_high.mp4 NOT FOUND for first episode!')
-            print('  Episode:', ep)
-            print('  cam_high will FALLBACK to video.mp4 (lower quality)')
-            print('  Consider checking your data or setting multi_view=False')
+        cameras = ('cam_high', 'cam_left_wrist', 'cam_right_wrist')
+        missing = []
+        for camera in cameras:
+            key = ep + f'raw_video/{camera}.mp4'
+            try:
+                s3.head_object(Bucket=bucket, Key=key)
+            except s3.exceptions.ClientError:
+                missing.append(camera)
+        if missing:
+            raise SystemExit(f'ERROR: first episode {ep} is missing camera videos: {missing}')
+        print('Multi-view (3-view) training: ENABLED')
+        print('  Camera views verified:', ', '.join(cameras))
+        print('  First episode:', ep)
 "
 echo "---"
 MASTER_ADDR=$(hostname -I | awk '{print $1}')

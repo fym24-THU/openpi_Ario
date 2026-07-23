@@ -69,6 +69,94 @@ def init_logging():
         logger.handlers[0].setFormatter(formatter)
 
 
+def validate_and_log_multiview_batch(observation, actions, *, is_main: bool) -> None:
+    """Fail fast unless the first transformed batch contains three valid views."""
+    expected_keys = ("base_0_rgb", "left_wrist_0_rgb", "right_wrist_0_rgb")
+    missing_images = [key for key in expected_keys if key not in observation.images]
+    missing_masks = [key for key in expected_keys if key not in observation.image_masks]
+    if missing_images or missing_masks:
+        raise RuntimeError(
+            "Invalid multi-view batch: "
+            f"missing images={missing_images}, missing masks={missing_masks}"
+        )
+
+    images = {}
+    for key in expected_keys:
+        image = torch.as_tensor(observation.images[key]).detach().cpu()
+        mask = torch.as_tensor(observation.image_masks[key]).detach().cpu().bool().reshape(-1)
+        images[key] = image
+
+        if image.ndim != 4 or tuple(image.shape[1:]) not in {
+            (224, 224, 3),
+            (3, 224, 224),
+        }:
+            raise RuntimeError(
+                f"Invalid multi-view image shape for {key}: {tuple(image.shape)}; "
+                "expected [B,224,224,3] or [B,3,224,224]"
+            )
+        if mask.numel() != image.shape[0] or not bool(mask.all()):
+            raise RuntimeError(
+                f"Invalid multi-view mask for {key}: shape={tuple(mask.shape)}, "
+                f"values={mask.tolist()}"
+            )
+
+        image_float = image.float()
+        per_sample_std = image_float.reshape(image.shape[0], -1).std(dim=1)
+        constant_samples = torch.nonzero(per_sample_std == 0, as_tuple=False).reshape(-1).tolist()
+        if constant_samples:
+            raise RuntimeError(
+                f"Invalid multi-view image for {key}: constant samples at batch indices "
+                f"{constant_samples}"
+            )
+        image_std = float(image_float.std())
+        if is_main:
+            logging.info(
+                "First batch view %s: shape=%s dtype=%s range=[%.3f, %.3f] "
+                "std=%.3f mask_all_true=%s",
+                key,
+                tuple(image.shape),
+                image.dtype,
+                float(image_float.min()),
+                float(image_float.max()),
+                image_std,
+                bool(mask.all()),
+            )
+
+    for left, right in (
+        ("base_0_rgb", "left_wrist_0_rgb"),
+        ("base_0_rgb", "right_wrist_0_rgb"),
+        ("left_wrist_0_rgb", "right_wrist_0_rgb"),
+    ):
+        equal_samples = (
+            (images[left] == images[right])
+            .reshape(images[left].shape[0], -1)
+            .all(dim=1)
+        )
+        duplicate_indices = torch.nonzero(
+            equal_samples, as_tuple=False
+        ).reshape(-1).tolist()
+        if duplicate_indices:
+            raise RuntimeError(
+                f"Invalid multi-view batch: {left} and {right} are exactly identical "
+                f"at batch indices {duplicate_indices}"
+            )
+        mean_abs_diff = float((images[left].float() - images[right].float()).abs().mean())
+        if is_main:
+            logging.info(
+                "First batch view difference %s vs %s: mean_abs_diff=%.3f",
+                left,
+                right,
+                mean_abs_diff,
+            )
+
+    if is_main:
+        logging.info(
+            "MULTI-VIEW FIRST BATCH CHECK PASSED: batch=%d actions_shape=%s",
+            images[expected_keys[0]].shape[0],
+            tuple(actions.shape),
+        )
+
+
 def init_wandb(config: _config.TrainConfig, *, resuming: bool, enabled: bool = True):
     """Initialize wandb logging."""
     if not enabled:
@@ -508,7 +596,7 @@ def train_loop(config: _config.TrainConfig):
                 logging.info("Multi-view (3-view) training: ENABLED")
                 logging.info("  Camera views: cam_high, cam_left_wrist, cam_right_wrist")
                 logging.info("  Primary view (observation/image): cam_high (source: raw_video/cam_high.mp4)")
-                logging.info("  NOTE: if raw_video/cam_high.mp4 is missing per-episode, a [WARN] will print at runtime")
+                logging.info("  Only episodes containing all three raw camera videos are used")
             else:
                 logging.info("Multi-view (3-view) training: DISABLED (single-view: video.mp4)")
 
@@ -518,6 +606,7 @@ def train_loop(config: _config.TrainConfig):
         if is_main
         else None
     )
+    first_batch_checked = False
 
     while global_step < config.num_train_steps:
         # Set epoch for distributed training
@@ -527,6 +616,10 @@ def train_loop(config: _config.TrainConfig):
         data_start = time.time()
         for observation, actions in loader:
             data_time = time.time() - data_start
+
+            if not first_batch_checked and getattr(config.data, "multi_view", False):
+                validate_and_log_multiview_batch(observation, actions, is_main=is_main)
+                first_batch_checked = True
 
             # Check if we've reached the target number of steps
             if global_step >= config.num_train_steps:
