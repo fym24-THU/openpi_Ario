@@ -18,6 +18,7 @@ PT_FILES = ["eef_torso.pt", "head.pt", "eef_left.pt", "gripper_cmd.pt", "eef_rig
 IMAGE_SIZE = (320, 240)
 
 CAMERA_VIEWS = ("cam_high", "cam_left_wrist", "cam_right_wrist")
+DISK_CACHE_FORMAT_VERSION = 2
 
 
 @dataclass
@@ -103,20 +104,42 @@ class ArioStreamingDataset:
 
     def _discover_episodes(self) -> list[tuple[str, str]]:
         s3 = self._get_s3()
-        episodes = []
+        episodes: set[tuple[str, str]] = set()
         for uri in self._config.s3_prefixes.split(","):
             uri = uri.strip()
             if not uri:
                 continue
             bucket, prefix = self._parse_s3_uri(uri)
             paginator = s3.get_paginator("list_objects_v2")
+            discovered_views: dict[str, set[str]] = {}
             for page in paginator.paginate(Bucket=bucket, Prefix=prefix):
                 for obj in page.get("Contents", []):
                     key = obj["Key"]
-                    if key.endswith("/video.mp4"):
+                    if self._config.multi_view:
+                        for cam in CAMERA_VIEWS:
+                            suffix = f"raw_video/{cam}.mp4"
+                            if key.endswith(suffix):
+                                ep_prefix = key[: -len(suffix)]
+                                discovered_views.setdefault(ep_prefix, set()).add(cam)
+                                break
+                    elif key.endswith("/video.mp4"):
                         ep_prefix = key[: key.rfind("/video.mp4") + 1]
-                        episodes.append((bucket, ep_prefix))
-        episodes.sort(key=lambda x: x[1])
+                        episodes.add((bucket, ep_prefix))
+
+            if self._config.multi_view:
+                required_views = set(CAMERA_VIEWS)
+                for ep_prefix, views in discovered_views.items():
+                    if views == required_views:
+                        episodes.add((bucket, ep_prefix))
+                    else:
+                        missing = sorted(required_views - views)
+                        print(
+                            f"[WARN] Skipping incomplete multi-view episode {ep_prefix}: "
+                            f"missing {missing}",
+                            flush=True,
+                        )
+
+        episodes = sorted(episodes, key=lambda x: (x[0], x[1]))
         if self._config.max_episodes is not None:
             episodes = episodes[: self._config.max_episodes]
         print(f"ArioStreamingDataset: found {len(episodes)} episodes on S3")
@@ -179,7 +202,7 @@ class ArioStreamingDataset:
         for attempt in range(_retries):
             ep_idx, frame_idx = self._global_to_local(index)
             bucket, prefix = self._episodes[ep_idx]
-            cache_key = prefix
+            cache_key = f"{bucket}/{prefix}"
 
             try:
                 state_action, frames_dict = self._get_episode_with_timeout(bucket, prefix, cache_key, _timeout)
@@ -252,14 +275,14 @@ class ArioStreamingDataset:
         disk_path = self._disk_cache_path(cache_key)
         if disk_path.exists():
             try:
-                data = np.load(disk_path, allow_pickle=True)
-                state_action = data["state_action"]
-                frames_dict = {}
-                for cam in CAMERA_VIEWS:
-                    if cam in data:
-                        frames_dict[cam] = list(data[cam])
-                    else:
-                        frames_dict[cam] = list(data["frames"])
+                with np.load(disk_path, allow_pickle=False) as data:
+                    state_action = data["state_action"]
+                    missing_cameras = [cam for cam in CAMERA_VIEWS if cam not in data]
+                    if missing_cameras:
+                        raise ValueError(
+                            f"Cache {disk_path} is missing camera arrays {missing_cameras}"
+                        )
+                    frames_dict = {cam: list(data[cam]) for cam in CAMERA_VIEWS}
                 disk_path.stat()
                 os.utime(disk_path, None)
                 self._cache[cache_key] = (state_action, frames_dict)
@@ -309,7 +332,18 @@ class ArioStreamingDataset:
 
     def _disk_cache_path(self, cache_key: str) -> Path:
         import hashlib
-        key_hash = hashlib.md5(cache_key.encode()).hexdigest()
+
+        cache_identity = "|".join(
+            [
+                f"v{DISK_CACHE_FORMAT_VERSION}",
+                cache_key,
+                f"rate={self._config.video_downsample_rate}",
+                f"size={self._config.image_size}",
+                f"multi_view={self._config.multi_view}",
+                f"skip_video={self._config.skip_video}",
+            ]
+        )
+        key_hash = hashlib.md5(cache_identity.encode()).hexdigest()
         cache_dir = Path(self._config.disk_cache_dir)
         cache_dir.mkdir(parents=True, exist_ok=True)
         return cache_dir / f"{key_hash}.npz"
@@ -380,15 +414,7 @@ class ArioStreamingDataset:
             try:
                 frames_dict[cam] = self._extract_video_frames(s3, bucket, video_key)
             except Exception as e:
-                if cam == "cam_high":
-                    print(
-                        f"[WARN] raw_video/cam_high.mp4 not found for {prefix}, "
-                        f"falling back to video.mp4. Error: {e}",
-                        flush=True,
-                    )
-                    frames_dict[cam] = self._extract_video_frames(s3, bucket, prefix + "video.mp4")
-                else:
-                    raise RuntimeError(f"Missing required camera view {cam}: {e}")
+                raise RuntimeError(f"Failed to load required camera view {cam}: {e}") from e
         return frames_dict
 
     def _decode_video(self, path: Path) -> list[np.ndarray]:

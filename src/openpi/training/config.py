@@ -545,6 +545,9 @@ class ArioXingchenDataConfig(DataConfigFactory):
                 _transforms.RepackTransform(
                     {
                         "observation/image": "observation/image",
+                        "observation/cam_high": "observation/cam_high",
+                        "observation/cam_left_wrist": "observation/cam_left_wrist",
+                        "observation/cam_right_wrist": "observation/cam_right_wrist",
                         "observation/state": "observation/state",
                         "actions": "actions",
                         "prompt": "prompt",

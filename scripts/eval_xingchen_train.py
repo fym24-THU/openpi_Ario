@@ -69,10 +69,12 @@ def main():
         min_frames=data_cfg.min_frames,
         image_size=data_cfg.image_size,
         task=data_cfg.default_prompt,
+        load_instructions=data_cfg.load_instructions,
         cache_size=32,
         max_episodes=data_cfg.max_episodes,
         disk_cache_dir=data_cfg.disk_cache_dir,
         disk_cache_max_gb=data_cfg.disk_cache_max_gb,
+        multi_view=data_cfg.multi_view,
     )
     action_horizon = train_config.model.action_horizon
 
@@ -98,6 +100,9 @@ def main():
 
         obs = {
             "observation/image": sample["observation/image"],
+            "observation/cam_high": sample["observation/cam_high"],
+            "observation/cam_left_wrist": sample["observation/cam_left_wrist"],
+            "observation/cam_right_wrist": sample["observation/cam_right_wrist"],
             "observation/state": sample["observation/state"],
             "prompt": sample["prompt"],
         }
