@@ -73,6 +73,7 @@ def main():
         max_episodes=data_cfg.max_episodes,
         disk_cache_dir=data_cfg.disk_cache_dir,
         disk_cache_max_gb=data_cfg.disk_cache_max_gb,
+        instruction_key=data_cfg.instruction_key,
     )
     action_horizon = train_config.model.action_horizon
 

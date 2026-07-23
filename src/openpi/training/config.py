@@ -532,6 +532,7 @@ class ArioXingchenDataConfig(DataConfigFactory):
     max_episodes: int | None = None
     disk_cache_dir: str = "/tmp/ario_disk_cache"
     disk_cache_max_gb: float = 200.0
+    instruction_key: str | None = None
 
     @override
     def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
@@ -576,6 +577,7 @@ class ArioXingchenDataConfig(DataConfigFactory):
             max_episodes=self.max_episodes,
             disk_cache_dir=self.disk_cache_dir,
             disk_cache_max_gb=self.disk_cache_max_gb,
+            instruction_key=self.instruction_key,
         )
 
         return dataclasses.replace(
@@ -1087,6 +1089,49 @@ _CONFIGS = [
             s3_prefixes="s3://shengshu-world-model-data/ARIO-new/jianzhi/foldclothes/",
             s3_endpoint="https://oss-cn-wulanchabu.aliyuncs.com",
             use_delta_actions=True,
+        ),
+        pytorch_weight_path="./checkpoints/pi05_base_pytorch",
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=5_000,
+            peak_lr=5e-5,
+            decay_steps=500_000,
+            decay_lr=5e-5,
+        ),
+        optimizer=_optimizer.AdamW(clip_gradient_norm=1.0),
+        ema_decay=0.999,
+        num_train_steps=100_000,
+        batch_size=64,
+        save_interval=5000,
+        keep_period=10_000,
+    ),
+    #
+    # Xingchen Bench_XC03 PP3-PP10 — single-view streaming from Ario/OSS.
+    #
+    TrainConfig(
+        name="pi05_xingchen_bench_xc03_pp3_pp10",
+        exp_name="bench_xc03_pp3_pp10",
+        model=pi0_config.Pi0Config(
+            pi05=True,
+            action_dim=32,
+            action_horizon=50,
+        ),
+        data=ArioXingchenDataConfig(
+            repo_id="xingchen/bench_xc03_pp3_pp10",
+            s3_prefixes=(
+                "s3://shengshu-world-model-data/ARIO-new/xingchen/Bench_XC03_PP3_20260605_01/,"
+                "s3://shengshu-world-model-data/ARIO-new/xingchen/Bench_XC03_PP4_260605_01/,"
+                "s3://shengshu-world-model-data/ARIO-new/xingchen/Bench_XC03_PP5_260605_01/,"
+                "s3://shengshu-world-model-data/ARIO-new/xingchen/Bench_XC03_PP6_260606_01/,"
+                "s3://shengshu-world-model-data/ARIO-new/xingchen/Bench_XC03_PP7_260608_01/,"
+                "s3://shengshu-world-model-data/ARIO-new/xingchen/Bench_XC03_PP8_260608_01/,"
+                "s3://shengshu-world-model-data/ARIO-new/xingchen/Bench_XC03_PP9_260609_01/,"
+                "s3://shengshu-world-model-data/ARIO-new/xingchen/Bench_XC03_PP10_260609_01/"
+            ),
+            s3_endpoint="https://oss-cn-wulanchabu.aliyuncs.com",
+            min_frames=1,
+            use_delta_actions=True,
+            default_prompt="桌面物品分拣与放置",
+            instruction_key="instruction_qwen37_plus_coarse",
         ),
         pytorch_weight_path="./checkpoints/pi05_base_pytorch",
         lr_schedule=_optimizer.CosineDecaySchedule(

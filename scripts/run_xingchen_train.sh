@@ -28,6 +28,7 @@ fi
 echo "Using $NUM_GPUS GPU(s)"
 
 echo "=== Step 0: Single Vision ==="
+CONFIG_NAME="pi05_xingchen_bench_xc03_pp3_pp10"
 echo "=== Step 1: Convert JAX weights to PyTorch (if not already done) ==="
 PYTORCH_WEIGHT_DIR="./checkpoints/pi05_base_pytorch"
 if [ -f "$PYTORCH_WEIGHT_DIR/model.safetensors" ]; then
@@ -36,13 +37,12 @@ else
     echo "Converting JAX weights to PyTorch format..."
     python examples/convert_jax_model_to_pytorch.py \
         --checkpoint_dir ~/.cache/openpi/openpi-assets/checkpoints/pi05_base \
-        --config_name pi05_xingchen_ario \
+        --config_name "$CONFIG_NAME" \
         --output_path "$PYTORCH_WEIGHT_DIR" \
         --precision bfloat16
 fi
 
 echo "=== Step 2: Compute norm stats (if not already done) ==="
-CONFIG_NAME="pi05_xingchen_ario"
 NORM_STATS_PATH=$(python -c "
 from openpi.training.config import get_config
 cfg = get_config('$CONFIG_NAME')
@@ -64,6 +64,6 @@ echo "Using MASTER_ADDR=$MASTER_ADDR MASTER_PORT=$MASTER_PORT"
 
 torchrun --nnodes=1 --nproc_per_node=$NUM_GPUS \
     --master_addr="$MASTER_ADDR" --master_port="$MASTER_PORT" \
-    scripts/train_pytorch.py pi05_xingchen_ario --overwrite
+    scripts/train_pytorch.py "$CONFIG_NAME" --overwrite
 
 echo "=== Done ==="

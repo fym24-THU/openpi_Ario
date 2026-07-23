@@ -21,10 +21,18 @@ PT_FILES = ["eef_torso.pt", "head.pt", "eef_left.pt", "gripper_cmd.pt", "eef_rig
 IMAGE_SIZE = (320, 240)
 
 # New data format: a single state.pt. It may be either a [T, 31] tensor or a
-# dict containing left/right end poses and gripper values.
+# dict containing torso/head/arm end poses and gripper values.
 STATE_PT_FILE = "state.pt"
-STATE_DICT_KEYS = ("endpose_left", "endpose_right", "gripper_left", "gripper_right")
+STATE_DICT_KEYS = (
+    "endpose_torso",
+    "qpos_head",
+    "endpose_left",
+    "gripper_left",
+    "endpose_right",
+    "gripper_right",
+)
 INDEX_CACHE_VERSION = 1
+EPISODE_CACHE_VERSION = 2
 INDEX_CACHE_WAIT_SECONDS = 30 * 60
 
 
@@ -41,6 +49,7 @@ class ArioConfig:
     disk_cache_dir: str = "/tmp/ario_disk_cache"
     disk_cache_max_gb: float = 200.0
     skip_video: bool = False
+    instruction_key: str | None = None
 
 
 class ArioStreamingDataset:
@@ -58,6 +67,7 @@ class ArioStreamingDataset:
 
         # LRU cache for decoded episodes: ep_key -> (state_action, frames)
         self._cache: OrderedDict[str, tuple[np.ndarray, list[np.ndarray]]] = OrderedDict()
+        self._instruction_cache: OrderedDict[str, list[tuple[int, int, str]]] = OrderedDict()
         self._cache_size = config.cache_size
 
         # Discover episodes and build global frame index
@@ -77,6 +87,7 @@ class ArioStreamingDataset:
         state["_s3"] = None
         state["_pid"] = None
         state["_cache"] = OrderedDict()
+        state["_instruction_cache"] = OrderedDict()
         return state
 
     def _get_s3(self):
@@ -102,6 +113,7 @@ class ArioStreamingDataset:
                 **kwargs,
             )
             self._cache.clear()
+            self._instruction_cache.clear()
         return self._s3
 
     def _discover_episodes(self) -> list[tuple[str, str]]:
@@ -312,12 +324,14 @@ class ArioStreamingDataset:
 
                 state = state_action[frame_idx]
                 actions = self._get_action_chunk(state_action, frame_idx)
+                raw_frame_idx = frame_idx * self._config.video_downsample_rate
+                prompt = self._get_prompt(bucket, prefix, raw_frame_idx)
 
                 return {
                     "observation/image": image,
                     "observation/state": state,
                     "actions": actions,
-                    "prompt": self._config.task,
+                    "prompt": prompt,
                 }
             except (TimeoutError, Exception) as e:
                 print(f"[WARN] Episode fetch failed (attempt {attempt+1}/{_retries}), ep={ep_idx}: {e}. Skipping.", flush=True)
@@ -429,7 +443,8 @@ class ArioStreamingDataset:
 
     def _disk_cache_path(self, cache_key: str) -> Path:
         import hashlib
-        key_hash = hashlib.md5(cache_key.encode()).hexdigest()
+        versioned_key = f"{EPISODE_CACHE_VERSION}:{cache_key}"
+        key_hash = hashlib.md5(versioned_key.encode()).hexdigest()
         cache_dir = Path(self._config.disk_cache_dir)
         cache_dir.mkdir(parents=True, exist_ok=True)
         return cache_dir / f"{key_hash}.npz"
@@ -484,11 +499,13 @@ class ArioStreamingDataset:
             value_types = {key: type(state[key]).__name__ for key in STATE_DICT_KEYS}
             raise TypeError(f"State dict values must be tensors, got {value_types}")
 
-        endpose_left, endpose_right, gripper_left, gripper_right = tensors
+        endpose_torso, qpos_head, endpose_left, gripper_left, endpose_right, gripper_right = tensors
         expected_widths = {
+            "endpose_torso": 9,
+            "qpos_head": 2,
             "endpose_left": 9,
-            "endpose_right": 9,
             "gripper_left": 1,
+            "endpose_right": 9,
             "gripper_right": 1,
         }
         lengths = {value.shape[0] for value in tensors if value.ndim == 2}
@@ -502,16 +519,75 @@ class ArioStreamingDataset:
         if len(lengths) != 1:
             raise ValueError(f"State dict tensors have inconsistent lengths: {[tuple(value.shape) for value in tensors]}")
 
-        # Existing Xingchen layout:
+        # Xingchen layout:
         # torso(9) + head(2) + left(9) + left gripper(1) + right(9) + right gripper(1).
-        # The new dict format has no torso/head values, so those 11 dimensions are fixed at zero.
-        num_frames = endpose_left.shape[0]
-        torso_and_head = torch.zeros((num_frames, 11), dtype=endpose_left.dtype)
         state_action = torch.cat(
-            [torso_and_head, endpose_left, gripper_left, endpose_right, gripper_right],
+            [endpose_torso, qpos_head, endpose_left, gripper_left, endpose_right, gripper_right],
             dim=-1,
         )
         return state_action.detach().cpu().numpy().astype(np.float32)
+
+    def _get_prompt(self, bucket: str, prefix: str, raw_frame_idx: int) -> str:
+        instruction_key = self._config.instruction_key
+        if not instruction_key:
+            return self._config.task
+
+        cache_key = f"{bucket}/{prefix}"
+        if cache_key not in self._instruction_cache:
+            try:
+                s3 = self._get_s3()
+                data = self._s3_download_bytes(s3, bucket, prefix + "instructions.json")
+                segments = self._deserialize_instructions(data, instruction_key)
+            except Exception as exc:
+                print(
+                    f"[WARN] Failed to load {cache_key}instructions.json "
+                    f"({type(exc).__name__}: {exc}); using fallback prompt.",
+                    flush=True,
+                )
+                segments = []
+            self._instruction_cache[cache_key] = segments
+            if len(self._instruction_cache) > self._cache_size:
+                self._instruction_cache.popitem(last=False)
+        else:
+            self._instruction_cache.move_to_end(cache_key)
+
+        return self._select_instruction(self._instruction_cache[cache_key], raw_frame_idx, self._config.task)
+
+    @staticmethod
+    def _deserialize_instructions(data: bytes, instruction_key: str) -> list[tuple[int, int, str]]:
+        payload = json.loads(data)
+        raw_segments = payload.get(instruction_key)
+        if not isinstance(raw_segments, list) or not raw_segments:
+            raise ValueError(f"instructions.json has no non-empty list at {instruction_key!r}")
+
+        segments = []
+        for index, segment in enumerate(raw_segments):
+            if not isinstance(segment, dict):
+                raise TypeError(f"{instruction_key}[{index}] must be an object")
+            instruction = segment.get("instruction")
+            start_frame = segment.get("start_frame")
+            end_frame = segment.get("end_frame")
+            if not isinstance(instruction, str) or not instruction.strip():
+                raise ValueError(f"{instruction_key}[{index}].instruction must be a non-empty string")
+            if not isinstance(start_frame, int) or not isinstance(end_frame, int) or start_frame > end_frame:
+                raise ValueError(f"{instruction_key}[{index}] has an invalid frame range")
+            segments.append((start_frame, end_frame, instruction.strip()))
+        return sorted(segments, key=lambda segment: (segment[0], segment[1]))
+
+    @staticmethod
+    def _select_instruction(segments: list[tuple[int, int, str]], raw_frame_idx: int, fallback: str) -> str:
+        if not segments:
+            return fallback
+        for start_frame, end_frame, instruction in segments:
+            if start_frame <= raw_frame_idx <= end_frame:
+                return instruction
+
+        # Annotation ranges can be slightly shorter than state/video. Use the
+        # nearest segment for uncovered head/tail frames and annotation gaps.
+        return min(
+            segments,
+            key=lambda segment: min(abs(raw_frame_idx - segment[0]), abs(raw_frame_idx - segment[1])),
+        )[2]
 
     def _extract_video_frames(self, s3, bucket: str, video_key: str) -> list[np.ndarray]:
         data = self._s3_download_bytes(s3, bucket, video_key)
