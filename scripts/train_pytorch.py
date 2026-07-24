@@ -447,10 +447,29 @@ def train_loop(config: _config.TrainConfig):
         logging.info(f"Loading weights from: {config.pytorch_weight_path}")
 
         model_path = os.path.join(config.pytorch_weight_path, "model.safetensors")
-        safetensors.torch.load_model(
-            (model.module if isinstance(model, torch.nn.parallel.DistributedDataParallel) else model), model_path
-        )
-        logging.info(f"Loaded PyTorch weights from {config.pytorch_weight_path}")
+        actual_model = model.module if isinstance(model, torch.nn.parallel.DistributedDataParallel) else model
+
+        if getattr(config, "load_vlm_only", False):
+            # Use an allowlist so the action expert and all flow-matching projections
+            # remain at their randomly initialized values.
+            vlm_prefix = "paligemma_with_expert.paligemma."
+            pretrained_state = safetensors.torch.load_file(model_path)
+            vlm_state = {k: v for k, v in pretrained_state.items() if k.startswith(vlm_prefix)}
+            if not vlm_state:
+                raise ValueError(f"No VLM weights with prefix {vlm_prefix!r} found in {model_path}")
+
+            incompatible_keys = actual_model.load_state_dict(vlm_state, strict=False)
+            if incompatible_keys.unexpected_keys:
+                raise ValueError(f"Unexpected VLM keys in {model_path}: {incompatible_keys.unexpected_keys}")
+
+            logging.info(
+                f"Loaded VLM-only weights from {config.pytorch_weight_path} "
+                f"({len(vlm_state)} VLM keys loaded; "
+                f"{len(pretrained_state) - len(vlm_state)} non-VLM keys skipped)"
+            )
+        else:
+            safetensors.torch.load_model(actual_model, model_path)
+            logging.info(f"Loaded PyTorch weights from {config.pytorch_weight_path}")
 
     # Optimizer + learning rate schedule from config
     warmup_steps = config.lr_schedule.warmup_steps

@@ -608,6 +608,9 @@ class TrainConfig:
     # Optional path to a PyTorch checkpoint to load weights from.
     pytorch_weight_path: str | None = None
 
+    # If true, only load VLM weights from pytorch_weight_path, skip flow matching projections.
+    load_vlm_only: bool = False
+
     # Precision for PyTorch training.
     pytorch_training_precision: Literal["bfloat16", "float32"] = "bfloat16"
 
@@ -1089,6 +1092,7 @@ _CONFIGS = [
             use_delta_actions=True,
         ),
         pytorch_weight_path="./checkpoints/pi05_base_pytorch",
+        load_vlm_only=True,
         lr_schedule=_optimizer.CosineDecaySchedule(
             warmup_steps=5_000,
             peak_lr=5e-5,
@@ -1122,6 +1126,7 @@ _CONFIGS = [
             use_delta_actions=True,
         ),
         pytorch_weight_path="./checkpoints/pi05_base_pytorch",
+        load_vlm_only=True,
         lr_schedule=_optimizer.CosineDecaySchedule(
             warmup_steps=50,
             peak_lr=5e-5,
