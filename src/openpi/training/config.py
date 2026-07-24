@@ -528,10 +528,10 @@ class ArioXingchenDataConfig(DataConfigFactory):
     image_size: tuple[int, int] = (320, 240)
     use_delta_actions: bool = True
     default_prompt: str = "fold clothes"
-    cache_size: int = 32
+    cache_size: int = 128
     max_episodes: int | None = None
     disk_cache_dir: str = "/tmp/ario_disk_cache"
-    disk_cache_max_gb: float = 200.0
+    disk_cache_max_gb: float = 500.0
 
     @override
     def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:

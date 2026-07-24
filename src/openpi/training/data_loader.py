@@ -50,6 +50,90 @@ class DataLoader(Protocol[T_co]):
         raise NotImplementedError("Subclasses of DataLoader should implement __iter__.")
 
 
+class EpisodeAwareDistributedSampler(torch.utils.data.Sampler[int]):
+    """Shuffle episodes while keeping each episode's frames adjacent.
+
+    All ranks build the same episode-local global ordering, then take strided
+    shards so they receive equal sample counts without breaking DDP.
+    """
+
+    def __init__(
+        self,
+        episode_lengths: Sequence[int],
+        *,
+        num_replicas: int = 1,
+        rank: int = 0,
+        shuffle: bool = True,
+        seed: int = 0,
+        drop_last: bool = False,
+    ):
+        if num_replicas <= 0:
+            raise ValueError(f"num_replicas must be positive, got {num_replicas}")
+        if rank < 0 or rank >= num_replicas:
+            raise ValueError(f"rank must be in [0, {num_replicas}), got {rank}")
+        if not episode_lengths or any(length <= 0 for length in episode_lengths):
+            raise ValueError("episode_lengths must contain only positive lengths")
+
+        self._episode_lengths = tuple(int(length) for length in episode_lengths)
+        self._episode_offsets = []
+        offset = 0
+        for length in self._episode_lengths:
+            self._episode_offsets.append(offset)
+            offset += length
+
+        self._dataset_size = offset
+        self._num_replicas = num_replicas
+        self._rank = rank
+        self._shuffle = shuffle
+        self._seed = seed
+        self._drop_last = drop_last
+        self.epoch = 0
+
+        if drop_last:
+            self._num_samples = self._dataset_size // self._num_replicas
+        else:
+            self._num_samples = (self._dataset_size + self._num_replicas - 1) // self._num_replicas
+        self._total_size = self._num_samples * self._num_replicas
+
+    def __iter__(self):
+        generator = torch.Generator()
+        generator.manual_seed(self._seed + self.epoch)
+
+        if self._shuffle:
+            episode_order = torch.randperm(len(self._episode_lengths), generator=generator).tolist()
+        else:
+            episode_order = list(range(len(self._episode_lengths)))
+
+        indices = []
+        for episode_idx in episode_order:
+            length = self._episode_lengths[episode_idx]
+            offset = self._episode_offsets[episode_idx]
+            if self._shuffle:
+                local_indices = torch.randperm(length, generator=generator).tolist()
+                indices.extend(offset + index for index in local_indices)
+            else:
+                indices.extend(range(offset, offset + length))
+
+        if self._drop_last:
+            indices = indices[: self._total_size]
+        elif len(indices) < self._total_size:
+            padding_size = self._total_size - len(indices)
+            indices.extend((indices * ((padding_size // len(indices)) + 1))[:padding_size])
+
+        rank_indices = indices[self._rank : self._total_size : self._num_replicas]
+        if len(rank_indices) != self._num_samples:
+            raise RuntimeError(
+                f"Sampler produced {len(rank_indices)} samples for rank {self._rank}, expected {self._num_samples}"
+            )
+        return iter(rank_indices)
+
+    def __len__(self) -> int:
+        return self._num_samples
+
+    def set_epoch(self, epoch: int) -> None:
+        self.epoch = epoch
+
+
 class TransformedDataset(Dataset[T_co]):
     def __init__(self, dataset: Dataset, transforms: Sequence[_transforms.DataTransformFn]):
         self._dataset = dataset
@@ -304,25 +388,44 @@ def create_torch_data_loader(
             execute in the main process.
         seed: The seed to use for shuffling the data.
     """
-    dataset = create_torch_dataset(data_config, action_horizon, model_config)
-    dataset = transform_dataset(dataset, data_config, skip_norm_stats=skip_norm_stats)
+    raw_dataset = create_torch_dataset(data_config, action_horizon, model_config)
+    dataset = transform_dataset(raw_dataset, data_config, skip_norm_stats=skip_norm_stats)
 
     # Use TorchDataLoader for both frameworks
     # For PyTorch DDP, create DistributedSampler and divide batch size by world size
     # For JAX, divide by process count
     sampler = None
     if framework == "pytorch":
-        if torch.distributed.is_initialized():
-            sampler = torch.utils.data.distributed.DistributedSampler(
-                dataset,
-                num_replicas=torch.distributed.get_world_size(),
-                rank=torch.distributed.get_rank(),
+        distributed = torch.distributed.is_initialized()
+        world_size = torch.distributed.get_world_size() if distributed else 1
+        rank = torch.distributed.get_rank() if distributed else 0
+        episode_lengths = getattr(raw_dataset, "episode_lengths", None)
+        if episode_lengths is not None:
+            sampler = EpisodeAwareDistributedSampler(
+                episode_lengths,
+                num_replicas=world_size,
+                rank=rank,
                 shuffle=shuffle,
+                seed=seed,
                 drop_last=True,
             )
-            local_batch_size = batch_size // torch.distributed.get_world_size()
-        else:
-            local_batch_size = batch_size
+            logging.info(
+                "Using episode-aware sampler for %d episodes on rank %d/%d",
+                len(episode_lengths),
+                rank,
+                world_size,
+            )
+        elif distributed:
+            sampler = torch.utils.data.distributed.DistributedSampler(
+                dataset,
+                num_replicas=world_size,
+                rank=rank,
+                shuffle=shuffle,
+                seed=seed,
+                drop_last=True,
+            )
+
+        local_batch_size = batch_size // world_size if distributed else batch_size
     else:
         local_batch_size = batch_size // jax.process_count()
 
@@ -429,6 +532,8 @@ class TorchDataLoader:
                 jax.sharding.PartitionSpec("B"),
             )
         self._num_batches = num_batches
+        self._sampler = sampler
+        self._epoch = 0
 
         mp_context = None
         if num_workers > 0:
@@ -471,6 +576,15 @@ class TorchDataLoader:
                     yield jax.tree.map(lambda x: jax.make_array_from_process_local_data(self._sharding, x), batch)
                 else:
                     yield jax.tree.map(torch.as_tensor, batch)
+            self.set_epoch(self._epoch + 1)
+
+    def __len__(self) -> int:
+        return len(self._data_loader)
+
+    def set_epoch(self, epoch: int) -> None:
+        self._epoch = epoch
+        if self._sampler is not None and hasattr(self._sampler, "set_epoch"):
+            self._sampler.set_epoch(epoch)
 
 
 def _collate_fn(items):
@@ -543,3 +657,10 @@ class DataLoaderImpl(DataLoader):
     def __iter__(self):
         for batch in self._data_loader:
             yield _model.Observation.from_dict(batch), batch["actions"]
+
+    def __len__(self) -> int:
+        return len(self._data_loader)
+
+    def set_epoch(self, epoch: int) -> None:
+        if hasattr(self._data_loader, "set_epoch"):
+            self._data_loader.set_epoch(epoch)

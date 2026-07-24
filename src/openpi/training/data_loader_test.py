@@ -7,6 +7,43 @@ from openpi.training import config as _config
 from openpi.training import data_loader as _data_loader
 
 
+def test_episode_aware_distributed_sampler_preserves_locality():
+    episode_lengths = (6, 4, 5)
+    rank0 = _data_loader.EpisodeAwareDistributedSampler(
+        episode_lengths, num_replicas=2, rank=0, shuffle=False, drop_last=True
+    )
+    rank1 = _data_loader.EpisodeAwareDistributedSampler(
+        episode_lengths, num_replicas=2, rank=1, shuffle=False, drop_last=True
+    )
+
+    assert list(rank0) == [0, 2, 4, 6, 8, 10, 12]
+    assert list(rank1) == [1, 3, 5, 7, 9, 11, 13]
+
+
+def test_episode_aware_distributed_sampler_shuffles_by_epoch():
+    sampler = _data_loader.EpisodeAwareDistributedSampler(
+        (8, 8, 8), num_replicas=2, rank=0, shuffle=True, seed=7, drop_last=True
+    )
+
+    epoch0 = list(sampler)
+    sampler.set_epoch(1)
+    epoch1 = list(sampler)
+
+    assert epoch0 != epoch1
+    assert len(epoch0) == len(epoch1) == 12
+
+    def episode_id(index: int) -> int:
+        return index // 8
+
+    # Once sampling leaves an episode, it should not return to it in the same epoch.
+    episode_runs = [episode_id(epoch0[0])]
+    for index in epoch0[1:]:
+        current = episode_id(index)
+        if current != episode_runs[-1]:
+            episode_runs.append(current)
+    assert len(episode_runs) == len(set(episode_runs))
+
+
 def test_torch_data_loader():
     config = pi0_config.Pi0Config(action_dim=24, action_horizon=50, max_token_len=48)
     dataset = _data_loader.FakeDataset(config, 16)

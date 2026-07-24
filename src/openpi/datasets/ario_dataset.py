@@ -36,10 +36,10 @@ class ArioConfig:
     min_frames: int = 1885
     image_size: tuple[int, int] = IMAGE_SIZE
     task: str = "fold clothes"
-    cache_size: int = 32
+    cache_size: int = 128
     max_episodes: int | None = None
     disk_cache_dir: str = "/tmp/ario_disk_cache"
-    disk_cache_max_gb: float = 200.0
+    disk_cache_max_gb: float = 500.0
     skip_video: bool = False
 
 
@@ -289,6 +289,11 @@ class ArioStreamingDataset:
     def __len__(self) -> int:
         return self._cumulative[-1] if self._cumulative else 0
 
+    @property
+    def episode_lengths(self) -> tuple[int, ...]:
+        """Return frame counts so samplers can preserve episode locality."""
+        return tuple(self._episode_lengths)
+
     def __getitem__(self, index: int, _retries: int = 3, _timeout: float = 60.0) -> dict:
         import random
         import signal
@@ -320,7 +325,10 @@ class ArioStreamingDataset:
                     "prompt": self._config.task,
                 }
             except (TimeoutError, Exception) as e:
-                print(f"[WARN] Episode fetch failed (attempt {attempt+1}/{_retries}), ep={ep_idx}: {e}. Skipping.", flush=True)
+                print(
+                    f"[WARN] Episode fetch failed (attempt {attempt + 1}/{_retries}), ep={ep_idx}: {e}. Skipping.",
+                    flush=True,
+                )
                 index = random.randint(0, len(self) - 1)
 
         raise RuntimeError(f"Failed to fetch any episode after {_retries} retries")
@@ -348,6 +356,7 @@ class ArioStreamingDataset:
     def _global_to_local(self, index: int) -> tuple[int, int]:
         """Convert global frame index to (episode_idx, local_frame_idx)."""
         import bisect
+
         ep_idx = bisect.bisect_right(self._cumulative, index)
         local = index - (self._cumulative[ep_idx - 1] if ep_idx > 0 else 0)
         return ep_idx, local
@@ -358,9 +367,7 @@ class ArioStreamingDataset:
         indices = [min(frame_idx + i, n - 1) for i in range(self._action_horizon)]
         return state_action[indices]
 
-    def _get_episode_state(
-        self, bucket: str, prefix: str, cache_key: str, timeout: float
-    ) -> np.ndarray:
+    def _get_episode_state(self, bucket: str, prefix: str, cache_key: str, timeout: float) -> np.ndarray:
         """Get only state/action data (no video). Used when skip_video=True."""
         state_key = cache_key + "__state"
         if state_key in self._cache:
@@ -381,9 +388,7 @@ class ArioStreamingDataset:
 
         return state_action
 
-    def _get_episode(
-        self, bucket: str, prefix: str, cache_key: str
-    ) -> tuple[np.ndarray, list[np.ndarray]]:
+    def _get_episode(self, bucket: str, prefix: str, cache_key: str) -> tuple[np.ndarray, list[np.ndarray]]:
         """Get episode data, using memory LRU cache backed by disk cache."""
         if cache_key in self._cache:
             self._cache.move_to_end(cache_key)
@@ -429,6 +434,7 @@ class ArioStreamingDataset:
 
     def _disk_cache_path(self, cache_key: str) -> Path:
         import hashlib
+
         key_hash = hashlib.md5(cache_key.encode()).hexdigest()
         cache_dir = Path(self._config.disk_cache_dir)
         cache_dir.mkdir(parents=True, exist_ok=True)
@@ -500,7 +506,9 @@ class ArioStreamingDataset:
         if invalid_shapes:
             raise ValueError(f"Unexpected state dict tensor shapes: {invalid_shapes}")
         if len(lengths) != 1:
-            raise ValueError(f"State dict tensors have inconsistent lengths: {[tuple(value.shape) for value in tensors]}")
+            raise ValueError(
+                f"State dict tensors have inconsistent lengths: {[tuple(value.shape) for value in tensors]}"
+            )
 
         # Existing Xingchen layout:
         # torso(9) + head(2) + left(9) + left gripper(1) + right(9) + right gripper(1).
