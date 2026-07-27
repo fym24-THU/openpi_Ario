@@ -24,8 +24,10 @@ def find_latest_log_dir(base: Path) -> Path:
 def main():
     base = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("logs")
 
-    # If user passed a directory containing stderr.log directly, use it
-    if (base / "stderr.log").exists():
+    # If user passed a file directly, use it
+    if base.is_file():
+        log_file = base
+    elif (base / "stderr.log").exists():
         log_file = base / "stderr.log"
     elif (base / "attempt_0/0/stderr.log").exists():
         log_file = base / "attempt_0/0/stderr.log"
@@ -55,7 +57,7 @@ def main():
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
 
-    out_path = base / "loss_curve.png" if base != Path("logs") else Path("logs/loss_curve.png")
+    out_path = log_file.with_suffix(".png")
     plt.savefig(out_path, dpi=150)
     print(f"Saved to {out_path}")
 

@@ -146,6 +146,30 @@ def get_model_parameters(model):
     )
 
 
+def create_weight_decay_param_groups(model, weight_decay):
+    """Split trainable parameters into AdamW decay and no-decay groups.
+
+    Transformer matrix weights (including linear and embedding weights) are
+    decayed. Biases, normalization scales, and other scalar/vector parameters
+    are not: these parameters have fewer than two dimensions.
+    """
+    decay_params = []
+    no_decay_params = []
+
+    for param in model.parameters():
+        if not param.requires_grad:
+            continue
+        if param.ndim >= 2:
+            decay_params.append(param)
+        else:
+            no_decay_params.append(param)
+
+    return [
+        {"params": decay_params, "weight_decay": weight_decay},
+        {"params": no_decay_params, "weight_decay": 0.0},
+    ]
+
+
 def save_checkpoint(model, optimizer, global_step, config, is_main, data_config):
     """Save a checkpoint with model state, optimizer state, and metadata."""
     if not is_main:
@@ -477,13 +501,14 @@ def train_loop(config: _config.TrainConfig):
     decay_steps = config.lr_schedule.decay_steps
     end_lr = config.lr_schedule.decay_lr
 
-    # Create optimizer with config parameters
+    # Apply weight decay only to matrix weights. Norm parameters, biases, and
+    # scalar parameters must not be decayed.
+    optimizer_param_groups = create_weight_decay_param_groups(model, config.optimizer.weight_decay)
     optim = torch.optim.AdamW(
-        model.parameters(),
+        optimizer_param_groups,
         lr=peak_lr,
         betas=(config.optimizer.b1, config.optimizer.b2),
         eps=config.optimizer.eps,
-        weight_decay=config.optimizer.weight_decay,
     )
 
     # Load checkpoint if resuming
