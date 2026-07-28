@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-cd /home/fanyiming/openpi
+cd /home/fanyiming/openpi_Ario
 export HOME=/home/fanyiming
 source .venv/bin/activate
 
@@ -9,10 +9,16 @@ source .venv/bin/activate
 export AWS_ACCESS_KEY_ID="${ALIBABA_ACCESS_KEY_ID:?Set ALIBABA_ACCESS_KEY_ID env var}"
 export AWS_SECRET_ACCESS_KEY="${ALIBABA_ACCESS_KEY_SECRET:?Set ALIBABA_ACCESS_KEY_SECRET env var}"
 export WANDB_MODE=disabled
-export NCCL_SOCKET_IFNAME=eth0
-export GLOO_SOCKET_IFNAME=eth0
+# Auto-detect network interface for NCCL (don't hardcode eth0)
+NCCL_IF=$(cat /sys/class/net/*/operstate 2>/dev/null | grep -l up /sys/class/net/*/operstate 2>/dev/null | head -1 | cut -d'/' -f5 || echo "")
+if [ -n "$NCCL_IF" ]; then
+    export NCCL_SOCKET_IFNAME=$NCCL_IF
+    export GLOO_SOCKET_IFNAME=$NCCL_IF
+fi
 export TORCHELASTIC_ERROR_FILE=/tmp/torch_error.json
 
+# Install transformers_replace patches
+cp -r ./src/openpi/models_pytorch/transformers_replace/* .venv/lib/python3.11/site-packages/transformers/
 
 # Number of GPUs (auto-detect or override via env)
 NUM_GPUS=${NUM_GPUS:-$(nvidia-smi -L 2>/dev/null | wc -l)}

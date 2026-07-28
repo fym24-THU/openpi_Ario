@@ -1095,7 +1095,7 @@ _CONFIGS = [
             ),
             use_delta_actions=True,
         ),
-        pytorch_weight_path="./checkpoints/pi05_base_pytorch",
+        pytorch_weight_path="/home/fanyiming/openpi_Ario/checkpoints/pi05_xingchen_ario/jianzhi_foldclothes",
         lr_schedule=_optimizer.CosineDecaySchedule(
             warmup_steps=5_000,
             peak_lr=5e-5,
@@ -1128,7 +1128,7 @@ _CONFIGS = [
             max_episodes=3,
             use_delta_actions=True,
         ),
-        pytorch_weight_path="./checkpoints/pi05_base_pytorch",
+        pytorch_weight_path="/home/fanyiming/openpi_Ario/checkpoints/pi05_xingchen_ario/jianzhi_foldclothes",
         lr_schedule=_optimizer.CosineDecaySchedule(
             warmup_steps=50,
             peak_lr=5e-5,
