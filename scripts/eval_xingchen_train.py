@@ -1,6 +1,6 @@
 """Evaluate checkpoint on training set.
 
-Loads the pi05_xingchen_fold_ario_debug checkpoint and evaluates prediction
+Loads the pi05_xingchen_bench_xc03_pp3_pp10 checkpoint and evaluates prediction
 accuracy on the training episodes. The metric is the L1/L2 distance between
 the predicted next-step position and the actual next-frame state.
 """
@@ -9,11 +9,8 @@ the predicted next-step position and the actual next-frame state.
 export AWS_ACCESS_KEY_ID=$ALIBABA_ACCESS_KEY_ID
 export AWS_SECRET_ACCESS_KEY=$ALIBABA_ACCESS_KEY_SECRET
 
-# 评估最后一个 checkpoint (step 500)
+# 评估 checkpoint
 python scripts/eval_xingchen_train.py
-
-# 评估其他 checkpoint
-python scripts/eval_xingchen_train.py --checkpoint_dir ./checkpoints/pi05_xingchen_fold_ario_debug/pi05_xingchen_fold_ario_debug/100
 
 # 增加样本数
 python scripts/eval_xingchen_train.py --num_samples 500
@@ -34,13 +31,13 @@ def main():
     parser.add_argument(
         "--checkpoint_dir",
         type=str,
-        default="./checkpoints/pi05_xingchen_fold_ario_debug/pi05_xingchen_fold_ario_debug/500",
+        default="./checkpoints/pi05_xingchen_bench_xc03_pp3_pp10/bench_xc03_pp3_pp10",
         help="Path to checkpoint directory",
     )
     parser.add_argument(
         "--config_name",
         type=str,
-        default="pi05_xingchen_fold_ario_debug",
+        default="pi05_xingchen_bench_xc03_pp3_pp10",
     )
     parser.add_argument("--num_samples", type=int, default=100, help="Number of samples to evaluate")
     parser.add_argument("--device", type=str, default="cuda", help="Device for inference")
@@ -82,20 +79,22 @@ def main():
     total_frames = len(dataset)
     print(f"Total frames in dataset: {total_frames}")
 
-    num_samples = min(args.num_samples, total_frames - 1)
-    indices = np.random.choice(total_frames - 1, size=num_samples, replace=False)
+    num_samples = min(args.num_samples, total_frames)
+    indices = np.random.choice(total_frames, size=num_samples, replace=False)
     indices.sort()
 
-    # Evaluate: for each sample, predict actions and compare first predicted action
-    # (which represents the predicted next state) against actual next-frame state.
-    l1_errors = []
-    l2_errors = []
-    per_dim_l1 = []
+    # Evaluate: predict action chunk and compare against ground truth chunk.
+    # dataset["actions"] shape: (action_horizon, 31) — absolute states at future timesteps.
+    # policy.infer() output also in absolute space after AbsoluteActions transform.
+    chunk_l1_errors = []
+    chunk_l2_errors = []
+    first_step_l1 = []
+    first_step_l2 = []
+    per_dim_l1_all = []
 
-    print(f"\nEvaluating {num_samples} samples...")
+    print(f"\nEvaluating {num_samples} samples (action_horizon={action_horizon})...")
     for i, idx in enumerate(tqdm(indices)):
         sample = dataset[int(idx)]
-        next_sample = dataset[int(idx) + 1]
 
         obs = {
             "observation/image": sample["observation/image"],
@@ -104,71 +103,81 @@ def main():
         }
 
         result = policy.infer(obs)
-        # result["actions"] shape: (action_horizon, 31) - absolute actions after output transforms
-        predicted_actions = result["actions"]  # (action_horizon, 31)
-        predicted_next_state = predicted_actions[0]  # first step prediction
+        predicted = np.array(result["actions"])  # (action_horizon, 31)
+        gt = np.array(sample["actions"][:, :predicted.shape[-1]])  # (action_horizon, 31)
 
-        # Ground truth: next frame's state
-        gt_next_state = next_sample["observation/state"]
+        # Full chunk error
+        diff = predicted - gt
+        chunk_l1 = np.abs(diff).mean()
+        chunk_l2 = np.sqrt((diff**2).mean())
+        chunk_l1_errors.append(chunk_l1)
+        chunk_l2_errors.append(chunk_l2)
 
-        # Compute errors
-        diff = predicted_next_state - gt_next_state
-        l1 = np.abs(diff).mean()
-        l2 = np.sqrt((diff**2).mean())
+        # First step error (actions[0] = current state prediction)
+        diff0 = predicted[0] - gt[0]
+        first_step_l1.append(np.abs(diff0).mean())
+        first_step_l2.append(np.sqrt((diff0**2).mean()))
 
-        l1_errors.append(l1)
-        l2_errors.append(l2)
-        per_dim_l1.append(np.abs(diff))
+        # Per-dim L1 averaged over horizon
+        per_dim_l1_all.append(np.abs(diff).mean(axis=0))
 
-    # Summary statistics
-    l1_errors = np.array(l1_errors)
-    l2_errors = np.array(l2_errors)
-    per_dim_l1 = np.stack(per_dim_l1, axis=0)  # (num_samples, 31)
+    chunk_l1_errors = np.array(chunk_l1_errors)
+    chunk_l2_errors = np.array(chunk_l2_errors)
+    first_step_l1 = np.array(first_step_l1)
+    first_step_l2 = np.array(first_step_l2)
+    per_dim_l1_all = np.stack(per_dim_l1_all, axis=0)  # (num_samples, 31)
 
     print("\n" + "=" * 60)
     print("EVALUATION RESULTS")
     print("=" * 60)
     print(f"Checkpoint: {args.checkpoint_dir}")
+    print(f"Config:     {args.config_name}")
     print(f"Num samples: {num_samples}")
     print(f"Total frames: {total_frames}")
+    print(f"Action horizon: {action_horizon}")
     print("-" * 60)
-    print(f"Mean L1 error (avg over dims): {l1_errors.mean():.6f}")
-    print(f"Std  L1 error:                 {l1_errors.std():.6f}")
-    print(f"Mean L2 error (RMS over dims): {l2_errors.mean():.6f}")
-    print(f"Std  L2 error:                 {l2_errors.std():.6f}")
-    print(f"Median L1 error:               {np.median(l1_errors):.6f}")
-    print(f"Max L1 error:                  {l1_errors.max():.6f}")
+    print("First-step error (actions[0] vs gt[0]):")
+    print(f"  Mean L1: {first_step_l1.mean():.6f}  Std: {first_step_l1.std():.6f}")
+    print(f"  Mean L2: {first_step_l2.mean():.6f}  Std: {first_step_l2.std():.6f}")
+    print("-" * 60)
+    print("Full chunk error (avg over all horizon steps):")
+    print(f"  Mean L1: {chunk_l1_errors.mean():.6f}  Std: {chunk_l1_errors.std():.6f}")
+    print(f"  Mean L2: {chunk_l2_errors.mean():.6f}  Std: {chunk_l2_errors.std():.6f}")
+    print(f"  Median L1: {np.median(chunk_l1_errors):.6f}")
+    print(f"  Max L1:    {chunk_l1_errors.max():.6f}")
     print("-" * 60)
 
-    # Per-dimension breakdown
     dim_labels = [
-        # eef_torso: 9 dims
         "torso_0", "torso_1", "torso_2", "torso_3", "torso_4", "torso_5", "torso_6", "torso_7", "torso_8",
-        # head: 2 dims
         "head_0", "head_1",
-        # eef_left: 9 dims
         "left_0", "left_1", "left_2", "left_3", "left_4", "left_5", "left_6", "left_7", "left_8",
-        # gripper_cmd left: 1 dim
         "grip_L",
-        # eef_right: 9 dims
         "right_0", "right_1", "right_2", "right_3", "right_4", "right_5", "right_6", "right_7", "right_8",
-        # gripper_cmd right: 1 dim
         "grip_R",
     ]
 
-    print("\nPer-dimension mean L1 error:")
-    mean_per_dim = per_dim_l1.mean(axis=0)
+    print("\nPer-dimension mean L1 error (averaged over horizon):")
+    mean_per_dim = per_dim_l1_all.mean(axis=0)
     for d in range(min(len(dim_labels), len(mean_per_dim))):
         bar = "#" * int(mean_per_dim[d] * 200)
         print(f"  {dim_labels[d]:>8s}: {mean_per_dim[d]:.6f}  {bar}")
 
-    # Save results
+    # Sanity check: if first-step error is very low, model has learned training data
+    if first_step_l1.mean() < 0.01:
+        print("\n[OK] First-step L1 < 0.01 — model fits training data well.")
+    elif first_step_l1.mean() < 0.05:
+        print("\n[WARN] First-step L1 in [0.01, 0.05] — partial fit, might need more training.")
+    else:
+        print("\n[FAIL] First-step L1 > 0.05 — model has NOT learned training data properly.")
+
     results_path = Path(args.checkpoint_dir) / "eval_results.npz"
     np.savez(
         results_path,
-        l1_errors=l1_errors,
-        l2_errors=l2_errors,
-        per_dim_l1=per_dim_l1,
+        chunk_l1_errors=chunk_l1_errors,
+        chunk_l2_errors=chunk_l2_errors,
+        first_step_l1=first_step_l1,
+        first_step_l2=first_step_l2,
+        per_dim_l1=per_dim_l1_all,
         indices=indices,
     )
     print(f"\nResults saved to: {results_path}")
