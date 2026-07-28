@@ -1079,7 +1079,7 @@ _CONFIGS = [
         keep_period=10_000,
     ),
     #
-    # Xingchen (Astribot-S1) fold-clothes config — streaming from Ario/OSS directly.
+    # Xingchen (Astribot-S1) config — streaming from Ario/OSS directly.
     #
     TrainConfig(
         name="pi05_xingchen_ario",
@@ -1096,19 +1096,20 @@ _CONFIGS = [
             load_instructions=True,
             use_delta_actions=True,
         ),
-        pytorch_weight_path="./checkpoints/pi05_base_pytorch",
+        weight_loader=weight_loaders.CheckpointWeightLoader("./checkpoints/pi05_base_jax/params"),
         lr_schedule=_optimizer.CosineDecaySchedule(
-            warmup_steps=5_000,
-            peak_lr=5e-5,
-            decay_steps=500_000,
-            decay_lr=5e-5,
+            warmup_steps=1_000,
+            peak_lr=1e-4,
+            decay_steps=3_000,
+            decay_lr=1e-5,
         ),
         optimizer=_optimizer.AdamW(clip_gradient_norm=1.0),
         ema_decay=0.999,
         num_train_steps=100_000,
         batch_size=64,
+        num_workers=8,
         save_interval=5000,
-        keep_period=10_000,
+        keep_period=5000,
     ),
     #
     # Xingchen small-scale validation: 1 day of data, 500 steps, verify loss decreases.
@@ -1129,7 +1130,7 @@ _CONFIGS = [
             max_episodes=3,
             use_delta_actions=True,
         ),
-        pytorch_weight_path="./checkpoints/pi05_base_pytorch",
+        weight_loader=weight_loaders.CheckpointWeightLoader("./checkpoints/pi05_base_jax/params"),
         lr_schedule=_optimizer.CosineDecaySchedule(
             warmup_steps=50,
             peak_lr=5e-5,

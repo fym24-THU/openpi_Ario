@@ -2,6 +2,7 @@ import dataclasses
 import functools
 import logging
 import platform
+import time
 from typing import Any
 
 import etils.epath as epath
@@ -45,6 +46,86 @@ def init_logging():
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
     logger.handlers[0].setFormatter(formatter)
+
+
+def validate_and_log_multiview_batch(batch: tuple) -> None:
+    """Fail fast unless the first transformed batch contains three valid views."""
+    observation, actions = batch
+    expected_keys = ("base_0_rgb", "left_wrist_0_rgb", "right_wrist_0_rgb")
+    missing_images = [key for key in expected_keys if key not in observation.images]
+    missing_masks = [key for key in expected_keys if key not in observation.image_masks]
+    if missing_images or missing_masks:
+        raise RuntimeError(
+            "Invalid multi-view batch: "
+            f"missing images={missing_images}, missing masks={missing_masks}"
+        )
+
+    images = {}
+    for key in expected_keys:
+        image = np.asarray(observation.images[key])
+        mask = np.asarray(observation.image_masks[key]).astype(bool).reshape(-1)
+        images[key] = image
+
+        if image.ndim != 4 or tuple(image.shape[1:]) not in {
+            (224, 224, 3),
+            (3, 224, 224),
+        }:
+            raise RuntimeError(
+                f"Invalid multi-view image shape for {key}: {tuple(image.shape)}; "
+                "expected [B,224,224,3] or [B,3,224,224]"
+            )
+        if mask.size != image.shape[0] or not bool(mask.all()):
+            raise RuntimeError(
+                f"Invalid multi-view mask for {key}: shape={tuple(mask.shape)}, "
+                f"values={mask.tolist()}"
+            )
+
+        image_float = image.astype(np.float32)
+        per_sample_std = image_float.reshape(image.shape[0], -1).std(axis=1)
+        constant_samples = np.where(per_sample_std == 0)[0].tolist()
+        if constant_samples:
+            raise RuntimeError(
+                f"Invalid multi-view image for {key}: constant samples at batch indices "
+                f"{constant_samples}"
+            )
+        image_std = float(image_float.std())
+        logging.info(
+            "First batch view %s: shape=%s dtype=%s range=[%.3f, %.3f] "
+            "std=%.3f mask_all_true=%s",
+            key,
+            tuple(image.shape),
+            image.dtype,
+            float(image_float.min()),
+            float(image_float.max()),
+            image_std,
+            bool(mask.all()),
+        )
+
+    for left, right in (
+        ("base_0_rgb", "left_wrist_0_rgb"),
+        ("base_0_rgb", "right_wrist_0_rgb"),
+        ("left_wrist_0_rgb", "right_wrist_0_rgb"),
+    ):
+        equal_samples = (images[left] == images[right]).reshape(images[left].shape[0], -1).all(axis=1)
+        duplicate_indices = np.where(equal_samples)[0].tolist()
+        if duplicate_indices:
+            raise RuntimeError(
+                f"Invalid multi-view batch: {left} and {right} are exactly identical "
+                f"at batch indices {duplicate_indices}"
+            )
+        mean_abs_diff = float(np.abs(images[left].astype(np.float32) - images[right].astype(np.float32)).mean())
+        logging.info(
+            "First batch view difference %s vs %s: mean_abs_diff=%.3f",
+            left,
+            right,
+            mean_abs_diff,
+        )
+
+    logging.info(
+        "MULTI-VIEW FIRST BATCH CHECK PASSED: batch=%d actions_shape=%s",
+        images[expected_keys[0]].shape[0],
+        tuple(np.asarray(actions).shape),
+    )
 
 
 def init_wandb(config: _config.TrainConfig, *, resuming: bool, log_code: bool = False, enabled: bool = True):
@@ -226,6 +307,21 @@ def main(config: _config.TrainConfig):
     batch = next(data_iter)
     logging.info(f"Initialized data loader:\n{training_utils.array_tree_to_info(batch)}")
 
+    # Log multi-view status
+    if hasattr(config.data, 'multi_view'):
+        multi_view_enabled = config.data.multi_view
+        if multi_view_enabled:
+            logging.info("Multi-view (3-view) training: ENABLED")
+            logging.info("  Camera views: cam_high, cam_left_wrist, cam_right_wrist")
+            logging.info("  Primary view (observation/image): cam_high (source: raw_video/cam_high.mp4)")
+            logging.info("  Only episodes containing all three raw camera videos are used")
+        else:
+            logging.info("Multi-view (3-view) training: DISABLED (single-view: video.mp4)")
+
+    # Validate first batch for multi-view correctness
+    if getattr(config.data, "multi_view", False):
+        validate_and_log_multiview_batch(batch)
+
     # Log images from first batch to sanity check.
     images_to_log = [
         wandb.Image(np.concatenate([np.array(img[i]) for img in batch[0].images.values()], axis=1))
@@ -256,18 +352,36 @@ def main(config: _config.TrainConfig):
     )
 
     infos = []
+    start_time = time.time()
     for step in pbar:
         with sharding.set_mesh(mesh):
+            train_start = time.time()
             train_state, info = ptrain_step(train_rng, train_state, batch)
+            jax.block_until_ready(info)
+            train_time = time.time() - train_start
         infos.append(info)
         if step % config.log_interval == 0:
             stacked_infos = common_utils.stack_forest(infos)
             reduced_info = jax.device_get(jax.tree.map(jnp.mean, stacked_infos))
             info_str = ", ".join(f"{k}={v:.4f}" for k, v in reduced_info.items())
-            pbar.write(f"Step {step}: {info_str}")
+
+            # Compute ETA
+            elapsed = time.time() - start_time
+            time_per_step = elapsed / config.log_interval if config.log_interval > 0 else 0
+            remaining_steps = config.num_train_steps - step
+            eta_seconds = remaining_steps * time_per_step
+            eta_h = int(eta_seconds // 3600)
+            eta_m = int((eta_seconds % 3600) // 60)
+            eta_str = f"ETA={eta_h}h{eta_m:02d}m"
+
+            pbar.write(f"Step {step}: {info_str} train_time={train_time:.3f}s time={elapsed:.1f}s {eta_str}")
             wandb.log(reduced_info, step=step)
             infos = []
+            start_time = time.time()
+
+        data_start = time.time()
         batch = next(data_iter)
+        data_time = time.time() - data_start
 
         if (step % config.save_interval == 0 and step > start_step) or step == config.num_train_steps - 1:
             _checkpoints.save_state(checkpoint_manager, train_state, data_loader, step)
