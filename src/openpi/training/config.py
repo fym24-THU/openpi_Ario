@@ -1106,7 +1106,7 @@ _CONFIGS = [
         optimizer=_optimizer.AdamW(clip_gradient_norm=1.0),
         ema_decay=0.999,
         num_train_steps=100_000,
-        batch_size=64,
+        batch_size=128,
         num_workers=8,
         save_interval=5000,
         keep_period=5000,
