@@ -6,10 +6,8 @@ import io
 import os
 import tempfile
 from collections import OrderedDict
-from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterator
 
 import cv2
 import numpy as np
@@ -194,7 +192,7 @@ class ArioStreamingDataset:
     def __len__(self) -> int:
         return self._cumulative[-1] if self._cumulative else 0
 
-    def __getitem__(self, index: int, _retries: int = 3, _timeout: float = 60.0) -> dict:
+    def __getitem__(self, index: int, _retries: int = 10, _timeout: float = 60.0) -> dict:
         import random
         import signal
 
@@ -278,43 +276,36 @@ class ArioStreamingDataset:
         if cached_episode is not None:
             return self._remember_episode(cache_key, cached_episode)
 
-        # Only one worker may populate a particular episode cache file. Recheck
-        # after acquiring the lock because another worker may have completed it
-        # while this worker was waiting.
-        with self._disk_cache_lock(disk_path):
-            cached_episode = self._load_from_disk_cache(disk_path)
-            if cached_episode is not None:
-                return self._remember_episode(cache_key, cached_episode)
+        # Download and decode
+        s3 = self._get_s3()
+        state_action = self._build_state_action(s3, bucket, prefix)
 
-            s3 = self._get_s3()
-            state_action = self._build_state_action(s3, bucket, prefix)
-
-            if self._config.skip_video:
-                # Only need state/actions (e.g. for norm stats), skip expensive video download
-                rate = self._config.video_downsample_rate
-                indices = list(range(0, len(state_action), rate))
-                state_action = state_action[indices].astype(np.float32)
-                target_w, target_h = self._config.image_size
-                dummy_frame = np.zeros((target_h, target_w, 3), dtype=np.uint8)
-                frames_dict = {cam: [dummy_frame] * len(state_action) for cam in CAMERA_VIEWS}
+        if self._config.skip_video:
+            rate = self._config.video_downsample_rate
+            indices = list(range(0, len(state_action), rate))
+            state_action = state_action[indices].astype(np.float32)
+            target_w, target_h = self._config.image_size
+            dummy_frame = np.zeros((target_h, target_w, 3), dtype=np.uint8)
+            frames_dict = {cam: [dummy_frame] * len(state_action) for cam in CAMERA_VIEWS}
+        else:
+            if self._config.multi_view:
+                frames_dict = self._extract_multi_view_frames(s3, bucket, prefix)
             else:
-                if self._config.multi_view:
-                    frames_dict = self._extract_multi_view_frames(s3, bucket, prefix)
-                else:
-                    frames = self._extract_video_frames(s3, bucket, prefix + "video.mp4")
-                    frames_dict = {cam: frames for cam in CAMERA_VIEWS}
+                frames = self._extract_video_frames(s3, bucket, prefix + "video.mp4")
+                frames_dict = {cam: frames for cam in CAMERA_VIEWS}
 
-                # Align lengths and downsample
-                min_len = len(state_action)
-                for cam in frames_dict:
-                    min_len = min(min_len, len(frames_dict[cam]))
-                rate = self._config.video_downsample_rate
-                indices = list(range(0, min_len, rate))
+            # Align lengths and downsample
+            min_len = len(state_action)
+            for cam in frames_dict:
+                min_len = min(min_len, len(frames_dict[cam]))
+            rate = self._config.video_downsample_rate
+            indices = list(range(0, min_len, rate))
 
-                state_action = state_action[indices].astype(np.float32)
-                frames_dict = {cam: [frames_dict[cam][i] for i in indices] for cam in frames_dict}
+            state_action = state_action[indices].astype(np.float32)
+            frames_dict = {cam: [frames_dict[cam][i] for i in indices] for cam in frames_dict}
 
-            self._save_to_disk_cache(disk_path, state_action, frames_dict)
+        # Save to disk cache
+        self._save_to_disk_cache(disk_path, state_action, frames_dict)
 
         return self._remember_episode(cache_key, (state_action, frames_dict))
 
@@ -345,19 +336,6 @@ class ArioStreamingDataset:
         except Exception:
             disk_path.unlink(missing_ok=True)
             return None
-
-    @contextmanager
-    def _disk_cache_lock(self, disk_path: Path) -> Iterator[None]:
-        """Hold an inter-process lock while populating one cache entry."""
-        import fcntl
-
-        lock_path = disk_path.with_suffix(disk_path.suffix + ".lock")
-        with lock_path.open("a+b") as lock_file:
-            fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
-            try:
-                yield
-            finally:
-                fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
 
     def _disk_cache_path(self, cache_key: str) -> Path:
         import hashlib
