@@ -70,7 +70,7 @@ def main():
         image_size=data_cfg.image_size,
         task=data_cfg.default_prompt,
         load_instructions=data_cfg.load_instructions,
-        cache_size=32,
+        cache_size=64,
         max_episodes=data_cfg.max_episodes,
         disk_cache_dir=data_cfg.disk_cache_dir,
         disk_cache_max_gb=data_cfg.disk_cache_max_gb,

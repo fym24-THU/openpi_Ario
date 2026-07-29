@@ -6,8 +6,10 @@ import io
 import os
 import tempfile
 from collections import OrderedDict
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Iterator
 
 import cv2
 import numpy as np
@@ -31,10 +33,10 @@ class ArioConfig:
     task: str = "fold clothes"
     load_instructions: bool = False
     skip_video: bool = False
-    cache_size: int = 32
+    cache_size: int = 64
     max_episodes: int | None = None
     disk_cache_dir: str = "/tmp/ario_disk_cache"
-    disk_cache_max_gb: float = 200.0
+    disk_cache_max_gb: float = 500.0
     multi_view: bool = True
 
 
@@ -271,64 +273,91 @@ class ArioStreamingDataset:
             self._cache.move_to_end(cache_key)
             return self._cache[cache_key]
 
-        # Try disk cache
         disk_path = self._disk_cache_path(cache_key)
-        if disk_path.exists():
-            try:
-                with np.load(disk_path, allow_pickle=False) as data:
-                    state_action = data["state_action"]
-                    missing_cameras = [cam for cam in CAMERA_VIEWS if cam not in data]
-                    if missing_cameras:
-                        raise ValueError(
-                            f"Cache {disk_path} is missing camera arrays {missing_cameras}"
-                        )
-                    frames_dict = {cam: list(data[cam]) for cam in CAMERA_VIEWS}
-                disk_path.stat()
-                os.utime(disk_path, None)
-                self._cache[cache_key] = (state_action, frames_dict)
-                if len(self._cache) > self._cache_size:
-                    self._cache.popitem(last=False)
-                return state_action, frames_dict
-            except Exception:
-                disk_path.unlink(missing_ok=True)
+        cached_episode = self._load_from_disk_cache(disk_path)
+        if cached_episode is not None:
+            return self._remember_episode(cache_key, cached_episode)
 
-        # Download and decode
-        s3 = self._get_s3()
-        state_action = self._build_state_action(s3, bucket, prefix)
+        # Only one worker may populate a particular episode cache file. Recheck
+        # after acquiring the lock because another worker may have completed it
+        # while this worker was waiting.
+        with self._disk_cache_lock(disk_path):
+            cached_episode = self._load_from_disk_cache(disk_path)
+            if cached_episode is not None:
+                return self._remember_episode(cache_key, cached_episode)
 
-        if self._config.skip_video:
-            # Only need state/actions (e.g. for norm stats), skip expensive video download
-            rate = self._config.video_downsample_rate
-            indices = list(range(0, len(state_action), rate))
-            state_action = state_action[indices].astype(np.float32)
-            target_w, target_h = self._config.image_size
-            dummy_frame = np.zeros((target_h, target_w, 3), dtype=np.uint8)
-            frames_dict = {cam: [dummy_frame] * len(state_action) for cam in CAMERA_VIEWS}
-        else:
-            if self._config.multi_view:
-                frames_dict = self._extract_multi_view_frames(s3, bucket, prefix)
+            s3 = self._get_s3()
+            state_action = self._build_state_action(s3, bucket, prefix)
+
+            if self._config.skip_video:
+                # Only need state/actions (e.g. for norm stats), skip expensive video download
+                rate = self._config.video_downsample_rate
+                indices = list(range(0, len(state_action), rate))
+                state_action = state_action[indices].astype(np.float32)
+                target_w, target_h = self._config.image_size
+                dummy_frame = np.zeros((target_h, target_w, 3), dtype=np.uint8)
+                frames_dict = {cam: [dummy_frame] * len(state_action) for cam in CAMERA_VIEWS}
             else:
-                frames = self._extract_video_frames(s3, bucket, prefix + "video.mp4")
-                frames_dict = {cam: frames for cam in CAMERA_VIEWS}
+                if self._config.multi_view:
+                    frames_dict = self._extract_multi_view_frames(s3, bucket, prefix)
+                else:
+                    frames = self._extract_video_frames(s3, bucket, prefix + "video.mp4")
+                    frames_dict = {cam: frames for cam in CAMERA_VIEWS}
 
-            # Align lengths and downsample
-            min_len = len(state_action)
-            for cam in frames_dict:
-                min_len = min(min_len, len(frames_dict[cam]))
-            rate = self._config.video_downsample_rate
-            indices = list(range(0, min_len, rate))
+                # Align lengths and downsample
+                min_len = len(state_action)
+                for cam in frames_dict:
+                    min_len = min(min_len, len(frames_dict[cam]))
+                rate = self._config.video_downsample_rate
+                indices = list(range(0, min_len, rate))
 
-            state_action = state_action[indices].astype(np.float32)
-            frames_dict = {cam: [frames_dict[cam][i] for i in indices] for cam in frames_dict}
+                state_action = state_action[indices].astype(np.float32)
+                frames_dict = {cam: [frames_dict[cam][i] for i in indices] for cam in frames_dict}
 
-        # Save to disk cache
-        self._save_to_disk_cache(disk_path, state_action, frames_dict)
+            self._save_to_disk_cache(disk_path, state_action, frames_dict)
 
-        self._cache[cache_key] = (state_action, frames_dict)
+        return self._remember_episode(cache_key, (state_action, frames_dict))
+
+    def _remember_episode(
+        self,
+        cache_key: str,
+        episode: tuple[np.ndarray, dict[str, list[np.ndarray]]],
+    ) -> tuple[np.ndarray, dict[str, list[np.ndarray]]]:
+        self._cache[cache_key] = episode
         if len(self._cache) > self._cache_size:
             self._cache.popitem(last=False)
+        return episode
 
-        return state_action, frames_dict
+    def _load_from_disk_cache(
+        self, disk_path: Path
+    ) -> tuple[np.ndarray, dict[str, list[np.ndarray]]] | None:
+        if not disk_path.exists():
+            return None
+        try:
+            with np.load(disk_path, allow_pickle=False) as data:
+                state_action = data["state_action"]
+                missing_cameras = [cam for cam in CAMERA_VIEWS if cam not in data]
+                if missing_cameras:
+                    raise ValueError(f"Cache {disk_path} is missing camera arrays {missing_cameras}")
+                frames_dict = {cam: list(data[cam]) for cam in CAMERA_VIEWS}
+            os.utime(disk_path, None)
+            return state_action, frames_dict
+        except Exception:
+            disk_path.unlink(missing_ok=True)
+            return None
+
+    @contextmanager
+    def _disk_cache_lock(self, disk_path: Path) -> Iterator[None]:
+        """Hold an inter-process lock while populating one cache entry."""
+        import fcntl
+
+        lock_path = disk_path.with_suffix(disk_path.suffix + ".lock")
+        with lock_path.open("a+b") as lock_file:
+            fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
+            try:
+                yield
+            finally:
+                fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
 
     def _disk_cache_path(self, cache_key: str) -> Path:
         import hashlib
@@ -349,14 +378,26 @@ class ArioStreamingDataset:
         return cache_dir / f"{key_hash}.npz"
 
     def _save_to_disk_cache(self, path: Path, state_action: np.ndarray, frames_dict: dict[str, list[np.ndarray]]):
+        tmp_path: Path | None = None
         try:
             self._evict_disk_cache_if_needed()
             save_data = {"state_action": state_action}
             for cam, frames in frames_dict.items():
                 save_data[cam] = np.stack(frames)
-            np.savez(path, **save_data)
+            with tempfile.NamedTemporaryFile(
+                dir=path.parent,
+                prefix=f".{path.name}.",
+                suffix=".tmp",
+                delete=False,
+            ) as tmp:
+                tmp_path = Path(tmp.name)
+                np.savez(tmp, **save_data)
+                tmp.flush()
+                os.fsync(tmp.fileno())
+            os.replace(tmp_path, path)
         except Exception:
-            path.unlink(missing_ok=True)
+            if tmp_path is not None:
+                tmp_path.unlink(missing_ok=True)
 
     def _evict_disk_cache_if_needed(self):
         cache_dir = Path(self._config.disk_cache_dir)

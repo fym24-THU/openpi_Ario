@@ -529,10 +529,10 @@ class ArioXingchenDataConfig(DataConfigFactory):
     use_delta_actions: bool = True
     default_prompt: str = "fold clothes"
     load_instructions: bool = False
-    cache_size: int = 32
+    cache_size: int = 64
     max_episodes: int | None = None
     disk_cache_dir: str = "/tmp/ario_disk_cache"
-    disk_cache_max_gb: float = 200.0
+    disk_cache_max_gb: float = 500.0
     multi_view: bool = True
 
     @override
