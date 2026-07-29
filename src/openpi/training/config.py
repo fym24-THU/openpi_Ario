@@ -1083,30 +1083,36 @@ _CONFIGS = [
     #
     TrainConfig(
         name="pi05_xingchen_ario",
-        exp_name="new_blocks",
+        exp_name="xingchen_fold_only",
         model=pi0_config.Pi0Config(
             pi05=True,
             action_dim=32,
             action_horizon=50,
         ),
         data=ArioXingchenDataConfig(
-            repo_id="xingchen/new_blocks",
-            s3_prefixes="oss://shengshu-base2-test/xiaojun/新积木/",
-            min_frames=1,
-            load_instructions=True,
+            repo_id="xingchen/fold_clothes",
+            s3_prefixes=(
+                "s3://shengshu-base2-test/ario/xingchen/xingchen3-Pretrain_XC03_叠短袖_260623_01/,"
+                "s3://shengshu-base2-test/ario/xingchen/xingchen3-Pretrain_XC03_叠短袖_260624_01/,"
+                "s3://shengshu-base2-test/ario/xingchen/xingchen3-Pretrain_XC03_叠短袖_260625_01/,"
+                "s3://shengshu-base2-test/ario/xingchen/xingchen3-Pretrain_XC03_叠短袖_260626_01/,"
+                "s3://shengshu-base2-test/ario/xingchen/xingchen3-Pretrain_XC03_叠短袖_260629_01/,"
+                "s3://shengshu-base2-test/ario/xingchen/xingchen3-Pretrain_XC03_叠短袖_260630_01/,"
+                "s3://shengshu-base2-test/ario/xingchen/xingchen3-Pretrain_XC03_叠短袖_260703_01/"
+            ),
             use_delta_actions=True,
         ),
         weight_loader=weight_loaders.CheckpointWeightLoader("./checkpoints/pi05_base_jax/params"),
         lr_schedule=_optimizer.CosineDecaySchedule(
-            warmup_steps=1_000,
-            peak_lr=1e-4,
-            decay_steps=3_000,
-            decay_lr=1e-5,
+            warmup_steps=5_000,
+            peak_lr=5e-5,
+            decay_steps=500_000,
+            decay_lr=5e-5,
         ),
         optimizer=_optimizer.AdamW(clip_gradient_norm=1.0),
         ema_decay=0.999,
         num_train_steps=100_000,
-        batch_size=128,
+        batch_size=64,
         num_workers=8,
         save_interval=5000,
         keep_period=5000,
