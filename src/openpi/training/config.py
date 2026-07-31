@@ -1083,7 +1083,7 @@ _CONFIGS = [
     #
     TrainConfig(
         name="pi05_xingchen_ario",
-        exp_name="xingchen_fold_only",
+        exp_name="jz_xc_fold",
         model=pi0_config.Pi0Config(
             pi05=True,
             action_dim=32,
@@ -1102,7 +1102,7 @@ _CONFIGS = [
             ),
             use_delta_actions=True,
         ),
-        weight_loader=weight_loaders.CheckpointWeightLoader("./checkpoints/pi05_base_jax/params"),
+        weight_loader=weight_loaders.CheckpointWeightLoader("/home/fanyiming/openpi_Ario/checkpoints/pi05_xingchen_ario/jianzhi_foldclothes_jax/130000/params"),
         lr_schedule=_optimizer.CosineDecaySchedule(
             warmup_steps=5_000,
             peak_lr=5e-5,

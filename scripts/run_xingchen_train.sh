@@ -4,6 +4,22 @@ set -euo pipefail
 PROJECT_ROOT="${OPENPI_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 cd "$PROJECT_ROOT"
 
+cleanup_source_snapshot() {
+    local snapshot_root="${OPENPI_SNAPSHOT_ROOT:-}"
+    if [[ "${OPENPI_KEEP_SNAPSHOT:-0}" == "1" ]]; then
+        echo "Keeping source snapshot: $snapshot_root"
+        return
+    fi
+    if [[ -n "$snapshot_root" &&
+          "$snapshot_root" == "$PROJECT_ROOT" &&
+          -f "$snapshot_root/.openpi-snapshot/metadata.txt" ]]; then
+        echo "Removing source snapshot: $snapshot_root"
+        cd /
+        rm -rf -- "$snapshot_root"
+    fi
+}
+trap cleanup_source_snapshot EXIT
+
 if [[ "${OPENPI_CONTAINER:-0}" != "1" ]]; then
     if [[ ! -f .venv/bin/activate ]]; then
         echo "Missing .venv. Run 'uv sync', or submit with the openpi training container." >&2
@@ -12,8 +28,8 @@ if [[ "${OPENPI_CONTAINER:-0}" != "1" ]]; then
     source .venv/bin/activate
 fi
 
-# Prefer the source tree mounted by sslaunch over the snapshot baked into the
-# image, so submitted jobs always run the current server-side code.
+# Run imports from OPENPI_ROOT. The submission wrapper points this at an
+# immutable per-job snapshot; direct invocations continue to use this checkout.
 export PYTHONPATH="$PROJECT_ROOT/src:$PROJECT_ROOT/packages/openpi-client/src${PYTHONPATH:+:$PYTHONPATH}"
 
 # Accept either Alibaba-named credentials or AWS-compatible credentials
