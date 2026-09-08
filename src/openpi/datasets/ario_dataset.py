@@ -18,14 +18,14 @@ PT_FILES = ["eef_torso.pt", "head.pt", "eef_left.pt", "gripper_cmd.pt", "eef_rig
 IMAGE_SIZE = (320, 240)
 
 CAMERA_VIEWS = ("cam_high", "cam_left_wrist", "cam_right_wrist")
-DISK_CACHE_FORMAT_VERSION = 2
+DISK_CACHE_FORMAT_VERSION = 3
 
 
 @dataclass
 class ArioConfig:
     s3_prefixes: str = ""
     s3_endpoint: str = "https://oss-cn-wulanchabu-internal.aliyuncs.com"
-    video_downsample_rate: int = 6
+    video_downsample_rate: int = 1
     min_frames: int = 1885
     image_size: tuple[int, int] = IMAGE_SIZE
     task: str = "fold clothes"
@@ -421,16 +421,12 @@ class ArioStreamingDataset:
         cap = cv2.VideoCapture(str(path))
         if not cap.isOpened():
             raise RuntimeError(f"Cannot open video: {path}")
-        target_w, target_h = self._config.image_size
         frames = []
         while True:
             ret, frame = cap.read()
             if not ret:
                 break
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            h, w = frame.shape[:2]
-            if (w, h) != (target_w, target_h):
-                frame = cv2.resize(frame, (target_w, target_h), interpolation=cv2.INTER_AREA)
             frames.append(frame)
         cap.release()
         return frames

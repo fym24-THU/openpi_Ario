@@ -523,7 +523,7 @@ class ArioXingchenDataConfig(DataConfigFactory):
 
     s3_prefixes: str = ""
     s3_endpoint: str = "https://oss-cn-wulanchabu-internal.aliyuncs.com"
-    video_downsample_rate: int = 6
+    video_downsample_rate: int = 1
     min_frames: int = 1885
     image_size: tuple[int, int] = (320, 240)
     use_delta_actions: bool = True
@@ -1110,6 +1110,45 @@ _CONFIGS = [
         num_workers=8,
         save_interval=5000,
         keep_period=5000,
+    ),
+    #
+    # Xingchen egg-in-box tasks — stream two Ario datasets from OSS.
+    #
+    TrainConfig(
+        name="pi05_xingchen_egg_ario",
+        exp_name="egg_box",
+        model=pi0_config.Pi0Config(
+            pi05=True,
+            action_dim=32,
+            action_horizon=50,
+        ),
+        data=ArioXingchenDataConfig(
+            repo_id="xingchen/egg_box",
+            s3_prefixes=(
+                "s3://shengshu-world-model-data/ARIO-new/xingchen/"
+                "Pretrain_XC03_摆放鸡蛋_260807_07_专项1_n/,"
+                "s3://shengshu-world-model-data/ARIO-new/xingchen/"
+                "Pretrain_XC03_拜访鸡蛋_260805_01/"
+            ),
+            min_frames=1,
+            default_prompt="将鸡蛋全部放入盒子里，最后合上盖子",
+            load_instructions=False,
+            use_delta_actions=True,
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader("./checkpoints/pi05_base_jax/params"),
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=1_000,
+            peak_lr=1e-4,
+            decay_steps=3_000,
+            decay_lr=1e-5,
+        ),
+        optimizer=_optimizer.AdamW(clip_gradient_norm=1.0),
+        ema_decay=0.999,
+        num_train_steps=100_000,
+        batch_size=512,
+        num_workers=8,
+        save_interval=2500,
+        keep_period=2500,
     ),
     #
     # Xingchen small-scale validation: 1 day of data, 500 steps, verify loss decreases.

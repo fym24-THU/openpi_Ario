@@ -351,6 +351,12 @@ def main(config: _config.TrainConfig):
         dynamic_ncols=True,
     )
 
+    # Keep a plain-text metrics log beside the checkpoints. The OSS uploader
+    # synchronizes this file on every poll.
+    loss_log_path = config.checkpoint_dir / "loss.txt"
+    if not resuming:
+        loss_log_path.write_text("")
+
     infos = []
     start_time = time.time()
     for step in pbar:
@@ -376,6 +382,13 @@ def main(config: _config.TrainConfig):
 
             pbar.write(f"Step {step}: {info_str} train_time={train_time:.3f}s time={elapsed:.1f}s {eta_str}")
             wandb.log(reduced_info, step=step)
+            with loss_log_path.open("a") as loss_log:
+                loss_log.write(
+                    f"Step {step}: "
+                    f"grad_norm={reduced_info['grad_norm']:.4f}, "
+                    f"loss={reduced_info['loss']:.4f}, "
+                    f"param_norm={reduced_info['param_norm']:.4f}\n"
+                )
             infos = []
             start_time = time.time()
 

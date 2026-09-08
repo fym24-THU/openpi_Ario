@@ -4,7 +4,9 @@ import hashlib
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
+import numpy as np
 from openpi.datasets.ario_dataset import ArioConfig, ArioStreamingDataset
 
 
@@ -80,6 +82,24 @@ class ArioMultiViewDatasetTest(unittest.TestCase):
             requested_keys,
             ["root/episode/raw_video/cam_high.mp4"],
         )
+
+    def test_decode_video_preserves_native_resolution(self):
+        dataset = ArioStreamingDataset.__new__(ArioStreamingDataset)
+        dataset._config = ArioConfig(image_size=(320, 240))
+        bgr_frame = np.zeros((480, 640, 3), dtype=np.uint8)
+        capture = mock.MagicMock()
+        capture.isOpened.return_value = True
+        capture.read.side_effect = [(True, bgr_frame), (False, None)]
+
+        with (
+            mock.patch("openpi.datasets.ario_dataset.cv2.VideoCapture", return_value=capture),
+            mock.patch("openpi.datasets.ario_dataset.cv2.resize") as resize,
+        ):
+            frames = dataset._decode_video(Path("native.mp4"))
+
+        self.assertEqual(frames[0].shape, (480, 640, 3))
+        resize.assert_not_called()
+        capture.release.assert_called_once()
 
 
 if __name__ == "__main__":
