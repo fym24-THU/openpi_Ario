@@ -88,7 +88,14 @@ def create_oss_client() -> Any:
         aws_access_key_id=access_key,
         aws_secret_access_key=secret_key,
         region_name="cn-wulanchabu",
-        config=Config(signature_version="s3v4", s3={"addressing_style": addressing_style}),
+        config=Config(
+            signature_version="s3v4",
+            s3={"addressing_style": addressing_style},
+            # Newer botocore versions otherwise use aws-chunked request
+            # trailers, which Aliyun OSS's S3-compatible API rejects.
+            request_checksum_calculation="when_required",
+            response_checksum_validation="when_required",
+        ),
     )
 
 

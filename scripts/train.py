@@ -292,6 +292,7 @@ def main(config: _config.TrainConfig):
 
     checkpoint_manager, resuming = _checkpoints.initialize_checkpoint_dir(
         config.checkpoint_dir,
+        max_to_keep=config.max_checkpoints_to_keep,
         keep_period=config.keep_period,
         overwrite=config.overwrite,
         resume=config.resume,
@@ -304,7 +305,9 @@ def main(config: _config.TrainConfig):
         shuffle=True,
     )
     data_iter = iter(data_loader)
+    data_start = time.time()
     batch = next(data_iter)
+    initial_data_time = time.time() - data_start
     logging.info(f"Initialized data loader:\n{training_utils.array_tree_to_info(batch)}")
 
     # Log multi-view status
@@ -358,6 +361,8 @@ def main(config: _config.TrainConfig):
         loss_log_path.write_text("")
 
     infos = []
+    train_times = []
+    data_times = [initial_data_time]
     start_time = time.time()
     for step in pbar:
         with sharding.set_mesh(mesh):
@@ -366,10 +371,13 @@ def main(config: _config.TrainConfig):
             jax.block_until_ready(info)
             train_time = time.time() - train_start
         infos.append(info)
+        train_times.append(train_time)
         if step % config.log_interval == 0:
             stacked_infos = common_utils.stack_forest(infos)
             reduced_info = jax.device_get(jax.tree.map(jnp.mean, stacked_infos))
             info_str = ", ".join(f"{k}={v:.4f}" for k, v in reduced_info.items())
+            mean_train_time = float(np.mean(train_times))
+            mean_data_time = float(np.mean(data_times))
 
             # Compute ETA
             elapsed = time.time() - start_time
@@ -380,21 +388,33 @@ def main(config: _config.TrainConfig):
             eta_m = int((eta_seconds % 3600) // 60)
             eta_str = f"ETA={eta_h}h{eta_m:02d}m"
 
-            pbar.write(f"Step {step}: {info_str} train_time={train_time:.3f}s time={elapsed:.1f}s {eta_str}")
-            wandb.log(reduced_info, step=step)
+            pbar.write(
+                f"Step {step}: {info_str} "
+                f"train_time={mean_train_time:.3f}s data_time={mean_data_time:.3f}s "
+                f"time={elapsed:.1f}s {eta_str}"
+            )
+            wandb.log(
+                {**reduced_info, "train_time": mean_train_time, "data_time": mean_data_time},
+                step=step,
+            )
             with loss_log_path.open("a") as loss_log:
                 loss_log.write(
                     f"Step {step}: "
                     f"grad_norm={reduced_info['grad_norm']:.4f}, "
                     f"loss={reduced_info['loss']:.4f}, "
-                    f"param_norm={reduced_info['param_norm']:.4f}\n"
+                    f"param_norm={reduced_info['param_norm']:.4f}, "
+                    f"train_time={mean_train_time:.3f}, "
+                    f"data_time={mean_data_time:.3f}\n"
                 )
             infos = []
+            train_times = []
+            data_times = []
             start_time = time.time()
 
         data_start = time.time()
         batch = next(data_iter)
         data_time = time.time() - data_start
+        data_times.append(data_time)
 
         if (step % config.save_interval == 0 and step > start_step) or step == config.num_train_steps - 1:
             _checkpoints.save_state(checkpoint_manager, train_state, data_loader, step)

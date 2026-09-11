@@ -304,8 +304,9 @@ def create_torch_data_loader(
             execute in the main process.
         seed: The seed to use for shuffling the data.
     """
-    dataset = create_torch_dataset(data_config, action_horizon, model_config)
-    dataset = transform_dataset(dataset, data_config, skip_norm_stats=skip_norm_stats)
+    raw_dataset = create_torch_dataset(data_config, action_horizon, model_config)
+    episode_lengths = getattr(raw_dataset, "episode_lengths", None)
+    dataset = transform_dataset(raw_dataset, data_config, skip_norm_stats=skip_norm_stats)
 
     # Use TorchDataLoader for both frameworks
     # For PyTorch DDP, create DistributedSampler and divide batch size by world size
@@ -326,13 +327,35 @@ def create_torch_data_loader(
     else:
         local_batch_size = batch_size // jax.process_count()
 
+    batch_sampler = None
+    episode_frames_per_batch = (
+        data_config.ario_config.episode_frames_per_batch if data_config.ario_config is not None else 0
+    )
+    if episode_frames_per_batch and shuffle:
+        if framework != "jax":
+            raise ValueError("Episode-aware sampling is currently supported only for JAX training")
+        if episode_lengths is None:
+            raise ValueError("Episode-aware sampling requires a dataset that exposes episode_lengths")
+        batch_sampler = EpisodeAwareBatchSampler(
+            episode_lengths,
+            batch_size=local_batch_size,
+            frames_per_episode=episode_frames_per_batch,
+            seed=seed,
+        )
+        logging.info(
+            "Episode-aware sampling enabled: %d frames from each of %d episodes per batch",
+            episode_frames_per_batch,
+            local_batch_size // episode_frames_per_batch,
+        )
+
     logging.info(f"local_batch_size: {local_batch_size}")
     data_loader = TorchDataLoader(
         dataset,
         local_batch_size=local_batch_size,
         sharding=None if framework == "pytorch" else sharding,
-        shuffle=(sampler is None and shuffle),  # Don't shuffle if using sampler
+        shuffle=(batch_sampler is None and sampler is None and shuffle),
         sampler=sampler,
+        batch_sampler=batch_sampler,
         num_batches=num_batches,
         num_workers=num_workers,
         seed=seed,
@@ -383,6 +406,65 @@ def create_rlds_data_loader(
     return DataLoaderImpl(data_config, data_loader)
 
 
+class EpisodeAwareBatchSampler(torch.utils.data.Sampler[list[int]]):
+    """Yield frame-uniform batches containing contiguous groups from weighted episodes."""
+
+    def __init__(
+        self,
+        episode_lengths: Sequence[int],
+        *,
+        batch_size: int,
+        frames_per_episode: int,
+        seed: int,
+    ):
+        lengths = np.asarray(episode_lengths, dtype=np.int64)
+        if lengths.ndim != 1 or lengths.size == 0:
+            raise ValueError("episode_lengths must be a non-empty one-dimensional sequence")
+        if np.any(lengths <= 0):
+            raise ValueError("All episode lengths must be positive")
+        if frames_per_episode <= 0:
+            raise ValueError("frames_per_episode must be positive")
+        if batch_size % frames_per_episode != 0:
+            raise ValueError(
+                f"Batch size {batch_size} must be divisible by frames_per_episode {frames_per_episode}"
+            )
+        if lengths.sum() < batch_size:
+            raise ValueError(f"Dataset size {lengths.sum()} is smaller than batch size {batch_size}")
+
+        self._lengths = lengths
+        self._episode_offsets = np.concatenate(([0], np.cumsum(lengths[:-1])))
+        self._episode_probabilities = lengths / lengths.sum()
+        self._batch_size = batch_size
+        self._frames_per_episode = frames_per_episode
+        self._episodes_per_batch = batch_size // frames_per_episode
+        self._num_batches = int(lengths.sum() // batch_size)
+        self._seed = seed
+        self._epoch = 0
+
+    def __iter__(self) -> Iterator[list[int]]:
+        rng = np.random.default_rng(self._seed + self._epoch)
+        self._epoch += 1
+        local_offsets = np.arange(self._frames_per_episode)
+
+        for _ in range(self._num_batches):
+            episode_indices = rng.choice(
+                len(self._lengths),
+                size=self._episodes_per_batch,
+                replace=True,
+                p=self._episode_probabilities,
+            )
+            batch: list[int] = []
+            for episode_index in episode_indices:
+                episode_length = self._lengths[episode_index]
+                start = rng.integers(episode_length)
+                local_indices = (start + local_offsets) % episode_length
+                batch.extend((self._episode_offsets[episode_index] + local_indices).tolist())
+            yield batch
+
+    def __len__(self) -> int:
+        return self._num_batches
+
+
 class TorchDataLoader:
     """Torch data loader implementation."""
 
@@ -394,6 +476,7 @@ class TorchDataLoader:
         sharding: jax.sharding.Sharding | None = None,
         shuffle: bool = False,
         sampler: torch.utils.data.Sampler | None = None,
+        batch_sampler: torch.utils.data.Sampler[list[int]] | None = None,
         num_batches: int | None = None,
         num_workers: int = 0,
         seed: int = 0,
@@ -406,6 +489,7 @@ class TorchDataLoader:
             local_batch_size: The local batch size for each process.
             sharding: The sharding to use for the data loader.
             shuffle: Whether to shuffle the data.
+            batch_sampler: Optional sampler that yields complete batches of indices.
             num_batches: If provided, determines the number of returned batches. If the
                 number is larger than the number of batches in the dataset, the data loader
                 will loop over the dataset. If not provided, will iterate over the dataset
@@ -436,19 +520,31 @@ class TorchDataLoader:
 
         generator = torch.Generator()
         generator.manual_seed(seed)
-        self._data_loader = torch.utils.data.DataLoader(
-            typing.cast(torch.utils.data.Dataset, dataset),
-            batch_size=local_batch_size,
-            shuffle=(sampler is None and shuffle),  # Don't shuffle if using sampler
-            sampler=sampler,
-            num_workers=num_workers,
-            multiprocessing_context=mp_context,
-            persistent_workers=num_workers > 0,
-            collate_fn=_collate_fn,
-            worker_init_fn=_worker_init_fn,
-            drop_last=True,
-            generator=generator,
-        )
+        common_kwargs = {
+            "num_workers": num_workers,
+            "multiprocessing_context": mp_context,
+            "persistent_workers": num_workers > 0,
+            "collate_fn": _collate_fn,
+            "worker_init_fn": _worker_init_fn,
+            "generator": generator,
+        }
+        if batch_sampler is None:
+            self._data_loader = torch.utils.data.DataLoader(
+                typing.cast(torch.utils.data.Dataset, dataset),
+                batch_size=local_batch_size,
+                shuffle=(sampler is None and shuffle),
+                sampler=sampler,
+                drop_last=True,
+                **common_kwargs,
+            )
+        else:
+            if sampler is not None or shuffle:
+                raise ValueError("batch_sampler cannot be combined with sampler or shuffle")
+            self._data_loader = torch.utils.data.DataLoader(
+                typing.cast(torch.utils.data.Dataset, dataset),
+                batch_sampler=batch_sampler,
+                **common_kwargs,
+            )
 
     @property
     def torch_loader(self) -> torch.utils.data.DataLoader:

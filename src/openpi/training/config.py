@@ -20,6 +20,7 @@ import openpi.models.tokenizer as _tokenizer
 import openpi.policies.aloha_policy as aloha_policy
 import openpi.policies.droid_policy as droid_policy
 import openpi.policies.libero_policy as libero_policy
+import openpi.policies.songling_policy as songling_policy
 import openpi.policies.xingchen_policy as xingchen_policy
 import openpi.shared.download as _download
 import openpi.shared.normalize as _normalize
@@ -477,8 +478,6 @@ class LeRobotXingchenDataConfig(DataConfigFactory):
 
     @override
     def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
-        import openpi.policies.xingchen_policy as xingchen_policy
-
         repack_transform = _transforms.Group(
             inputs=[
                 _transforms.RepackTransform(
@@ -529,15 +528,18 @@ class ArioXingchenDataConfig(DataConfigFactory):
     use_delta_actions: bool = True
     default_prompt: str = "fold clothes"
     load_instructions: bool = False
+    instruction_field: str = "sub_instructions"
     cache_size: int = 32
+    video_reader_cache_size: int = 16
+    episode_frames_per_batch: int = 0
     max_episodes: int | None = None
     disk_cache_dir: str = "/tmp/ario_disk_cache"
     disk_cache_max_gb: float = 200.0
     multi_view: bool = True
+    filter_episodes_by_state: bool = False
 
     @override
     def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
-        import openpi.policies.xingchen_policy as xingchen_policy
         from openpi.datasets.ario_dataset import ArioConfig
 
         repack_transform = _transforms.Group(
@@ -578,11 +580,102 @@ class ArioXingchenDataConfig(DataConfigFactory):
             image_size=self.image_size,
             task=self.default_prompt,
             load_instructions=self.load_instructions,
+            instruction_field=self.instruction_field,
             cache_size=self.cache_size,
+            video_reader_cache_size=self.video_reader_cache_size,
+            episode_frames_per_batch=self.episode_frames_per_batch,
             max_episodes=self.max_episodes,
             disk_cache_dir=self.disk_cache_dir,
             disk_cache_max_gb=self.disk_cache_max_gb,
             multi_view=self.multi_view,
+            filter_episodes_by_state=self.filter_episodes_by_state,
+        )
+
+        return dataclasses.replace(
+            self.create_base_config(assets_dirs, model_config),
+            repack_transforms=repack_transform,
+            data_transforms=data_transforms,
+            model_transforms=model_transforms,
+            action_sequence_keys=("actions",),
+            ario_config=ario_cfg,
+        )
+
+
+@dataclasses.dataclass(frozen=True)
+class ArioSonglingDataConfig(DataConfigFactory):
+    """Config for Songling canonical55 data read directly from Ario format on OSS."""
+
+    s3_prefixes: str = ""
+    s3_endpoint: str = "https://oss-cn-wulanchabu-internal.aliyuncs.com"
+    excluded_episodes: tuple[str, ...] = ()
+    video_downsample_rate: int = 1
+    min_frames: int = 51
+    image_size: tuple[int, int] = (320, 240)
+    use_delta_actions: bool = True
+    default_prompt: str = ""
+    load_instructions: bool = True
+    instruction_field: str = "sub_instructions"
+    cache_size: int = 32
+    video_reader_cache_size: int = 16
+    episode_frames_per_batch: int = 0
+    max_episodes: int | None = None
+    disk_cache_dir: str = "/tmp/ario_songling_disk_cache"
+    disk_cache_max_gb: float = 200.0
+    multi_view: bool = True
+    filter_episodes_by_state: bool = True
+
+    @override
+    def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
+        from openpi.datasets.ario_dataset import ArioConfig
+
+        repack_transform = _transforms.Group(
+            inputs=[
+                _transforms.RepackTransform(
+                    {
+                        "observation/image": "observation/image",
+                        "observation/cam_high": "observation/cam_high",
+                        "observation/cam_left_wrist": "observation/cam_left_wrist",
+                        "observation/cam_right_wrist": "observation/cam_right_wrist",
+                        "observation/state": "observation/state",
+                        "actions": "actions",
+                        "prompt": "prompt",
+                    }
+                )
+            ]
+        )
+
+        data_transforms = _transforms.Group(
+            inputs=[songling_policy.SonglingInputs(model_type=model_config.model_type)],
+            outputs=[songling_policy.SonglingOutputs()],
+        )
+        if self.use_delta_actions:
+            delta_action_mask = _transforms.make_bool_mask(6, -1, 6, -1)
+            data_transforms = data_transforms.push(
+                inputs=[_transforms.DeltaActions(delta_action_mask)],
+                outputs=[_transforms.AbsoluteActions(delta_action_mask)],
+            )
+
+        model_transforms = ModelTransformFactory(default_prompt=self.default_prompt)(model_config)
+        ario_cfg = ArioConfig(
+            s3_prefixes=self.s3_prefixes,
+            s3_endpoint=self.s3_endpoint,
+            excluded_episodes=self.excluded_episodes,
+            video_downsample_rate=self.video_downsample_rate,
+            min_frames=self.min_frames,
+            image_size=self.image_size,
+            task=self.default_prompt,
+            load_instructions=self.load_instructions,
+            instruction_field=self.instruction_field,
+            cache_size=self.cache_size,
+            video_reader_cache_size=self.video_reader_cache_size,
+            episode_frames_per_batch=self.episode_frames_per_batch,
+            max_episodes=self.max_episodes,
+            disk_cache_dir=self.disk_cache_dir,
+            disk_cache_max_gb=self.disk_cache_max_gb,
+            multi_view=self.multi_view,
+            data_format="songling_canonical55",
+            action_start_offset=1,
+            filter_episodes_by_state=self.filter_episodes_by_state,
         )
 
         return dataclasses.replace(
@@ -647,6 +740,9 @@ class TrainConfig:
     log_interval: int = 100
     # How often (in steps) to save checkpoints.
     save_interval: int = 1000
+    # Maximum number of local checkpoints retained by Orbax. Set to None when
+    # an external uploader owns deletion after remote verification.
+    max_checkpoints_to_keep: int | None = 1
     # If set, any existing checkpoints matching step % keep_period == 0 will not be deleted.
     keep_period: int | None = 5000
 
@@ -690,6 +786,33 @@ class TrainConfig:
 
 
 # Use `get_config` if you need to get a config by name in your code.
+SONGLING_GARMENT_FOLDING_ROOT = "s3://shengshu-world-model-data/ARIO-new/songling"
+SONGLING_GARMENT_FOLDING_TASKS = (
+    "叠军绿色T恤",
+    "叠杏色T恤",
+    "叠杏色T恤_1",
+    "叠松石绿T恤",
+    "叠深灰T恤",
+    "叠红色T恤",
+    "叠蓝色T恤",
+    "叠黑色T恤",
+    "叠衣服_卡其拼棕",
+    "叠衣服_棉_蓝色",
+    "叠衣服_深灰",
+    "叠衣服_深蓝拼白",
+    "叠衣服_纯棉_草绿",
+    "叠衣服_绵羊毛_灰色",
+)
+SONGLING_GARMENT_FOLDING_PREFIXES = ",".join(
+    f"{SONGLING_GARMENT_FOLDING_ROOT}/{task}/" for task in SONGLING_GARMENT_FOLDING_TASKS
+)
+SONGLING_GARMENT_FOLDING_EXCLUDED_EPISODES = (
+    f"{SONGLING_GARMENT_FOLDING_ROOT}/叠衣服_棉_蓝色/ms_541/",
+    f"{SONGLING_GARMENT_FOLDING_ROOT}/叠衣服_棉_蓝色/ms_629/",
+    f"{SONGLING_GARMENT_FOLDING_ROOT}/叠衣服_棉_蓝色/ms_663/",
+)
+
+
 _CONFIGS = [
     #
     # Inference Aloha configs.
@@ -1182,6 +1305,84 @@ _CONFIGS = [
         batch_size=8,
         save_interval=100,
         keep_period=500,
+    ),
+    #
+    # Songling canonical55 qpos validation: stream a few fold-clothes episodes from OSS.
+    #
+    TrainConfig(
+        name="pi05_songling_fold_ario_debug",
+        exp_name="pi05_songling_fold_ario_debug",
+        model=pi0_config.Pi0Config(
+            pi05=True,
+            action_dim=32,
+            action_horizon=50,
+        ),
+        data=ArioSonglingDataConfig(
+            repo_id="songling/fold_army_green_tshirt",
+            s3_prefixes="s3://shengshu-world-model-data/ARIO-new/songling/叠军绿色T恤/",
+            min_frames=51,
+            max_episodes=3,
+            default_prompt="",
+            load_instructions=True,
+            instruction_field="sub_instructions",
+            use_delta_actions=True,
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader("./checkpoints/pi05_base_jax/params"),
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=1_000,
+            peak_lr=1e-4,
+            decay_steps=3_000,
+            decay_lr=1e-5,
+        ),
+        optimizer=_optimizer.AdamW(clip_gradient_norm=1.0),
+        ema_decay=0.99,
+        num_train_steps=500,
+        batch_size=8,
+        num_workers=3,
+        save_interval=100,
+        max_checkpoints_to_keep=None,
+        keep_period=None,
+    ),
+    #
+    # Songling garment-folding training across all configured clothing tasks.
+    #
+    TrainConfig(
+        name="pi05_songling_garment_folding_ario",
+        exp_name="pi05_songling_garment_folding_ario",
+        model=pi0_config.Pi0Config(
+            pi05=True,
+            action_dim=32,
+            action_horizon=50,
+        ),
+        data=ArioSonglingDataConfig(
+            repo_id="songling/garment_folding",
+            s3_prefixes=SONGLING_GARMENT_FOLDING_PREFIXES,
+            excluded_episodes=SONGLING_GARMENT_FOLDING_EXCLUDED_EPISODES,
+            min_frames=51,
+            default_prompt="",
+            load_instructions=True,
+            instruction_field="sub_instructions",
+            use_delta_actions=True,
+            filter_episodes_by_state=True,
+            episode_frames_per_batch=16,
+            disk_cache_max_gb=1_000.0,
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader("./checkpoints/pi05_base_jax/params"),
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=1_000,
+            peak_lr=1e-4,
+            decay_steps=30_00,
+            decay_lr=1e-5,
+        ),
+        optimizer=_optimizer.AdamW(clip_gradient_norm=1.0),
+        ema_decay=0.99,
+        num_train_steps=1_000_000,
+        batch_size=512,
+        num_workers=8,
+        log_interval=100,
+        save_interval=5_000,
+        max_checkpoints_to_keep=None,
+        keep_period=None,
     ),
     #
     # ALOHA Sim configs. This config is used to demonstrate how to train on a simple simulated environment.
