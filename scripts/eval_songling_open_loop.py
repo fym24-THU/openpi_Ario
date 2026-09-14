@@ -205,6 +205,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--checkpoint-dir", type=Path, required=True)
     parser.add_argument("--config-name", required=True)
     parser.add_argument("--output-dir", type=Path, default=Path("offline_eval_results/songling"))
+    parser.add_argument(
+        "--trace-output",
+        type=Path,
+        help=(
+            "Optional compressed NPZ with per-sample observation states, predictions, "
+            "targets, and frame indices for slave-side replay."
+        ),
+    )
     parser.add_argument("--max-samples", type=int, help="Random sample limit; default evaluates every valid frame")
     parser.add_argument("--max-episodes", type=int)
     parser.add_argument("--chunk-horizon", type=int)
@@ -247,8 +255,22 @@ def main() -> None:
     accumulator = RmseAccumulator(chunk_horizon)
     rng = np.random.default_rng(args.seed)
     inference_times = []
+    trace_predictions = None
+    trace_targets = None
+    trace_states = None
+    trace_valid_horizons = None
+    trace_episode_indices = None
+    trace_frame_indices = None
+    if args.trace_output is not None:
+        trace_shape = (len(indices), chunk_horizon, ACTION_DIM)
+        trace_predictions = np.full(trace_shape, np.nan, dtype=np.float32)
+        trace_targets = np.full(trace_shape, np.nan, dtype=np.float32)
+        trace_states = np.empty((len(indices), ACTION_DIM), dtype=np.float32)
+        trace_valid_horizons = np.empty(len(indices), dtype=np.int32)
+        trace_episode_indices = np.empty(len(indices), dtype=np.int32)
+        trace_frame_indices = np.empty(len(indices), dtype=np.int64)
     started = time.monotonic()
-    for index in tqdm(indices, desc="Open-loop evaluation"):
+    for trace_index, index in enumerate(tqdm(indices, desc="Open-loop evaluation")):
         episode_index, frame_index = dataset.global_to_local(int(index))
         valid_horizon = min(chunk_horizon, episode_lengths[episode_index] - frame_index - 1)
         # Fail instead of silently substituting a random frame, which would corrupt alignment.
@@ -262,6 +284,13 @@ def main() -> None:
         prediction = np.asarray(result["actions"][:valid_horizon, :ACTION_DIM])
         target = np.asarray(sample["actions"][:valid_horizon, :ACTION_DIM])
         accumulator.update(prediction, target)
+        if trace_predictions is not None:
+            trace_predictions[trace_index, :valid_horizon] = prediction
+            trace_targets[trace_index, :valid_horizon] = target
+            trace_states[trace_index] = np.asarray(sample["observation/state"][:ACTION_DIM])
+            trace_valid_horizons[trace_index] = valid_horizon
+            trace_episode_indices[trace_index] = episode_index
+            trace_frame_indices[trace_index] = frame_index
 
     mean_rmse, max_rmse = accumulator.results()
     args.output_dir.mkdir(parents=True, exist_ok=True)
@@ -289,9 +318,36 @@ def main() -> None:
         json.dumps(summary, ensure_ascii=False, indent=2, allow_nan=False),
         encoding="utf-8",
     )
+    if args.trace_output is not None:
+        args.trace_output.parent.mkdir(parents=True, exist_ok=True)
+        np.savez_compressed(
+            args.trace_output,
+            predictions=trace_predictions,
+            targets=trace_targets,
+            observation_states=trace_states,
+            valid_horizons=trace_valid_horizons,
+            global_indices=indices,
+            episode_indices=trace_episode_indices,
+            frame_indices=trace_frame_indices,
+            metadata_json=np.asarray(
+                json.dumps(
+                    {
+                        "checkpoint_dir": str(checkpoint_dir),
+                        "config_name": args.config_name,
+                        "chunk_horizon": chunk_horizon,
+                        "action_dim": ACTION_DIM,
+                        "stride": args.stride,
+                        "seed": args.seed,
+                    },
+                    ensure_ascii=False,
+                )
+            ),
+        )
     print(f"Summary: {args.output_dir / 'summary.json'}")
     print(f"CSV:     {args.output_dir / 'rmse_by_chunk_step.csv'}")
     print(f"Plot:    {args.output_dir / 'rmse_by_chunk_step.png'}")
+    if args.trace_output is not None:
+        print(f"Trace:   {args.trace_output}")
 
 
 if __name__ == "__main__":
