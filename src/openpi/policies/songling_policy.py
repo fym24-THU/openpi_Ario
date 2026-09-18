@@ -1,4 +1,10 @@
-"""Policy transforms for Songling dual-arm qpos control."""
+"""Policy transforms for Songling dual-arm qpos control.
+
+Ario canonical55 stores Songling arm joints in degrees. Training and this policy
+use radians: `ArioStreamingDataset` converts the 12 arm joints on load. Gripper
+slots stay in raw encoder units. Xingchen data is already in radians and is not
+converted.
+"""
 
 import dataclasses
 
@@ -9,6 +15,19 @@ from openpi import transforms
 from openpi.models import model as _model
 
 ACTION_DIM = 14
+# True for the 6+6 arm joints; False for the two gripper slots.
+ARM_JOINT_MASK = np.array([True] * 6 + [False] + [True] * 6 + [False])
+
+
+def arm_joints_deg_to_rad(qpos: np.ndarray) -> np.ndarray:
+    """Convert Songling 14-D arm joints from degrees to radians. Grippers unchanged."""
+    qpos = np.array(qpos, dtype=np.float32, copy=True)
+    if qpos.shape[-1] < ACTION_DIM:
+        raise ValueError(f"Expected at least {ACTION_DIM} Songling dimensions, got {qpos.shape}")
+    joints = qpos[..., :ACTION_DIM]
+    joints[..., ARM_JOINT_MASK] = np.deg2rad(joints[..., ARM_JOINT_MASK])
+    qpos[..., :ACTION_DIM] = joints
+    return qpos
 
 
 def make_songling_example() -> dict:

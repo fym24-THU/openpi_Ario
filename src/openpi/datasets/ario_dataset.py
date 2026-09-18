@@ -599,7 +599,12 @@ class ArioStreamingDataset:
 
     @staticmethod
     def _extract_songling_qpos14(state_dict: dict[str, torch.Tensor]) -> np.ndarray:
-        """Extract [left qpos6, left gripper, right qpos6, right gripper] from canonical55."""
+        """Extract 14-D Songling qpos from canonical55 and convert arm joints to radians.
+
+        Layout: [left qpos6, left gripper, right qpos6, right gripper]. Canonical55 stores
+        arm joints in degrees; grippers remain in raw encoder units. Xingchen data is not
+        converted here.
+        """
         canonical = state_dict.get("__canonical55__")
         mask = state_dict.get("__canonical55_mask__")
         if canonical is None or mask is None:
@@ -618,7 +623,9 @@ class ArioStreamingDataset:
         if not torch.all(padding_mask == 0):
             raise ValueError("Songling canonical55 seventh joint slots must be invalid padding")
 
-        return canonical[:, SONGLING_QPOS14_INDICES].detach().cpu().numpy()
+        from openpi.policies.songling_policy import arm_joints_deg_to_rad
+
+        return arm_joints_deg_to_rad(canonical[:, SONGLING_QPOS14_INDICES].detach().cpu().numpy())
 
     def _read_video_frame(
         self,

@@ -603,7 +603,11 @@ class ArioXingchenDataConfig(DataConfigFactory):
 
 @dataclasses.dataclass(frozen=True)
 class ArioSonglingDataConfig(DataConfigFactory):
-    """Config for Songling canonical55 data read directly from Ario format on OSS."""
+    """Config for Songling canonical55 data read directly from Ario format on OSS.
+
+    Arm joint qpos/actions are converted from degrees to radians on load. Gripper
+    dimensions stay in raw encoder units. Xingchen configs are unchanged.
+    """
 
     s3_prefixes: str = ""
     s3_endpoint: str = "https://oss-cn-wulanchabu-internal.aliyuncs.com"
@@ -1378,6 +1382,50 @@ _CONFIGS = [
         ema_decay=0.99,
         num_train_steps=1_000_000,
         batch_size=512,
+        num_workers=8,
+        log_interval=100,
+        save_interval=5_000,
+        max_checkpoints_to_keep=None,
+        keep_period=None,
+    ),
+    #
+    # Songling bfjm ario-format dataset on shengshu-base2-test.
+    #
+    TrainConfig(
+        name="pi05_songling_bfjm_ario",
+        exp_name="pi05_songling_bfjm_ario",
+        model=pi0_config.Pi0Config(
+            pi05=True,
+            action_dim=32,
+            action_horizon=50,
+        ),
+        data=ArioSonglingDataConfig(
+            repo_id="songling/bfjm",
+            s3_prefixes=(
+                "s3://shengshu-base2-test/caimengchen/Songling/ario-format/Songling/bfjm_0915/,"
+                "s3://shengshu-base2-test/caimengchen/Songling/ario-format/Songling/bfjm_0916/,"
+                "s3://shengshu-base2-test/caimengchen/Songling/ario-format/Songling/bfjm_0917/"
+            ),
+            min_frames=51,
+            default_prompt="",
+            load_instructions=True,
+            instruction_field="instruction_qwen38_max_medium_ch",
+            use_delta_actions=True,
+            filter_episodes_by_state=True,
+            episode_frames_per_batch=16,
+            disk_cache_max_gb=1_000.0,
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader("./checkpoints/pi05_base_jax/params"),
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=1_000,
+            peak_lr=5e-5,
+            decay_steps=1_000_000,
+            decay_lr=5e-5,
+        ),
+        optimizer=_optimizer.AdamW(clip_gradient_norm=1.0),
+        ema_decay=0.99,
+        num_train_steps=60_000,
+        batch_size=64,
         num_workers=8,
         log_interval=100,
         save_interval=5_000,

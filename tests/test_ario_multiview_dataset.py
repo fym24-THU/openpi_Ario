@@ -15,6 +15,7 @@ from openpi.datasets.ario_dataset import EPISODE_SELECTION_SQL
 from openpi.datasets.ario_dataset import SONGLING_QPOS14_INDICES
 from openpi.datasets.ario_dataset import ArioConfig
 from openpi.datasets.ario_dataset import ArioStreamingDataset
+from openpi.policies.songling_policy import arm_joints_deg_to_rad
 
 
 class _FakePaginator:
@@ -252,11 +253,32 @@ class ArioMultiViewDatasetTest(unittest.TestCase):
             }
         )
 
-        expected = canonical[:, SONGLING_QPOS14_INDICES].numpy()
-        np.testing.assert_array_equal(state, expected)
+        expected = arm_joints_deg_to_rad(canonical[:, SONGLING_QPOS14_INDICES].numpy())
+        np.testing.assert_allclose(state, expected)
         self.assertEqual(state.shape, (2, 14))
         self.assertNotIn(6, SONGLING_QPOS14_INDICES)
         self.assertNotIn(23, SONGLING_QPOS14_INDICES)
+
+    def test_extracts_songling_qpos14_converts_arm_joints_not_grippers(self):
+        canonical = torch.zeros((1, 55), dtype=torch.float32)
+        canonical[0, 0] = 180.0
+        canonical[0, 16] = 80.0
+        canonical[0, 17] = 90.0
+        canonical[0, 33] = 12.5
+        mask = torch.zeros_like(canonical)
+        mask[:, SONGLING_QPOS14_INDICES] = 1
+
+        state = ArioStreamingDataset._extract_songling_qpos14(
+            {
+                "__canonical55__": canonical,
+                "__canonical55_mask__": mask,
+            }
+        )
+
+        np.testing.assert_allclose(state[0, 0], np.pi)
+        np.testing.assert_allclose(state[0, 6], 80.0)
+        np.testing.assert_allclose(state[0, 7], np.pi / 2)
+        np.testing.assert_allclose(state[0, 13], 12.5)
 
     def test_rejects_valid_seventh_joint_slot(self):
         canonical = torch.zeros((2, 55), dtype=torch.float32)
